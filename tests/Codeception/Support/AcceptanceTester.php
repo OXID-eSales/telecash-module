@@ -56,7 +56,7 @@ final class AcceptanceTester extends \Codeception\Actor
         $I = $this;
 
         $I->getServiceFromContainer(ModuleSettingsServiceInterface::class)
-            ->saveGreetingMode(ModuleSettingsServiceInterface::GREETING_MODE_PERSONAL);
+            ->saveApiMode(ModuleSettingsServiceInterface::API_MODE_SANDBOX);
     }
 
     public function setGreetingModeGeneric(): void
@@ -64,7 +64,7 @@ final class AcceptanceTester extends \Codeception\Actor
         $I = $this;
 
         $I->getServiceFromContainer(ModuleSettingsServiceInterface::class)
-            ->saveGreetingMode(ModuleSettingsServiceInterface::GREETING_MODE_GENERIC);
+            ->saveApiMode(ModuleSettingsServiceInterface::API_MODE_LIVE);
     }
 
     public function getDemoUserName(): string

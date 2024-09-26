@@ -17,9 +17,9 @@ use OxidSolutionCatalysts\TeleCash\Core\Module;
  */
 class ModuleSettingsService implements ModuleSettingsServiceInterface
 {
-    public const GREETING_MODE_VALUES = [
-        self::GREETING_MODE_GENERIC,
-        self::GREETING_MODE_PERSONAL,
+    public const API_MODE_VALUES = [
+        self::API_MODE_LIVE,
+        self::API_MODE_SANDBOX,
     ];
 
     public function __construct(
@@ -27,25 +27,20 @@ class ModuleSettingsService implements ModuleSettingsServiceInterface
     ) {
     }
 
-    public function isPersonalGreetingMode(): bool
+    public function isLiveApiMode(): bool
     {
-        return self::GREETING_MODE_PERSONAL === $this->getGreetingMode();
+        return self::API_MODE_SANDBOX === $this->getApiMode();
     }
 
-    public function getGreetingMode(): string
+    public function getApiMode(): string
     {
-        $value = (string)$this->moduleSettingService->getString(self::GREETING_MODE, Module::MODULE_ID);
+        $value = (string)$this->moduleSettingService->getString(self::API_MODE, Module::MODULE_ID);
 
-        return (!empty($value) && in_array($value, self::GREETING_MODE_VALUES)) ? $value : self::GREETING_MODE_GENERIC;
+        return (!empty($value) && in_array($value, self::API_MODE_VALUES, true)) ? $value : self::API_MODE_LIVE;
     }
 
-    public function saveGreetingMode(string $value): void
+    public function saveApiMode(string $value): void
     {
-        $this->moduleSettingService->saveString(self::GREETING_MODE, $value, Module::MODULE_ID);
-    }
-
-    public function isLoggingEnabled(): bool
-    {
-        return $this->moduleSettingService->getBoolean(self::LOGGER_STATUS, Module::MODULE_ID);
+        $this->moduleSettingService->saveString(self::API_MODE, $value, Module::MODULE_ID);
     }
 }

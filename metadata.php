@@ -6,6 +6,8 @@
  */
 
 use OxidSolutionCatalysts\TeleCash\Core\Module;
+use OxidSolutionCatalysts\TeleCash\Settings\Service\ModuleSettingsServiceInterface;
+
 /**
  * Metadata version
  */
@@ -34,5 +36,12 @@ $aModule = [
     'settings' => [
         //TODO: add help texts for settings to explain possibilities and point out which ones only serve as example
         /** Main */
+        [
+            'group'       => 'osctelecash_api',
+            'name'        => ModuleSettingsServiceInterface::API_MODE,
+            'type'        => 'select',
+            'constraints' => ModuleSettingsServiceInterface::API_MODE_SANDBOX . '|' . ModuleSettingsServiceInterface::API_MODE_LIVE,
+            'value'       => ModuleSettingsServiceInterface::API_MODE_SANDBOX
+        ],
     ],
 ];

@@ -11,19 +11,15 @@ namespace OxidSolutionCatalysts\TeleCash\Settings\Service;
 
 interface ModuleSettingsServiceInterface
 {
-    public const GREETING_MODE = 'oemoduletemplate_GreetingMode';
+    public const API_MODE = 'osctelecash_apimode';
 
-    public const GREETING_MODE_GENERIC = 'generic';
+    public const API_MODE_LIVE = 'live';
 
-    public const GREETING_MODE_PERSONAL = 'personal';
+    public const API_MODE_SANDBOX = 'sandbox';
 
-    public const LOGGER_STATUS = 'oemoduletemplate_LoggerEnabled';
+    public function isLiveApiMode(): bool;
 
-    public function isPersonalGreetingMode(): bool;
+    public function getApiMode(): string;
 
-    public function getGreetingMode(): string;
-
-    public function saveGreetingMode(string $value): void;
-
-    public function isLoggingEnabled(): bool;
+    public function saveApiMode(string $value): void;
 }

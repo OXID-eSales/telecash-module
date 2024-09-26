@@ -12,7 +12,9 @@ namespace OxidSolutionCatalysts\TeleCash\Tests\Settings\Service;
 use OxidEsales\EshopCommunity\Internal\Framework\Module\Facade\ModuleSettingService;
 use OxidSolutionCatalysts\TeleCash\Core\Module;
 use OxidSolutionCatalysts\TeleCash\Settings\Service\ModuleSettingsService;
+use OxidSolutionCatalysts\TeleCash\Settings\Service\ModuleSettingsServiceInterface;
 use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\MockObject\Exception;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\String\UnicodeString;
 
@@ -20,107 +22,86 @@ use Symfony\Component\String\UnicodeString;
 final class ModuleSettingsTest extends TestCase
 {
     /**
-     * @dataProvider getGreetingModeDataProvider
+     * @dataProvider getApiModeDataProvider
+     * @throws Exception
      */
-    public function testGetGreetingMode(string $value, string $expected): void
+    public function testgetApiMode(string $value, string $expected): void
     {
         $mssMock = $this->createPartialMock(ModuleSettingService::class, ['getString']);
         $mssMock->method('getString')->willReturnMap([
-            [ModuleSettingsService::GREETING_MODE, Module::MODULE_ID, new UnicodeString($value)]
+            [ModuleSettingsServiceInterface::API_MODE, Module::MODULE_ID, new UnicodeString($value)]
         ]);
 
         $sut = new ModuleSettingsService($mssMock);
-        $this->assertSame($expected, $sut->getGreetingMode());
+        $this->assertSame($expected, $sut->getApiMode());
     }
 
-    public static function getGreetingModeDataProvider(): array
+    public static function getApiModeDataProvider(): array
     {
         return [
             [
                 'value' => '',
-                'expected' => ModuleSettingsService::GREETING_MODE_GENERIC
+                'expected' => ModuleSettingsServiceInterface::API_MODE_LIVE
             ],
             [
                 'value' => 'someUnpredictable',
-                'expected' => ModuleSettingsService::GREETING_MODE_GENERIC
+                'expected' => ModuleSettingsServiceInterface::API_MODE_LIVE
             ],
             [
-                'value' => ModuleSettingsService::GREETING_MODE_GENERIC,
-                'expected' => \OxidSolutionCatalysts\TeleCash\Settings\Service\ModuleSettingsService::GREETING_MODE_GENERIC
+                'value' => ModuleSettingsServiceInterface::API_MODE_LIVE,
+                'expected' => ModuleSettingsServiceInterface::API_MODE_LIVE
             ],
             [
-                'value' => ModuleSettingsService::GREETING_MODE_PERSONAL,
-                'expected' => ModuleSettingsService::GREETING_MODE_PERSONAL
+                'value' => ModuleSettingsServiceInterface::API_MODE_SANDBOX,
+                'expected' => ModuleSettingsServiceInterface::API_MODE_SANDBOX
             ],
         ];
     }
 
     /**
-     * @dataProvider isPersonalGreetingModeDataProvider
+     * @dataProvider isLiveApiModeDataProvider
+     * @throws Exception
      */
-    public function testIsPersonalGreetingMode(string $value, bool $expected): void
+    public function testisLiveApiMode(string $value, bool $expected): void
     {
         $mssMock = $this->createPartialMock(ModuleSettingService::class, ['getString']);
         $mssMock->method('getString')->willReturnMap([
-            [ModuleSettingsService::GREETING_MODE, Module::MODULE_ID, new UnicodeString($value)]
+            [ModuleSettingsServiceInterface::API_MODE, Module::MODULE_ID, new UnicodeString($value)]
         ]);
 
         $sut = new ModuleSettingsService($mssMock);
-        $this->assertSame($expected, $sut->isPersonalGreetingMode());
+        $this->assertSame($expected, $sut->isLiveApiMode());
     }
 
-    public static function isPersonalGreetingModeDataProvider(): array
+    public static function isLiveApiModeDataProvider(): array
     {
         return [
             [
-                'value' => \OxidSolutionCatalysts\TeleCash\Settings\Service\ModuleSettingsService::GREETING_MODE_GENERIC,
+                'value' => ModuleSettingsServiceInterface::API_MODE_LIVE,
                 'expected' => false
             ],
             [
-                'value' => ModuleSettingsService::GREETING_MODE_PERSONAL,
+                'value' => ModuleSettingsServiceInterface::API_MODE_SANDBOX,
                 'expected' => true
             ],
         ];
     }
 
-    public function testSaveGreetingMode(): void
+    /**
+     * @throws Exception
+     */
+    public function testsaveApiMode(): void
     {
         $value = 'someValue';
 
         $mssMock = $this->createPartialMock(ModuleSettingService::class, ['saveString']);
         $mssMock->expects($this->atLeastOnce())->method('saveString')->with(
-            ModuleSettingsService::GREETING_MODE,
+            ModuleSettingsServiceInterface::API_MODE,
             $value,
             Module::MODULE_ID
         );
 
         $sut = new ModuleSettingsService($mssMock);
-        $sut->saveGreetingMode($value);
-    }
-
-    public function testIsLoggingEnabledReturnsTrue(): void
-    {
-        $mssMock = $this->createPartialMock(ModuleSettingService::class, ['getBoolean']);
-        $mssMock->method('getBoolean')->willReturnMap([
-            [\OxidSolutionCatalysts\TeleCash\Settings\Service\ModuleSettingsService::LOGGER_STATUS, Module::MODULE_ID, true]
-        ]);
-
-        $sut = new ModuleSettingsService($mssMock);
-        $result = $sut->isLoggingEnabled();
-
-        $this->assertTrue($result);
-    }
-
-    public function testIsLoggingEnabledReturnsFalse(): void
-    {
-        $mssMock = $this->createPartialMock(ModuleSettingService::class, ['getBoolean']);
-        $mssMock->method('getBoolean')->willReturnMap([
-            [ModuleSettingsService::LOGGER_STATUS, Module::MODULE_ID, false]
-        ]);
-
-        $sut = new ModuleSettingsService($mssMock);
-        $result = $sut->isLoggingEnabled();
-
-        $this->assertFalse($result);
+        $sut->saveApiMode($value);
     }
 }
