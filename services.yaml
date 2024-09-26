@@ -13,6 +13,6 @@ services:
     public: false
     autowire: true
 
-  OxidEsales\ModuleTemplate\Core\Registry:
+  OxidSolutionCatalysts\TeleCash\Core\Registry:
     class: OxidEsales\Eshop\Core\Registry
     public: true

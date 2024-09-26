@@ -7,13 +7,13 @@
 
 declare(strict_types=1);
 
-namespace OxidEsales\ModuleTemplate\Tests\Unit\Tracker\Subscriber;
+namespace OxidSolutionCatalysts\TeleCash\Tests\Unit\Tracker\Subscriber;
 
 use OxidEsales\EshopCommunity\Internal\Transition\ShopEvents\BeforeModelUpdateEvent;
-use OxidEsales\ModuleTemplate\Extension\Model\User;
-use OxidEsales\ModuleTemplate\Tracker\Model\TrackerModel;
-use OxidEsales\ModuleTemplate\Tracker\Service\TrackerServiceInterface;
-use OxidEsales\ModuleTemplate\Tracker\Subscriber\BeforeModelUpdate;
+use OxidSolutionCatalysts\TeleCash\Extension\Model\User;
+use OxidSolutionCatalysts\TeleCash\Tracker\Model\TrackerModel;
+use OxidSolutionCatalysts\TeleCash\Tracker\Service\TrackerServiceInterface;
+use OxidSolutionCatalysts\TeleCash\Tracker\Subscriber\BeforeModelUpdate;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
 

@@ -7,10 +7,10 @@
 
 declare(strict_types=1);
 
-namespace OxidEsales\ModuleTemplate\Tests\Integration\Logging\Command;
+namespace OxidSolutionCatalysts\TeleCash\Tests\Integration\Logging\Command;
 
 use org\bovigo\vfs\vfsStream;
-use OxidEsales\ModuleTemplate\Logging\Command\ReadLogsCommand;
+use OxidSolutionCatalysts\TeleCash\Logging\Command\ReadLogsCommand;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\Console\Application;

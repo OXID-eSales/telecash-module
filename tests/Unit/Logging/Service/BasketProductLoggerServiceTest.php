@@ -7,10 +7,10 @@
 
 declare(strict_types=1);
 
-namespace OxidEsales\ModuleTemplate\Tests\Logging\Service;
+namespace OxidSolutionCatalysts\TeleCash\Tests\Logging\Service;
 
-use OxidEsales\ModuleTemplate\Logging\Service\BasketProductLoggerService;
-use OxidEsales\ModuleTemplate\Settings\Service\ModuleSettingsServiceInterface;
+use OxidSolutionCatalysts\TeleCash\Logging\Service\BasketProductLoggerService;
+use OxidSolutionCatalysts\TeleCash\Settings\Service\ModuleSettingsServiceInterface;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
 use Psr\Log\LoggerInterface as PsrLoggerInterface;

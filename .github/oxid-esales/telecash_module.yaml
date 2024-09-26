@@ -9,45 +9,45 @@ install_shop_with_modules:
               "oxid-esales/twig-component": "{{ .Data.global.composer.dev_ref }}",
               "oxid-esales/twig-admin-theme": "{{ .Data.global.composer.dev_ref }}",
               "oxid-esales/apex-theme": "{{ .Data.global.composer.dev_ref }}",
-              "oxid-esales/module-template": "{{ .Data.global.composer.ref_name }}"
+              "oxid-solution-catalysts/telecash-module": "{{ .Data.global.composer.ref_name }}"
           },
           "repositories": {
-            "oxid-esales/module-template": {
+            "oxid-solution-catalysts/telecash-module": {
               "type": "git",
-              "url": "https://github.com/OXID-eSales/module-template.git"
+              "url": "https://github.com/OXID-eSales/telecash-module"
             }
           }
       }
   custom_script_container: |
-    vendor/bin/oe-console oe:module:activate oe_moduletemplate
+    vendor/bin/oe-console oe:module:activate osc_telecash
 
 runscript: &runscript
   matrix:
     script: |
       [
-        "module_template:tests-unit",
-        "module_template:tests-integration",
-        "module_template:tests-codeception"
+        "osc_telecash:tests-unit",
+        "osc_telecash:tests-integration",
+        "osc_telecash:tests-codeception"
       ]
-  module_template:
-    path: 'vendor/oxid-esales/module-template'
+  osc_telecash:
+    path: 'vendor/oxid-solution-catalysts/telecash-module'
 
 runslim:
   <<: *runscript
   matrix:
     script: |
       [
-        "module_template:phpcs-report",
-        "module_template:phpmd-report",
-        "module_template:phpstan-report"
+        "osc_telecash:phpcs-report",
+        "osc_telecash:phpmd-report",
+        "osc_telecash:phpstan-report"
       ]
 
 sonarcloud:
   matrix:
     testplan: '["-"]'
-  strip_path: '/var/www/vendor/oxid-esales/module-template/'
-  project_key: 'OXID-eSales_module-template'
-  project_name: 'oxid-esales/module-template'
+  strip_path: '/var/www/vendor/oxid-solution-catalysts/telecash-module/'
+  project_key: 'OXID-eSales_telecash-module'
+  project_name: 'oxid-solution-catalysts/telecash-module'
   organization: 'oxid-esales'
   parameters: |
     -Dsonar.language=php

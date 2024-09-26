@@ -7,15 +7,15 @@
 
 declare(strict_types=1);
 
-namespace OxidEsales\ModuleTemplate\Tests\Integration\Extension\Controller;
+namespace OxidSolutionCatalysts\TeleCash\Tests\Integration\Extension\Controller;
 
 use OxidEsales\Eshop\Application\Controller\StartController as EshopStartController;
 use OxidEsales\Eshop\Application\Model\User as EshopModelUser;
 use OxidEsales\Eshop\Core\Registry;
 use OxidEsales\Eshop\Core\Registry as EshopRegistry;
-use OxidEsales\ModuleTemplate\Extension\Controller\StartController;
-use OxidEsales\ModuleTemplate\Settings\Service\ModuleSettingsServiceInterface;
-use OxidEsales\ModuleTemplate\Tests\Integration\IntegrationTestCase;
+use OxidSolutionCatalysts\TeleCash\Extension\Controller\StartController;
+use OxidSolutionCatalysts\TeleCash\Settings\Service\ModuleSettingsServiceInterface;
+use OxidSolutionCatalysts\TeleCash\Tests\Integration\IntegrationTestCase;
 use PHPUnit\Framework\Attributes\CoversClass;
 
 /*

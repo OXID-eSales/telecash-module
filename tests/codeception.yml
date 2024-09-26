@@ -1,4 +1,4 @@
-namespace: OxidEsales\ModuleTemplate\Tests\Codeception
+namespace: OxidSolutionCatalysts\TeleCash\Tests\Codeception
 support_namespace: Support
 
 params:

@@ -7,7 +7,7 @@
 
 declare(strict_types=1);
 
-namespace OxidEsales\ModuleTemplate\Core;
+namespace OxidSolutionCatalysts\TeleCash\Core;
 
 /**
  * Class defines what module does on Shop events.

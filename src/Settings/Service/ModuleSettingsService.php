@@ -7,10 +7,10 @@
 
 declare(strict_types=1);
 
-namespace OxidEsales\ModuleTemplate\Settings\Service;
+namespace OxidSolutionCatalysts\TeleCash\Settings\Service;
 
 use OxidEsales\EshopCommunity\Internal\Framework\Module\Facade\ModuleSettingServiceInterface;
-use OxidEsales\ModuleTemplate\Core\Module;
+use OxidSolutionCatalysts\TeleCash\Core\Module;
 
 /**
  * @extendable-class

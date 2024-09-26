@@ -7,14 +7,14 @@
 
 declare(strict_types=1);
 
-namespace OxidEsales\ModuleTemplate\Tests\Unit\Greeting\Infrastructure;
+namespace OxidSolutionCatalysts\TeleCash\Tests\Unit\Greeting\Infrastructure;
 
 use OxidEsales\Eshop\Application\Model\User;
-use OxidEsales\ModuleTemplate\Greeting\Infrastructure\UserModelFactory;
+use OxidSolutionCatalysts\TeleCash\Greeting\Infrastructure\UserModelFactory;
 use PHPUnit\Framework\TestCase;
 
 /**
- * @covers \OxidEsales\ModuleTemplate\Greeting\Infrastructure\UserModelFactory
+ * @covers \OxidSolutionCatalysts\TeleCash\Greeting\Infrastructure\UserModelFactory
  */
 class UserModelFactoryTest extends TestCase
 {

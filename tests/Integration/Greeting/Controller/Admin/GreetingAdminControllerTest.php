@@ -7,12 +7,12 @@
 
 declare(strict_types=1);
 
-namespace OxidEsales\ModuleTemplate\Tests\Integration\Controller\Admin;
+namespace OxidSolutionCatalysts\TeleCash\Tests\Integration\Controller\Admin;
 
 use OxidEsales\Eshop\Application\Model\User as EshopModelUser;
-use OxidEsales\ModuleTemplate\Greeting\Controller\Admin\GreetingAdminController;
-use OxidEsales\ModuleTemplate\Core\Module as ModuleCore;
-use OxidEsales\ModuleTemplate\Tests\Integration\IntegrationTestCase;
+use OxidSolutionCatalysts\TeleCash\Greeting\Controller\Admin\GreetingAdminController;
+use OxidSolutionCatalysts\TeleCash\Core\Module as ModuleCore;
+use OxidSolutionCatalysts\TeleCash\Tests\Integration\IntegrationTestCase;
 
 /*
  * We want to test controller behavior going 'full way'.

@@ -7,9 +7,9 @@
 
 declare(strict_types=1);
 
-namespace OxidEsales\ModuleTemplate\Tests\Unit\Core;
+namespace OxidSolutionCatalysts\TeleCash\Tests\Unit\Core;
 
-use OxidEsales\ModuleTemplate\Core\ModuleEvents;
+use OxidSolutionCatalysts\TeleCash\Core\ModuleEvents;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
 

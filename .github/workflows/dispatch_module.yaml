@@ -42,7 +42,7 @@ jobs:
               ;;
           esac
           # shellcheck disable=SC2088
-          TESTPLAN="~/defaults/7.2.x.yaml,${LIMIT}~/module-template.yaml"
+          TESTPLAN="~/defaults/7.2.x.yaml,${LIMIT}~/telecash_module.yaml"
           echo "testplan=${TESTPLAN}" | tee -a "${GITHUB_OUTPUT}"
 
   dispatch_stable:

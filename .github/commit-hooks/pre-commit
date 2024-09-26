@@ -1,1 +1,1 @@
-docker compose exec -T --workdir /var/www/vendor/oxid-esales/module-template php composer static
+docker compose exec -T --workdir /var/www/vendor/oxid-solution-catalysts/telecash-module php composer static

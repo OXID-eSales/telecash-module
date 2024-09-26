@@ -7,12 +7,12 @@
 
 declare(strict_types=1);
 
-namespace OxidEsales\ModuleTemplate\Tests\Integration\Extension\Model;
+namespace OxidSolutionCatalysts\TeleCash\Tests\Integration\Extension\Model;
 
 use OxidEsales\Eshop\Application\Model\Article as EshopModelArticle;
 use OxidEsales\EshopCommunity\Tests\Integration\IntegrationTestCase;
-use OxidEsales\ModuleTemplate\Extension\Model\Basket;
-use OxidEsales\ModuleTemplate\Logging\Service\BasketProductLoggerServiceInterface;
+use OxidSolutionCatalysts\TeleCash\Extension\Model\Basket;
+use OxidSolutionCatalysts\TeleCash\Logging\Service\BasketProductLoggerServiceInterface;
 use PHPUnit\Framework\Attributes\CoversClass;
 
 #[CoversClass(Basket::class)]
@@ -44,7 +44,7 @@ final class BasketIntegrationTest extends IntegrationTestCase
         $loggerSpy = $this->createMock(BasketProductLoggerServiceInterface::class);
         $loggerSpy->expects($this->once())->method('log');
 
-        $basket = $this->createPartialMock(\OxidEsales\ModuleTemplate\Extension\Model\Basket::class, ['getService']);
+        $basket = $this->createPartialMock(\OxidSolutionCatalysts\TeleCash\Extension\Model\Basket::class, ['getService']);
         $basket->method('getService')->willReturnMap([
             [BasketProductLoggerServiceInterface::class, $loggerSpy]
         ]);

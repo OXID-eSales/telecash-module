@@ -7,18 +7,18 @@
 
 declare(strict_types=1);
 
-namespace OxidEsales\ModuleTemplate\Tests\Integration\Greeting\Controller;
+namespace OxidSolutionCatalysts\TeleCash\Tests\Integration\Greeting\Controller;
 
 use OxidEsales\Eshop\Application\Model\User as EshopModelUser;
 use OxidEsales\Eshop\Core\Registry;
 use OxidEsales\EshopCommunity\Internal\Container\ContainerFactory;
-use OxidEsales\ModuleTemplate\Core\Module as ModuleCore;
-use OxidEsales\ModuleTemplate\Extension\Model\User as ModuleUser;
-use OxidEsales\ModuleTemplate\Greeting\Controller\GreetingController;
-use OxidEsales\ModuleTemplate\Settings\Service\ModuleSettingsServiceInterface;
-use OxidEsales\ModuleTemplate\Tests\Integration\IntegrationTestCase;
-use OxidEsales\ModuleTemplate\Tracker\Model\TrackerModel;
-use OxidEsales\ModuleTemplate\Tracker\Repository\TrackerRepositoryInterface;
+use OxidSolutionCatalysts\TeleCash\Core\Module as ModuleCore;
+use OxidSolutionCatalysts\TeleCash\Extension\Model\User as ModuleUser;
+use OxidSolutionCatalysts\TeleCash\Greeting\Controller\GreetingController;
+use OxidSolutionCatalysts\TeleCash\Settings\Service\ModuleSettingsServiceInterface;
+use OxidSolutionCatalysts\TeleCash\Tests\Integration\IntegrationTestCase;
+use OxidSolutionCatalysts\TeleCash\Tracker\Model\TrackerModel;
+use OxidSolutionCatalysts\TeleCash\Tracker\Repository\TrackerRepositoryInterface;
 use PHPUnit\Framework\Attributes\CoversClass;
 
 /*

@@ -7,13 +7,13 @@
 
 declare(strict_types=1);
 
-namespace OxidEsales\ModuleTemplate\Tests\Unit\Greeting\Service;
+namespace OxidSolutionCatalysts\TeleCash\Tests\Unit\Greeting\Service;
 
 use OxidEsales\Eshop\Core\Language as CoreLanguage;
 use OxidEsales\Eshop\Core\Request as CoreRequest;
-use OxidEsales\ModuleTemplate\Core\Module as ModuleCore;
-use OxidEsales\ModuleTemplate\Greeting\Service\GreetingMessageService;
-use OxidEsales\ModuleTemplate\Settings\Service\ModuleSettingsServiceInterface;
+use OxidSolutionCatalysts\TeleCash\Core\Module as ModuleCore;
+use OxidSolutionCatalysts\TeleCash\Greeting\Service\GreetingMessageService;
+use OxidSolutionCatalysts\TeleCash\Settings\Service\ModuleSettingsServiceInterface;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
 

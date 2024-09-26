@@ -7,7 +7,7 @@
 
 declare(strict_types=1);
 
-namespace OxidEsales\ModuleTemplate\Settings\Service;
+namespace OxidSolutionCatalysts\TeleCash\Settings\Service;
 
 interface ModuleSettingsServiceInterface
 {

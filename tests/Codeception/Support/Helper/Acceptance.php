@@ -7,7 +7,7 @@
 
 declare(strict_types=1);
 
-namespace OxidEsales\ModuleTemplate\Tests\Codeception\Support\Helper;
+namespace OxidSolutionCatalysts\TeleCash\Tests\Codeception\Support\Helper;
 
 use OxidEsales\Facts\Facts;
 

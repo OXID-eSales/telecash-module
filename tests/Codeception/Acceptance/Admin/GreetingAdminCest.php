@@ -7,10 +7,10 @@
 
 declare(strict_types=1);
 
-namespace OxidEsales\ModuleTemplate\Tests\Codeception\Acceptance\Admin;
+namespace OxidSolutionCatalysts\TeleCash\Tests\Codeception\Acceptance\Admin;
 
 use OxidEsales\Codeception\Module\Translation\Translator;
-use OxidEsales\ModuleTemplate\Tests\Codeception\Support\AcceptanceTester;
+use OxidSolutionCatalysts\TeleCash\Tests\Codeception\Support\AcceptanceTester;
 
 /**
  * @group oe_moduletemplate

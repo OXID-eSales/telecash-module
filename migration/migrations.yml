@@ -1,4 +1,4 @@
 table_storage:
-  table_name: oxmigrations_oe_moduletemplate
+  table_name: oxmigrations_osc_telecash
 migrations_paths:
-  'OxidEsales\ModuleTemplate\Migrations': data
+  'OxidSolutionCatalysts\TeleCash\Migrations': data

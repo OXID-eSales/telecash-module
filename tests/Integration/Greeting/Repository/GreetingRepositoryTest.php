@@ -7,13 +7,13 @@
 
 declare(strict_types=1);
 
-namespace OxidEsales\ModuleTemplate\Tests\Integration\Greeting\Repository;
+namespace OxidSolutionCatalysts\TeleCash\Tests\Integration\Greeting\Repository;
 
 use OxidEsales\Eshop\Application\Model\User as EshopModelUser;
 use OxidEsales\EshopCommunity\Internal\Framework\Database\QueryBuilderFactoryInterface;
 use OxidEsales\EshopCommunity\Tests\Integration\IntegrationTestCase;
-use OxidEsales\ModuleTemplate\Greeting\Repository\GreetingRepository;
-use OxidEsales\ModuleTemplate\Greeting\Repository\GreetingRepositoryInterface;
+use OxidSolutionCatalysts\TeleCash\Greeting\Repository\GreetingRepository;
+use OxidSolutionCatalysts\TeleCash\Greeting\Repository\GreetingRepositoryInterface;
 use PHPUnit\Framework\Attributes\CoversClass;
 
 #[CoversClass(GreetingRepository::class)]

@@ -7,11 +7,11 @@ on:
     - cron: '16 1 */7 * *'
 
 jobs:
-  module_template_71x_nightly:
+  osc_telecash_71x_nightly:
     if: always()
     uses: oxid-eSales/github-actions/.github/workflows/universal_workflow_light.yaml@v4
     with:
-      testplan: '~/defaults/7.2.x.yaml,~/defaults/scheduled.yaml,~/module-template.yaml'
+      testplan: '~/defaults/7.2.x.yaml,~/defaults/scheduled.yaml,~/osc_telecash.yaml'
       runs_on: '"ubuntu-latest"'
       defaults: 'v4'
       plan_folder: '.github/oxid-esales'

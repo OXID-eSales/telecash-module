@@ -7,14 +7,14 @@
 
 declare(strict_types=1);
 
-namespace OxidEsales\ModuleTemplate\Tests\Integration\Tracker\Repository;
+namespace OxidSolutionCatalysts\TeleCash\Tests\Integration\Tracker\Repository;
 
 use OxidEsales\Eshop\Core\Registry;
 use OxidEsales\EshopCommunity\Internal\Framework\Database\QueryBuilderFactoryInterface;
 use OxidEsales\EshopCommunity\Tests\Integration\IntegrationTestCase;
-use OxidEsales\ModuleTemplate\Tracker\Model\TrackerModel;
-use OxidEsales\ModuleTemplate\Tracker\Repository\TrackerRepository;
-use OxidEsales\ModuleTemplate\Tracker\Repository\TrackerRepositoryInterface;
+use OxidSolutionCatalysts\TeleCash\Tracker\Model\TrackerModel;
+use OxidSolutionCatalysts\TeleCash\Tracker\Repository\TrackerRepository;
+use OxidSolutionCatalysts\TeleCash\Tracker\Repository\TrackerRepositoryInterface;
 use PHPUnit\Framework\Attributes\CoversClass;
 
 #[CoversClass(TrackerRepository::class)]

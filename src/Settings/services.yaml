@@ -3,6 +3,6 @@ services:
     public: false
     autowire: true
 
-  OxidEsales\ModuleTemplate\Settings\Service\ModuleSettingsServiceInterface:
-    class: OxidEsales\ModuleTemplate\Settings\Service\ModuleSettingsService
+  OxidSolutionCatalysts\TeleCash\Settings\Service\ModuleSettingsServiceInterface:
+    class: OxidSolutionCatalysts\TeleCash\Settings\Service\ModuleSettingsService
     public: true
