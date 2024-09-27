@@ -76,7 +76,7 @@ $ composer phpmd
 - run `composer update` in module root directory
 
 ```bash
-$ cd vendor/oxid-solution-catalysts/osc_telecash
+$ cd vendor/oxid-solution-catalysts/telecash-module
 $ composer update
 ```
 
