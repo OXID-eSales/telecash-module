@@ -6,6 +6,7 @@
  */
 
 use OxidSolutionCatalysts\TeleCash\Core\Module;
+use OxidSolutionCatalysts\TeleCash\Settings\Service\ModuleFileSettingsServiceInterface;
 use OxidSolutionCatalysts\TeleCash\Settings\Service\ModuleSettingsServiceInterface;
 
 /**
@@ -80,25 +81,25 @@ $aModule = [
         // these options are hidden, so the group is null
         [
             'group' => null,
-            'name'  => ModuleSettingsServiceInterface::CLIENT_CERT_P12_FILE,
+            'name'  => ModuleFileSettingsServiceInterface::CLIENT_CERT_P12_FILE,
             'type'  => 'string',
             'value' => '',
         ],
         [
             'group' => null,
-            'name'  => ModuleSettingsServiceInterface::CLIENT_CERT_PRIVATEKEY_FILE,
+            'name'  => ModuleFileSettingsServiceInterface::CLIENT_CERT_PRIVATEKEY_FILE,
             'type'  => 'string',
             'value' => '',
         ],
         [
             'group' => null,
-            'name'  => ModuleSettingsServiceInterface::CLIENT_CERT_PEM_FILE,
+            'name'  => ModuleFileSettingsServiceInterface::CLIENT_CERT_PEM_FILE,
             'type'  => 'string',
             'value' => '',
         ],
         [
             'group' => null,
-            'name'  => ModuleSettingsServiceInterface::TRUST_ANCHOR_PEM_FILE,
+            'name'  => ModuleFileSettingsServiceInterface::TRUST_ANCHOR_PEM_FILE,
             'type'  => 'string',
             'value' => '',
         ],

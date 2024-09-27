@@ -9,6 +9,8 @@ declare(strict_types=1);
 
 namespace OxidSolutionCatalysts\TeleCash\Settings\Service;
 
+use Symfony\Component\HttpFoundation\File\UploadedFile;
+
 interface ModuleFileSettingsServiceInterface
 {
     public const CLIENT_CERT_P12_FILE = 'osctelecash_clientcertificatep12file';
@@ -20,25 +22,25 @@ interface ModuleFileSettingsServiceInterface
     public const TRUST_ANCHOR_PEM_FILE = 'osctelecash_trustanchorpemfile';
 
 
-    public function storeClientCertificateP12File(): void;
+    public function storeClientCertificateP12File(UploadedFile $file): void;
 
     public function checkClientCertificateP12FileExists(): bool;
 
     public function getClientCertificateP12FilePath(): string;
 
-    public function storeClientCertificatePrivateKeyFile(): void;
+    public function storeClientCertificatePrivateKeyFile(UploadedFile $file): void;
 
     public function checkClientCertificatePrivateKeyFileExists(): bool;
 
     public function getClientCertificatePrivateKeyFilePath(): string;
 
-    public function storeClientCertificatePEMFile(): void;
+    public function storeClientCertificatePEMFile(UploadedFile $file): void;
 
     public function checkClientCertificatePEMFileExists(): bool;
 
     public function getClientCertificatePEMFilePath(): string;
 
-    public function storeTrustAnchorPEMFile(): void;
+    public function storeTrustAnchorPEMFile(UploadedFile $file): void;
 
     public function checkTrustAnchorPEMFileExists(): bool;
 
