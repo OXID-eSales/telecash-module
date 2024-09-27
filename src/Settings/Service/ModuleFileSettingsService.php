@@ -9,10 +9,12 @@ declare(strict_types=1);
 
 namespace OxidSolutionCatalysts\TeleCash\Settings\Service;
 
+use OxidEsales\Eshop\Core\Config;
 use OxidEsales\Eshop\Core\Registry;
 use OxidEsales\EshopCommunity\Internal\Framework\Module\Facade\ModuleSettingServiceInterface;
 use OxidEsales\Facts\Facts;
 use OxidSolutionCatalysts\TeleCash\Core\Module;
+use OxidSolutionCatalysts\TeleCash\Core\Service\RegistryService;
 use RuntimeException;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\Filesystem\Filesystem;
@@ -30,6 +32,7 @@ class ModuleFileSettingsService implements ModuleFileSettingsServiceInterface
     private Filesystem $filesystem;
 
     private string $uploadPath;
+    private Config $config;
 
     /**
      * ModuleFileSettingsService constructor.
@@ -37,10 +40,12 @@ class ModuleFileSettingsService implements ModuleFileSettingsServiceInterface
      * @param ModuleSettingServiceInterface $moduleSettingService Service for storing module settings
      */
     public function __construct(
-        private readonly ModuleSettingServiceInterface $moduleSettingService
+        private readonly ModuleSettingServiceInterface $moduleSettingService,
+        RegistryService $registryService
     ) {
         $this->filesystem = new Filesystem();
         $this->uploadPath = $this->initializeUploadPath();
+        $this->config = $registryService->getConfig();
     }
 
     /**
@@ -56,7 +61,7 @@ class ModuleFileSettingsService implements ModuleFileSettingsServiceInterface
             . 'var' . DIRECTORY_SEPARATOR
             . 'uploads' . DIRECTORY_SEPARATOR
             . 'shops' . DIRECTORY_SEPARATOR
-            . Registry::getConfig()->getShopId() . DIRECTORY_SEPARATOR
+            . $this->config->getShopId() . DIRECTORY_SEPARATOR
             . 'modules' . DIRECTORY_SEPARATOR
             . Module::MODULE_ID . DIRECTORY_SEPARATOR
             . 'certs';
@@ -92,17 +97,16 @@ class ModuleFileSettingsService implements ModuleFileSettingsServiceInterface
      *
      * @param UploadedFile $file The uploaded file
      * @param string $settingName The setting name to store the filename
-     * @return string The new filename of the stored file
+     * @return void The new filename of the stored file
      * @throws RuntimeException If there's an error moving the file
      */
-    private function storeUploadedFile(UploadedFile $file, string $settingName): string
+    private function storeUploadedFile(UploadedFile $file, string $settingName): void
     {
         $originalFilename = $file->getClientOriginalName();
         $safeFilename = $this->getSafeFilename($originalFilename);
 
         $file->move($this->uploadPath, $safeFilename);
         $this->moduleSettingService->saveString($settingName, $safeFilename, Module::MODULE_ID);
-        return $safeFilename;
     }
 
     /**

@@ -1,11 +1,21 @@
 <?php
 
+/**
+ * Copyright © OXID eSales AG. All rights reserved.
+ * See LICENSE file for license details.
+ */
+
 namespace OxidSolutionCatalysts\TeleCash\Tests\Unit\Settings\Service;
 
+use OxidEsales\Eshop\Core\Config;
 use OxidEsales\EshopCommunity\Internal\Framework\Module\Facade\ModuleSettingServiceInterface;
+use OxidSolutionCatalysts\TeleCash\Core\Service\RegistryService;
 use OxidSolutionCatalysts\TeleCash\Settings\Service\ModuleFileSettingsService;
 use OxidSolutionCatalysts\TeleCash\Core\Module;
+use OxidSolutionCatalysts\TeleCash\Settings\Service\ModuleFileSettingsServiceInterface;
 use PHPUnit\Framework\TestCase;
+use ReflectionException;
+use ReflectionMethod;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\Filesystem\Filesystem;
 use OxidEsales\Facts\Facts;
@@ -14,9 +24,10 @@ use OxidEsales\Eshop\Core\Registry;
 class ModuleFileSettingsTest extends TestCase
 {
     private $moduleSettingService;
-    private $service;
+    private ModuleFileSettingsService $service;
     private $filesystem;
-    private $uploadPath = '/var/www/shop/var/uploads/shops/1/modules/' . Module::MODULE_ID . '/certs';
+
+    private string $uploadPath = '/var/www/shop/var/uploads/shops/1/modules/' . Module::MODULE_ID . '/certs';
 
     protected function setUp(): void
     {
@@ -27,13 +38,16 @@ class ModuleFileSettingsTest extends TestCase
         $facts = $this->createMock(Facts::class);
         $facts->method('getShopRootPath')->willReturn('/var/www/shop');
 
-        $config = $this->createMock(\OxidEsales\Eshop\Core\Config::class);
+        $config = $this->createMock(Config::class);
         $config->method('getShopId')->willReturn(1);
 
-        $registry = $this->createMock(Registry::class);
-        $registry->method('getConfig')->willReturn($config);
+        $registryService = $this->createMock(RegistryService::class);
+        $registryService->method('getConfig')->willReturn($config);
 
-        $this->service = new ModuleFileSettingsService($this->moduleSettingService);
+        $this->service = new ModuleFileSettingsService(
+            $this->moduleSettingService,
+            $registryService
+        );
         $reflection = new \ReflectionClass($this->service);
 
         $filesystemProperty = $reflection->getProperty('filesystem');
@@ -43,36 +57,36 @@ class ModuleFileSettingsTest extends TestCase
         $uploadPathProperty->setValue($this->service, $this->uploadPath);
     }
 
-    public function certificateMethodsProvider(): array
+    public static function certificateMethodsProvider(): array
     {
         return [
             'P12' => [
-                'storeMethod' => 'storeClientCertificateP12File',
+                'storeMethod'       => 'storeClientCertificateP12File',
                 'checkExistsMethod' => 'checkClientCertificateP12FileExists',
-                'getPathMethod' => 'getClientCertificateP12FilePath',
-                'settingName' => ModuleFileSettingsService::CLIENT_CERT_P12_FILE,
-                'filename' => 'test.p12',
+                'getPathMethod'     => 'getClientCertificateP12FilePath',
+                'settingName'       => ModuleFileSettingsServiceInterface::CLIENT_CERT_P12_FILE,
+                'filename'          => 'test.p12',
             ],
             'PrivateKey' => [
-                'storeMethod' => 'storeClientCertificatePrivateKeyFile',
+                'storeMethod'       => 'storeClientCertificatePrivateKeyFile',
                 'checkExistsMethod' => 'checkClientCertificatePrivateKeyFileExists',
-                'getPathMethod' => 'getClientCertificatePrivateKeyFilePath',
-                'settingName' => ModuleFileSettingsService::CLIENT_CERT_PRIVATEKEY_FILE,
-                'filename' => 'test.key',
+                'getPathMethod'     => 'getClientCertificatePrivateKeyFilePath',
+                'settingName'       => ModuleFileSettingsServiceInterface::CLIENT_CERT_PRIVATEKEY_FILE,
+                'filename'          => 'test.key',
             ],
             'PEM' => [
-                'storeMethod' => 'storeClientCertificatePEMFile',
+                'storeMethod'       => 'storeClientCertificatePEMFile',
                 'checkExistsMethod' => 'checkClientCertificatePEMFileExists',
-                'getPathMethod' => 'getClientCertificatePEMFilePath',
-                'settingName' => ModuleFileSettingsService::CLIENT_CERT_PEM_FILE,
-                'filename' => 'test.pem',
+                'getPathMethod'     => 'getClientCertificatePEMFilePath',
+                'settingName'       => ModuleFileSettingsServiceInterface::CLIENT_CERT_PEM_FILE,
+                'filename'          => 'test.pem',
             ],
             'TrustAnchor' => [
-                'storeMethod' => 'storeTrustAnchorPEMFile',
+                'storeMethod'       => 'storeTrustAnchorPEMFile',
                 'checkExistsMethod' => 'checkTrustAnchorPEMFileExists',
-                'getPathMethod' => 'getTrustAnchorPEMFilePath',
-                'settingName' => ModuleFileSettingsService::TRUST_ANCHOR_PEM_FILE,
-                'filename' => 'trust_anchor.pem',
+                'getPathMethod'     => 'getTrustAnchorPEMFilePath',
+                'settingName'       => ModuleFileSettingsServiceInterface::TRUST_ANCHOR_PEM_FILE,
+                'filename'          => 'trust_anchor.pem',
             ],
         ];
     }
@@ -80,8 +94,13 @@ class ModuleFileSettingsTest extends TestCase
     /**
      * @dataProvider certificateMethodsProvider
      */
-    public function testStoreCertificateFile(string $storeMethod, string $checkExistsMethod, string $getPathMethod, string $settingName, string $filename)
-    {
+    public function testStoreCertificateFile(
+        string $storeMethod,
+        string $checkExistsMethod,
+        string $getPathMethod,
+        string $settingName,
+        string $filename
+    ): void {
         $file = $this->createMock(UploadedFile::class);
         $file->method('getClientOriginalName')->willReturn($filename);
 
@@ -113,7 +132,10 @@ class ModuleFileSettingsTest extends TestCase
         $this->assertEquals($expectedPath, $this->service->$getPathMethod());
     }
 
-    public function testGetSafeFilename()
+    /**
+     * @throws ReflectionException
+     */
+    public function testGetSafeFilename(): void
     {
         $unsafeFilename = 'test file@123.txt';
         $expectedSafeFilename = 'testfile123.txt';
@@ -121,20 +143,29 @@ class ModuleFileSettingsTest extends TestCase
         $this->filesystem->method('exists')
             ->willReturn(false);
 
-        $method = new \ReflectionMethod(ModuleFileSettingsService::class, 'getSafeFilename');
+        $method = new ReflectionMethod(
+            ModuleFileSettingsService::class,
+            'getSafeFilename'
+        );
 
         $actualSafeFilename = $method->invoke($this->service, $unsafeFilename);
         $this->assertEquals($expectedSafeFilename, $actualSafeFilename);
     }
 
-    public function testGetSafeFilenameWithExistingFile()
+    /**
+     * @throws ReflectionException
+     */
+    public function testGetSafeFilenameWithExistingFile(): void
     {
         $filename = 'test.txt';
 
         $this->filesystem->method('exists')
             ->willReturn(true);
 
-        $method = new \ReflectionMethod(ModuleFileSettingsService::class, 'getSafeFilename');
+        $method = new ReflectionMethod(
+            ModuleFileSettingsService::class,
+            'getSafeFilename'
+        );
 
         $safeFilename = $method->invoke($this->service, $filename);
         $this->assertStringStartsWith('test_', $safeFilename);
