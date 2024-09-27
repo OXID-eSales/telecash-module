@@ -1,12 +1,12 @@
 # OXID eShop TeleCash Module
 
-[![Development](https://github.com/OXID-eSales/osc_telecash/actions/workflows/trigger.yaml/badge.svg?branch=b-7.1.x)](https://github.com/OXID-eSales/osc_telecash/actions/workflows/trigger.yaml)
-[![Latest Version](https://img.shields.io/packagist/v/OXID-eSales/osc_telecash?logo=composer&label=latest&include_prereleases&color=orange)](https://packagist.org/packages/oxid-esales/osc_telecash)
-[![PHP Version](https://img.shields.io/packagist/php-v/oxid-esales/osc_telecash)](https://github.com/oxid-esales/osc_telecash)
+[![Development](https://github.com/OXID-eSales/telecash-module/actions/workflows/trigger.yaml/badge.svg?branch=b-7.1.x)](https://github.com/OXID-eSales/telecash-module/actions/workflows/trigger.yaml)
+[![Latest Version](https://img.shields.io/packagist/v/OXID-eSales/telecash-module?logo=composer&label=latest&include_prereleases&color=orange)](https://packagist.org/packages/oxid-esales/telecash-module)
+[![PHP Version](https://img.shields.io/packagist/php-v/oxid-esales/telecash-module)](https://github.com/oxid-esales/telecash-module)
 
-[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=OXID-eSales_osc_telecash&metric=alert_status)](https://sonarcloud.io/dashboard?id=OXID-eSales_osc_telecash)
-[![Coverage](https://sonarcloud.io/api/project_badges/measure?project=OXID-eSales_osc_telecash&metric=coverage)](https://sonarcloud.io/dashboard?id=OXID-eSales_osc_telecash)
-[![Technical Debt](https://sonarcloud.io/api/project_badges/measure?project=OXID-eSales_osc_telecash&metric=sqale_index)](https://sonarcloud.io/dashboard?id=OXID-eSales_osc_telecash)
+[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=OXID-eSales_telecash-module&metric=alert_status)](https://sonarcloud.io/dashboard?id=OXID-eSales_telecash-module)
+[![Coverage](https://sonarcloud.io/api/project_badges/measure?project=OXID-eSales_telecash-module&metric=coverage)](https://sonarcloud.io/dashboard?id=OXID-eSales_telecash-module)
+[![Technical Debt](https://sonarcloud.io/api/project_badges/measure?project=OXID-eSales_telecash-module&metric=sqale_index)](https://sonarcloud.io/dashboard?id=OXID-eSales_telecash-module)
 
 
 Payment-Module for Payment-Provider Telecash.
@@ -52,7 +52,7 @@ An admin account will be created: `noreply@oxid-esales.com / admin`
 
 This module is in working state and can be directly installed via composer:
 ```
-composer require oxid-solution-catalysts/osc_telecash
+composer require oxid-solution-catalysts/telecash-module
 ./vendor/bin/oe-eshop-doctrine_migration migrations:migrate osc_telecash
 ```
 
