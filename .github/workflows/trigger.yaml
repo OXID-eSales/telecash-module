@@ -5,7 +5,7 @@ on:
   pull_request: {}
   push:
     branches:
-      - 'b-7.2.x*'
+      - 'b-7.1.x*'
 
 jobs:
   osc_telecash_php82_mysql_80:
