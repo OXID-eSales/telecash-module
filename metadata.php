@@ -53,7 +53,7 @@ $aModule = [
             'name'  => ModuleSettingsServiceInterface::STORE_ID,
             'type'  => 'string',
             'value' => '',
-        ],
+    ],
         [
             'group' => 'osctelecash_api',
             'name'  => ModuleSettingsServiceInterface::USER_ID,
