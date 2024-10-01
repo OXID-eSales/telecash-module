@@ -7,6 +7,7 @@
 
 declare(strict_types=1);
 
+use OxidSolutionCatalysts\TeleCash\Settings\Service\ModuleFileSettingsServiceInterface;
 use OxidSolutionCatalysts\TeleCash\Settings\Service\ModuleSettingsServiceInterface;
 
 $aLang = [
@@ -29,4 +30,16 @@ $aLang = [
     'HELP_SHOP_MODULE_' . ModuleSettingsServiceInterface::CLIENT_CERT_INSTALL_PASSWORD    => 'The password which is required to access the p12 file (containing the client certificate and private key file).',
     'SHOP_MODULE_' . ModuleSettingsServiceInterface::CLIENT_CERT_PRIVATEKEY_PASSWORD      => 'Client Certificate Private Key Password',
     'HELP_SHOP_MODULE_' . ModuleSettingsServiceInterface::CLIENT_CERT_PRIVATEKEY_PASSWORD => 'This password protects the private key of the client certificate. This password is needed to access the private key file (“Client Certificate Private Key”) It follows the naming scheme ckp_creationTimestamp. For instance, this might be ckp_1193927132.',
-];
+    'SHOP_MODULE_' . ModuleFileSettingsServiceInterface::CLIENT_CERT_P12_FILE             => 'Client Certificate p12 File',
+    'HELP_SHOP_MODULE_' . ModuleFileSettingsServiceInterface::CLIENT_CERT_P12_FILE        => 'The client certificate and private key stored in a p12 file having the naming scheme WSstoreID._.userID.p12, e.g. in case of the above store ID / user ID examples, this would be WS101._.007.p12. This file is used for authenticating the client at the Gateway.',
+    'SHOP_MODULE_' . ModuleFileSettingsServiceInterface::CLIENT_CERT_PRIVATEKEY_FILE      => 'Client Certificate Private Key',
+    'HELP_SHOP_MODULE_' . ModuleFileSettingsServiceInterface::CLIENT_CERT_PRIVATEKEY_FILE => 'The private key of the client certificate stored in a key file having the naming scheme WSstoreID._.userID.key, e.g. in case of the above store ID / user ID examples, this would be WS10012345678._.1.key.',
+    'SHOP_MODULE_' . ModuleFileSettingsServiceInterface::CLIENT_CERT_PEM_FILE             => 'Client Certificate PEM File',
+    'HELP_SHOP_MODULE_' . ModuleFileSettingsServiceInterface::CLIENT_CERT_PEM_FILE        => 'The list of client certificates stored in a PEM file having the naming scheme WSstoreID._.userID.pem, e.g. in case of the above store ID / user ID examples, this would be WS10012345678._.1.pem.',
+    'SHOP_MODULE_' . ModuleFileSettingsServiceInterface::TRUST_ANCHOR_PEM_FILE            => 'Trust Anchor',
+    'HELP_SHOP_MODULE_' . ModuleFileSettingsServiceInterface::TRUST_ANCHOR_PEM_FILE       => 'as concatenated PEM File (tlstrust.pem): The file contains a list of client certificates you should trust to establish a trusted connection to the running the Web Service API. ',
+
+    'TELECASH_FILE_UPLOAD_SUCCESSFUL' => 'File %s uploaded successfully',
+    'TELECASH_FILE_UPLOAD_ERROR'      => 'Error uploading: %s',
+    'TELECASH_FILE_UPLOAD_NOTVALID'   => 'File %s is not valid',
+    ];

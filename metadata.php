@@ -5,7 +5,9 @@
  * See LICENSE file for license details.
  */
 
+use OxidEsales\Eshop\Application\Controller\Admin\ModuleConfiguration as oxModuleConfiguration;
 use OxidSolutionCatalysts\TeleCash\Core\Module;
+use OxidSolutionCatalysts\TeleCash\Extension\Application\Controller\Admin\ModuleConfiguration;
 use OxidSolutionCatalysts\TeleCash\Settings\Service\ModuleFileSettingsServiceInterface;
 use OxidSolutionCatalysts\TeleCash\Settings\Service\ModuleSettingsServiceInterface;
 
@@ -32,75 +34,76 @@ $aModule = [
     'author'      => 'OXID eSales AG',
     'url'         => '',
     'email'       => '',
-    'extend'      => [
-    ],
     'controllers' => [
     ],
     'events' => [
         'onActivate' => '\OxidSolutionCatalysts\TeleCash\Core\ModuleEvents::onActivate',
         'onDeactivate' => '\OxidSolutionCatalysts\TeleCash\Core\ModuleEvents::onDeactivate'
     ],
+    'extend' => [
+        oxModuleConfiguration::class => ModuleConfiguration::class,
+    ],
     'settings' => [
         [
-            'group'       => 'osctelecash_api',
+            'group'       => ModuleSettingsServiceInterface::MODULE_CONFIG_API_VARGROUP,
             'name'        => ModuleSettingsServiceInterface::API_MODE,
             'type'        => 'select',
             'constraints' => ModuleSettingsServiceInterface::API_MODE_SANDBOX . '|' . ModuleSettingsServiceInterface::API_MODE_LIVE,
             'value'       => ModuleSettingsServiceInterface::API_MODE_SANDBOX
         ],
         [
-            'group' => 'osctelecash_api',
+            'group' => ModuleSettingsServiceInterface::MODULE_CONFIG_API_VARGROUP,
             'name'  => ModuleSettingsServiceInterface::STORE_ID,
-            'type'  => 'string',
+            'type'  => 'str',
             'value' => '',
     ],
         [
-            'group' => 'osctelecash_api',
+            'group' => ModuleSettingsServiceInterface::MODULE_CONFIG_API_VARGROUP,
             'name'  => ModuleSettingsServiceInterface::USER_ID,
-            'type'  => 'string',
+            'type'  => 'str',
             'value' => '',
         ],
         [
-            'group' => 'osctelecash_api',
+            'group' => ModuleSettingsServiceInterface::MODULE_CONFIG_API_VARGROUP,
             'name'  => ModuleSettingsServiceInterface::BASIC_AUTH_PASSWORD,
-            'type'  => 'string',
+            'type'  => 'str',
             'value' => '',
         ],
         [
-            'group' => 'osctelecash_api',
+            'group' => ModuleSettingsServiceInterface::MODULE_CONFIG_API_VARGROUP,
             'name'  => ModuleSettingsServiceInterface::CLIENT_CERT_INSTALL_PASSWORD,
-            'type'  => 'string',
+            'type'  => 'str',
             'value' => '',
         ],
         [
-            'group' => 'osctelecash_api',
+            'group' => ModuleSettingsServiceInterface::MODULE_CONFIG_API_VARGROUP,
             'name'  => ModuleSettingsServiceInterface::CLIENT_CERT_PRIVATEKEY_PASSWORD,
-            'type'  => 'string',
+            'type'  => 'str',
             'value' => '',
         ],
         // these options are hidden, so the group is null
         [
             'group' => null,
             'name'  => ModuleFileSettingsServiceInterface::CLIENT_CERT_P12_FILE,
-            'type'  => 'string',
+            'type'  => 'str',
             'value' => '',
         ],
         [
             'group' => null,
             'name'  => ModuleFileSettingsServiceInterface::CLIENT_CERT_PRIVATEKEY_FILE,
-            'type'  => 'string',
+            'type'  => 'str',
             'value' => '',
         ],
         [
             'group' => null,
             'name'  => ModuleFileSettingsServiceInterface::CLIENT_CERT_PEM_FILE,
-            'type'  => 'string',
+            'type'  => 'str',
             'value' => '',
         ],
         [
             'group' => null,
             'name'  => ModuleFileSettingsServiceInterface::TRUST_ANCHOR_PEM_FILE,
-            'type'  => 'string',
+            'type'  => 'str',
             'value' => '',
         ],
     ]

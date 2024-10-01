@@ -10,7 +10,6 @@ declare(strict_types=1);
 namespace OxidSolutionCatalysts\TeleCash\Settings\Service;
 
 use OxidEsales\Eshop\Core\Config;
-use OxidEsales\Eshop\Core\Registry;
 use OxidEsales\EshopCommunity\Internal\Framework\Module\Facade\ModuleSettingServiceInterface;
 use OxidEsales\Facts\Facts;
 use OxidSolutionCatalysts\TeleCash\Core\Module;
@@ -26,13 +25,23 @@ use Symfony\Component\Filesystem\Exception\IOExceptionInterface;
  * This service handles the storage and retrieval of certificate files for the TeleCash module.
  * It manages different types of certificate files, preserving their original names while ensuring unique storage.
  * File names are stored using ModuleSettingServiceInterface for persistence.
+ *
+ * @SuppressWarnings(PHPMD.TooManyPublicMethods)
  */
 class ModuleFileSettingsService implements ModuleFileSettingsServiceInterface
 {
     private Filesystem $filesystem;
 
     private string $uploadPath;
+
     private Config $config;
+
+    public const TELECASH_UPLOADS = [
+        self::CLIENT_CERT_P12_FILE        => 'storeClientCertificateP12File',
+        self::CLIENT_CERT_PRIVATEKEY_FILE => 'storeClientCertificatePrivateKeyFile',
+        self::CLIENT_CERT_PEM_FILE        => 'storeClientCertificatePEMFile',
+        self::TRUST_ANCHOR_PEM_FILE       => 'storeTrustAnchorPEMFile',
+    ];
 
     /**
      * ModuleFileSettingsService constructor.
@@ -43,9 +52,9 @@ class ModuleFileSettingsService implements ModuleFileSettingsServiceInterface
         private readonly ModuleSettingServiceInterface $moduleSettingService,
         RegistryService $registryService
     ) {
+        $this->config = $registryService->getConfig();
         $this->filesystem = new Filesystem();
         $this->uploadPath = $this->initializeUploadPath();
-        $this->config = $registryService->getConfig();
     }
 
     /**
@@ -157,6 +166,29 @@ class ModuleFileSettingsService implements ModuleFileSettingsServiceInterface
     }
 
     /**
+     * Helper method for deleting a file and resetting the configuration.
+     *
+     * @param string $settingName The name of the configuration setting
+     * @return bool True if deleted successfully, otherwise false
+     */
+    private function deleteFile(string $settingName): bool
+    {
+        $filePath = $this->getFilePath($settingName);
+
+        try {
+            if ($this->filesystem->exists($filePath)) {
+                $this->filesystem->remove($filePath);
+            }
+
+            $this->moduleSettingService->saveString($settingName, '', Module::MODULE_ID);
+
+            return true;
+        } catch (IOExceptionInterface) {
+            return false;
+        }
+    }
+
+    /**
      * Store the uploaded Client Certificate P12 File.
      *
      * @param UploadedFile $file The uploaded P12 file
@@ -186,6 +218,16 @@ class ModuleFileSettingsService implements ModuleFileSettingsServiceInterface
     public function getClientCertificateP12FilePath(): string
     {
         return $this->getFilePath(self::CLIENT_CERT_P12_FILE);
+    }
+
+    /**
+     * Deletes the Client Certificate P12 file and resets the configuration.
+     *
+     * @return bool True, if deleted successfully, otherwise false
+     */
+    public function deleteClientCertificateP12File(): bool
+    {
+        return $this->deleteFile(self::CLIENT_CERT_P12_FILE);
     }
 
     /**
@@ -221,6 +263,16 @@ class ModuleFileSettingsService implements ModuleFileSettingsServiceInterface
     }
 
     /**
+     * Deletes the client certificate private key file and resets the configuration.
+     *
+     * @return bool True, if deleted successfully, otherwise false
+     */
+    public function deleteClientCertificatePrivateKeyFile(): bool
+    {
+        return $this->deleteFile(self::CLIENT_CERT_PRIVATEKEY_FILE);
+    }
+
+    /**
      * Store the uploaded Client Certificate PEM File.
      *
      * @param UploadedFile $file The uploaded PEM file
@@ -253,6 +305,16 @@ class ModuleFileSettingsService implements ModuleFileSettingsServiceInterface
     }
 
     /**
+     * Deletes the Client Certificate PEM file and resets the configuration.
+     *
+     * @return bool True, if deleted successfully, otherwise false
+     */
+    public function deleteClientCertificatePEMFile(): bool
+    {
+        return $this->deleteFile(self::CLIENT_CERT_PEM_FILE);
+    }
+
+    /**
      * Store the uploaded Trust Anchor PEM File.
      *
      * @param UploadedFile $file The uploaded trust anchor file
@@ -282,5 +344,15 @@ class ModuleFileSettingsService implements ModuleFileSettingsServiceInterface
     public function getTrustAnchorPEMFilePath(): string
     {
         return $this->getFilePath(self::TRUST_ANCHOR_PEM_FILE);
+    }
+
+    /**
+     * Deletes the Trust Anchor PEM file and resets the configuration.
+     *
+     * @return bool True, if deleted successfully, otherwise false
+     */
+    public function deleteTrustAnchorPEMFile(): bool
+    {
+        return $this->deleteFile(self::TRUST_ANCHOR_PEM_FILE);
     }
 }

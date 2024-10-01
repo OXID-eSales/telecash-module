@@ -16,6 +16,7 @@ use OxidSolutionCatalysts\TeleCash\Settings\Service\ModuleFileSettingsServiceInt
 use PHPUnit\Framework\TestCase;
 use ReflectionException;
 use ReflectionMethod;
+use Symfony\Component\Filesystem\Exception\IOException;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\Filesystem\Filesystem;
 use OxidEsales\Facts\Facts;
@@ -62,6 +63,7 @@ class ModuleFileSettingsTest extends TestCase
         return [
             'P12' => [
                 'storeMethod'       => 'storeClientCertificateP12File',
+                'deleteMethod'      => 'deleteClientCertificateP12File',
                 'checkExistsMethod' => 'checkClientCertificateP12FileExists',
                 'getPathMethod'     => 'getClientCertificateP12FilePath',
                 'settingName'       => ModuleFileSettingsServiceInterface::CLIENT_CERT_P12_FILE,
@@ -69,6 +71,7 @@ class ModuleFileSettingsTest extends TestCase
             ],
             'PrivateKey' => [
                 'storeMethod'       => 'storeClientCertificatePrivateKeyFile',
+                'deleteMethod'      => 'deleteClientCertificatePrivateKeyFile',
                 'checkExistsMethod' => 'checkClientCertificatePrivateKeyFileExists',
                 'getPathMethod'     => 'getClientCertificatePrivateKeyFilePath',
                 'settingName'       => ModuleFileSettingsServiceInterface::CLIENT_CERT_PRIVATEKEY_FILE,
@@ -76,6 +79,7 @@ class ModuleFileSettingsTest extends TestCase
             ],
             'PEM' => [
                 'storeMethod'       => 'storeClientCertificatePEMFile',
+                'deleteMethod'      => 'deleteClientCertificatePEMFile',
                 'checkExistsMethod' => 'checkClientCertificatePEMFileExists',
                 'getPathMethod'     => 'getClientCertificatePEMFilePath',
                 'settingName'       => ModuleFileSettingsServiceInterface::CLIENT_CERT_PEM_FILE,
@@ -83,6 +87,7 @@ class ModuleFileSettingsTest extends TestCase
             ],
             'TrustAnchor' => [
                 'storeMethod'       => 'storeTrustAnchorPEMFile',
+                'deleteMethod'      => 'deleteTrustAnchorPEMFile',
                 'checkExistsMethod' => 'checkTrustAnchorPEMFileExists',
                 'getPathMethod'     => 'getTrustAnchorPEMFilePath',
                 'settingName'       => ModuleFileSettingsServiceInterface::TRUST_ANCHOR_PEM_FILE,
@@ -94,8 +99,9 @@ class ModuleFileSettingsTest extends TestCase
     /**
      * @dataProvider certificateMethodsProvider
      */
-    public function testStoreCertificateFile(
+    public function testCertificateFileMethods(
         string $storeMethod,
+        string $deleteMethod,
         string $checkExistsMethod,
         string $getPathMethod,
         string $settingName,
@@ -104,6 +110,7 @@ class ModuleFileSettingsTest extends TestCase
         $file = $this->createMock(UploadedFile::class);
         $file->method('getClientOriginalName')->willReturn($filename);
 
+        // Test store method
         $this->filesystem->expects($this->once())
             ->method('exists')
             ->willReturn(false);
@@ -130,6 +137,39 @@ class ModuleFileSettingsTest extends TestCase
         // Test get path method
         $expectedPath = $this->uploadPath . '/' . $filename;
         $this->assertEquals($expectedPath, $this->service->$getPathMethod());
+
+        // Test delete method
+        $this->filesystem->expects($this->once())
+            ->method('remove')
+            ->with($expectedPath);
+
+        $this->moduleSettingService->expects($this->once())
+            ->method('saveString')
+            ->with($settingName, '', Module::MODULE_ID);
+
+        $this->assertTrue($this->service->$deleteMethod());
+    }
+
+    public function testDeleteNonExistentFile(): void
+    {
+        $this->moduleSettingService->method('getString')
+            ->willReturn('');
+
+        $this->assertFalse($this->service->deleteClientCertificateP12File());
+    }
+
+    public function testDeleteFileIOException(): void
+    {
+        $this->moduleSettingService->method('getString')
+            ->willReturn('test.p12');
+
+        $this->filesystem->method('exists')
+            ->willReturn(true);
+
+        $this->filesystem->method('remove')
+            ->willThrowException(new IOException('Test exception'));
+
+        $this->assertFalse($this->service->deleteClientCertificateP12File());
     }
 
     /**

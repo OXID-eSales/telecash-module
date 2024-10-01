@@ -11,6 +11,7 @@ namespace OxidSolutionCatalysts\TeleCash\Settings\Service;
 
 interface ModuleSettingsServiceInterface
 {
+    public const MODULE_CONFIG_API_VARGROUP = 'osctelecash_api';
     public const API_MODE = 'osctelecash_apimode';
     public const API_MODE_LIVE = 'live';
     public const API_MODE_SANDBOX = 'sandbox';
