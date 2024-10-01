@@ -7,7 +7,6 @@ namespace OxidSolutionCatalysts\TeleCash\IPG\API\Model;
  */
 class CreditCardItem extends DataStorageItem
 {
-
     /** @var CreditCardData */
     protected $creditCardData;
 
@@ -17,8 +16,12 @@ class CreditCardItem extends DataStorageItem
      * @param string|null    $function
      * @param string|null    $declineHostedDataDuplicates
      */
-    public function __construct(CreditCardData $creditCardData, string|null $hostedDataId, string|null $function = null, string|null $declineHostedDataDuplicates = null)
-    {
+    public function __construct(
+        CreditCardData $creditCardData,
+        string|null $hostedDataId,
+        string|null $function = null,
+        string|null $declineHostedDataDuplicates = null
+    ) {
         parent::__construct($hostedDataId, $function, $declineHostedDataDuplicates);
 
         $this->creditCardData = $creditCardData;

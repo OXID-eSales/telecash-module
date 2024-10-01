@@ -9,7 +9,6 @@ namespace OxidSolutionCatalysts\TeleCash\IPG\API\Model;
  */
 class TransactionDetailsTest extends \PHPUnit\Framework\TestCase
 {
-
     /**
      * @param string|null $comments
      * @param string|null $invoiceNumber

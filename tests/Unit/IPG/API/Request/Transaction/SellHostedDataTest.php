@@ -1,6 +1,7 @@
 <?php
 
 namespace OxidSolutionCatalysts\TeleCash\IPG\API\Request\Action;
+
 use OxidSolutionCatalysts\TeleCash\IPG\API\Model\Payment;
 use OxidSolutionCatalysts\TeleCash\IPG\API\Model\TransactionDetails;
 use OxidSolutionCatalysts\TeleCash\IPG\API\Request\Transaction\SellHostedData;
@@ -11,7 +12,6 @@ use Prophecy\Prophet;
  */
 class SellHostedDataTest extends \PHPUnit\Framework\TestCase
 {
-
     /**
      * @param Payment|null            $payment
      * @param TransactionDetails|null $transactionDetails

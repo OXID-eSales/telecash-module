@@ -10,16 +10,15 @@ use OxidSolutionCatalysts\TeleCash\IPG\API\Service\OrderService;
  */
 class Error extends AbstractResponse
 {
+    public const SOAP_ERROR_SERVER = 'SOAP-ENV:Server';
+    public const SOAP_ERROR_CLIENT = 'SOAP-ENV:Client';
 
-    const SOAP_ERROR_SERVER = 'SOAP-ENV:Server';
-    const SOAP_ERROR_CLIENT = 'SOAP-ENV:Client';
+    public const SOAP_CLIENT_ERROR_MERCHANT   = 'MerchantException';
+    public const SOAP_CLIENT_ERROR_PROCESSING = 'ProcessingException';
 
-    const SOAP_CLIENT_ERROR_MERCHANT   = 'MerchantException';
-    const SOAP_CLIENT_ERROR_PROCESSING = 'ProcessingException';
-
-    const ERROR_TYPE_SERVER         = 'Server-Error';
-    const ERROR_TYPE_CLIENT         = 'Client-Error';
-    const ERROR_TYPE_NOT_SUCCESSFUL = 'Not successful';
+    public const ERROR_TYPE_SERVER         = 'Server-Error';
+    public const ERROR_TYPE_CLIENT         = 'Client-Error';
+    public const ERROR_TYPE_NOT_SUCCESSFUL = 'Not successful';
 
     /** @var string $errorType */
     private string $errorType;
@@ -106,7 +105,11 @@ class Error extends AbstractResponse
                     $errorDetail = $document->getElementsByTagName('detail');
 
                     if (strpos($response->errorMessage, ':') !== false) {
-                        $response->clientErrorType = substr($response->errorMessage, 0, strpos($response->errorMessage, ':'));
+                        $response->clientErrorType = substr(
+                            $response->errorMessage,
+                            0,
+                            strpos($response->errorMessage, ':')
+                        );
                     } else {
                         $response->clientErrorType = $response->errorMessage;
                     }
@@ -117,11 +120,22 @@ class Error extends AbstractResponse
                             break;
 
                         case self::SOAP_CLIENT_ERROR_PROCESSING:
-                            $response->clientErrorDetail = $response->firstElementByTagNSString($document, OrderService::NAMESPACE_N3, 'ErrorMessage');;
+                            $response->clientErrorDetail = $response->firstElementByTagNSString(
+                                $document,
+                                OrderService::NAMESPACE_N3,
+                                'ErrorMessage'
+                            );
+                            ;
                             break;
 
                         default:
-                            throw new \Exception("Undefined SOAP Client Exception: " . $response->clientErrorType . ' (Complete SOAP Fault: ' . $document->saveXML() . ')');
+                            throw new \Exception(
+                                "Undefined SOAP Client Exception: " .
+                                $response->clientErrorType .
+                                ' (Complete SOAP Fault: ' .
+                                $document->saveXML() .
+                                ')'
+                            );
                     }
                     break;
 

@@ -22,5 +22,4 @@ class OrderRequest extends AbstractRequest
 
         $this->element = $this->document->createElement('ns3:IPGApiOrderRequest');
     }
-
 }

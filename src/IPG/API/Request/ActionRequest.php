@@ -22,5 +22,4 @@ class ActionRequest extends AbstractRequest
 
         $this->element = $this->document->createElement('ns3:IPGApiActionRequest');
     }
-
 }

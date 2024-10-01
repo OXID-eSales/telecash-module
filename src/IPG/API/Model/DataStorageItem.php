@@ -20,8 +20,11 @@ class DataStorageItem implements ElementInterface
      * @param string|null $function
      * @param string|null $declineHostedDataDuplicates
      */
-    public function __construct(string|null $hostedDataId, string|null $function = null, string|null $declineHostedDataDuplicates = null)
-    {
+    public function __construct(
+        string|null $hostedDataId,
+        string|null $function = null,
+        string|null $declineHostedDataDuplicates = null
+    ) {
         $this->hostedDataId                = $hostedDataId;
         $this->function                    = $function;
         $this->declineHostedDataDuplicates = $declineHostedDataDuplicates;
@@ -62,5 +65,4 @@ class DataStorageItem implements ElementInterface
     {
         $this->function = $function;
     }
-
 }

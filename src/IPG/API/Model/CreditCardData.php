@@ -2,13 +2,11 @@
 
 namespace OxidSolutionCatalysts\TeleCash\IPG\API\Model;
 
-
 /**
  * Class CreditCardData
  */
 class CreditCardData implements ElementInterface
 {
-
     /** @var string|null $CardNumber */
     private string|null $cardNumber;
 

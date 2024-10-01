@@ -7,7 +7,6 @@ namespace OxidSolutionCatalysts\TeleCash\IPG\API;
  */
 abstract class AbstractRequest
 {
-
     /** @var \DOMDocument */
     protected \DOMDocument $document;
 

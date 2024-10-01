@@ -12,17 +12,16 @@ use OxidSolutionCatalysts\TeleCash\IPG\API\Response\Error;
  */
 class OrderService extends SoapClientCurl
 {
+    public const NAMESPACE_N1   = 'http://ipg-online.com/ipgapi/schemas/v1';
+    public const NAMESPACE_N2   = 'http://ipg-online.com/ipgapi/schemas/a1';
+    public const NAMESPACE_N3   = 'http://ipg-online.com/ipgapi/schemas/ipgapi';
+    public const NAMESPACE_SOAP = 'http://schemas.xmlsoap.org/soap/envelope/';
 
-    const NAMESPACE_N1   = 'http://ipg-online.com/ipgapi/schemas/v1';
-    const NAMESPACE_N2   = 'http://ipg-online.com/ipgapi/schemas/a1';
-    const NAMESPACE_N3   = 'http://ipg-online.com/ipgapi/schemas/ipgapi';
-    const NAMESPACE_SOAP = 'http://schemas.xmlsoap.org/soap/envelope/';
+    public const SOAP_ERROR_SERVER = 'SOAP-ENV:Server';
+    public const SOAP_ERROR_CLIENT = 'SOAP-ENV:Client';
 
-    const SOAP_ERROR_SERVER = 'SOAP-ENV:Server';
-    const SOAP_ERROR_CLIENT = 'SOAP-ENV:Client';
-
-    const SOAP_CLIENT_ERROR_MERCHANT   = 'MerchantException';
-    const SOAP_CLIENT_ERROR_PROCESSING = 'ProcessingException';
+    public const SOAP_CLIENT_ERROR_MERCHANT   = 'MerchantException';
+    public const SOAP_CLIENT_ERROR_PROCESSING = 'ProcessingException';
 
     private bool $debug;
 
@@ -127,5 +126,4 @@ class OrderService extends SoapClientCurl
     {
         return $this->soapCall($orderRequest);
     }
-
 }

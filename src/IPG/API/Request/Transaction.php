@@ -9,7 +9,6 @@ use OxidSolutionCatalysts\TeleCash\IPG\API\Service\OrderService;
  */
 class Transaction extends OrderRequest
 {
-
     /**
      * @param OrderService $service
      */
@@ -29,5 +28,4 @@ class Transaction extends OrderRequest
     {
         return $this->element->getElementsByTagName('ns1:Transaction')->item(0);
     }
-
 }

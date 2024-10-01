@@ -10,7 +10,6 @@ use Prophecy\Prophet;
  */
 class StoreHostedDataTest extends \PHPUnit\Framework\TestCase
 {
-
     /**
      * @param DataStorageItem $storageItem
      *

@@ -9,7 +9,6 @@ namespace OxidSolutionCatalysts\TeleCash\IPG\API\Model;
  */
 class DataStorageItemTest extends \PHPUnit\Framework\TestCase
 {
-
     /**
      * @param string|null $hostedDataId
      * @param string|null $function
@@ -17,8 +16,11 @@ class DataStorageItemTest extends \PHPUnit\Framework\TestCase
      *
      * @dataProvider dataProvider
      */
-    public function testXMLGeneration(string|null $hostedDataId, string|null $function, string|null $declineHostedDataDuplicates)
-    {
+    public function testXMLGeneration(
+        string|null $hostedDataId,
+        string|null $function,
+        string|null $declineHostedDataDuplicates
+    ) {
         $item     = new DataStorageItem($hostedDataId, $function, $declineHostedDataDuplicates);
         $document = new \DOMDocument('1.0', 'UTF-8');
         $xml      = $item->getXML($document);
@@ -42,8 +44,16 @@ class DataStorageItemTest extends \PHPUnit\Framework\TestCase
         }
 
         if ($declineHostedDataDuplicates !== null) {
-            $this->assertArrayHasKey('ns2:DeclineHostedDataDuplicates', $children, 'Expected element DeclineHostedDataDuplicates not found');
-            $this->assertEquals($declineHostedDataDuplicates, $children['ns2:DeclineHostedDataDuplicates'], 'DeclineHostedDataDuplicates did not match');
+            $this->assertArrayHasKey(
+                'ns2:DeclineHostedDataDuplicates',
+                $children,
+                'Expected element DeclineHostedDataDuplicates not found'
+            );
+            $this->assertEquals(
+                $declineHostedDataDuplicates,
+                $children['ns2:DeclineHostedDataDuplicates'],
+                'DeclineHostedDataDuplicates did not match'
+            );
         }
     }
 

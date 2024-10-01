@@ -14,7 +14,6 @@ use OxidSolutionCatalysts\TeleCash\IPG\API\Service\OrderService;
  */
 class SellHostedData extends Transaction
 {
-
     /**
      * @param OrderService            $service
      * @param Payment                 $payment
@@ -48,5 +47,4 @@ class SellHostedData extends Transaction
 
         return $response instanceof Error ? $response : new Sell($response);
     }
-
 }

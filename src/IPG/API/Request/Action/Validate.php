@@ -15,7 +15,6 @@ use OxidSolutionCatalysts\TeleCash\IPG\API\Service\OrderService;
  */
 class Validate extends Action
 {
-
     /**
      * @param OrderService   $service
      * @param CreditCardData $creditCardData
@@ -55,5 +54,4 @@ class Validate extends Action
 
         return $response instanceof Error ? $response : new Validation($response);
     }
-
 }

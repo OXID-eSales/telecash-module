@@ -13,7 +13,6 @@ use OxidSolutionCatalysts\TeleCash\IPG\API\Service\OrderService;
  */
 class DeleteHostedData extends Action
 {
-
     /**
      * @param OrderService    $service
      * @param DataStorageItem $storageItem
@@ -39,5 +38,4 @@ class DeleteHostedData extends Action
 
         return $response instanceof Error ? $response : new Confirm($response);
     }
-
 }

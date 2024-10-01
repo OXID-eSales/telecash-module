@@ -9,7 +9,6 @@ use OxidSolutionCatalysts\TeleCash\IPG\API\Service\OrderService;
  */
 class Action extends ActionRequest
 {
-
     /**
      * @param OrderService $service
      */
@@ -18,5 +17,4 @@ class Action extends ActionRequest
         parent::__construct($service);
         $this->element->appendChild($this->document->createElement('ns2:Action'));
     }
-
 }

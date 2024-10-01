@@ -13,7 +13,6 @@ use OxidSolutionCatalysts\TeleCash\IPG\API\Service\OrderService;
  */
 class DisplayHostedData extends Action
 {
-
     /**
      * @param OrderService    $service
      * @param DataStorageItem $storageItem
@@ -39,5 +38,4 @@ class DisplayHostedData extends Action
 
         return $response instanceof Error ? $response : new Display($response);
     }
-
 }

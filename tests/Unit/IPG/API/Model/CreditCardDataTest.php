@@ -9,7 +9,6 @@ namespace OxidSolutionCatalysts\TeleCash\IPG\API\Model;
  */
 class CreditCardDataTest extends \PHPUnit\Framework\TestCase
 {
-
     /**
      * @param string|null $ccNumber
      * @param string|null $validMonth

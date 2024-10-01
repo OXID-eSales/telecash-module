@@ -10,7 +10,6 @@ use OxidSolutionCatalysts\TeleCash\IPG\API\Service\OrderService;
  */
 class Display extends Action
 {
-
     /**
      * @var string
      */
@@ -66,14 +65,34 @@ class Display extends Action
                 $this->wasSuccessful = true;
                 $ccData = $responseDoc->getElementsByTagNameNS(OrderService::NAMESPACE_N2, 'CreditCardData');
                 if ($ccData->length > 0) {
-                    $this->ccNumber     = $this->firstElementByTagNSString($responseDoc, OrderService::NAMESPACE_N1, 'CardNumber');
-                    $expMonth           = $this->firstElementByTagNSString($responseDoc, OrderService::NAMESPACE_N1, 'ExpMonth');
-                    $expYear            = $this->firstElementByTagNSString($responseDoc, OrderService::NAMESPACE_N1, 'ExpYear');
+                    $this->ccNumber     = $this->firstElementByTagNSString(
+                        $responseDoc,
+                        OrderService::NAMESPACE_N1,
+                        'CardNumber'
+                    );
+                    $expMonth           = $this->firstElementByTagNSString(
+                        $responseDoc,
+                        OrderService::NAMESPACE_N1,
+                        'ExpMonth'
+                    );
+                    $expYear            = $this->firstElementByTagNSString(
+                        $responseDoc,
+                        OrderService::NAMESPACE_N1,
+                        'ExpYear'
+                    );
                     $this->ccValid      = $expMonth . '/' . $expYear;
-                    $this->hostedDataId = $this->firstElementByTagNSString($responseDoc, OrderService::NAMESPACE_N2, 'HostedDataID');
+                    $this->hostedDataId = $this->firstElementByTagNSString(
+                        $responseDoc,
+                        OrderService::NAMESPACE_N2,
+                        'HostedDataID'
+                    );
                 }
             } else {
-                $this->errorMessage = $this->firstElementByTagNSString($responseDoc, OrderService::NAMESPACE_N2, 'ErrorMessage');
+                $this->errorMessage = $this->firstElementByTagNSString(
+                    $responseDoc,
+                    OrderService::NAMESPACE_N2,
+                    'ErrorMessage'
+                );
             }
         } else {
             throw new \Exception("Display Call failed " . $responseDoc->saveXML());

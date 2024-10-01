@@ -10,14 +10,13 @@ use OxidSolutionCatalysts\TeleCash\IPG\API\Service\OrderService;
  */
 class Sell extends AbstractResponse
 {
+    public const RESPONSE_SUCCESS = 'Function performed error-free';
 
-    const RESPONSE_SUCCESS = 'Function performed error-free';
-
-    const TRANSACTION_RESULT_APPROVED       = 'APPROVED';
-    const TRANSACTION_RESULT_DECLINED       = 'DECLINED';
-    const TRANSACTION_RESULT_FRAUD          = 'FRAUD';
-    const TRANSACTION_RESULT_FAILED         = 'FAILED';
-    const TRANSACTION_RESULT_NOT_SUCCESSFUL = 'NOT_SUCCESSFUL';
+    public const TRANSACTION_RESULT_APPROVED       = 'APPROVED';
+    public const TRANSACTION_RESULT_DECLINED       = 'DECLINED';
+    public const TRANSACTION_RESULT_FRAUD          = 'FRAUD';
+    public const TRANSACTION_RESULT_FAILED         = 'FAILED';
+    public const TRANSACTION_RESULT_NOT_SUCCESSFUL = 'NOT_SUCCESSFUL';
 
     /** @var bool */
     protected bool $wasSuccessful;
@@ -203,17 +202,26 @@ class Sell extends AbstractResponse
 
         $list = $responseDoc->getElementsByTagNameNS(OrderService::NAMESPACE_N3, 'successfully');
         if ($list->length > 0) {
-            $success = $responseDoc->getElementsByTagNameNS(OrderService::NAMESPACE_N3, 'successfully')->item(0)->nodeValue;
+            $success = $responseDoc->getElementsByTagNameNS(
+                OrderService::NAMESPACE_N3,
+                'successfully'
+            )->item(0)->nodeValue;
 
             $this->wasSuccessful = ($success === 'true');
         } else {
-            $list = $responseDoc->getElementsByTagNameNS(OrderService::NAMESPACE_N3, 'ProcessorResponseMessage');
+            $list = $responseDoc->getElementsByTagNameNS(
+                OrderService::NAMESPACE_N3,
+                'ProcessorResponseMessage'
+            );
             if ($list->length > 0) {
                 $this->wasSuccessful = ($list->item(0)->nodeValue === Sell::RESPONSE_SUCCESS);
             }
 
             if ($this->wasSuccessful === false) {
-                $list = $responseDoc->getElementsByTagNameNS(OrderService::NAMESPACE_N3, 'TransactionResult');
+                $list = $responseDoc->getElementsByTagNameNS(
+                    OrderService::NAMESPACE_N3,
+                    'TransactionResult'
+                );
                 if ($list->length > 0) {
                     $this->wasSuccessful = ($list->item(0)->nodeValue === Sell::TRANSACTION_RESULT_APPROVED);
                 }
@@ -231,26 +239,96 @@ class Sell extends AbstractResponse
     public function __construct(\DOMDocument $responseDoc)
     {
         if ($this->checkIfSuccessful($responseDoc)) {
-            $this->approvalCode             = $this->firstElementByTagNSString($responseDoc, OrderService::NAMESPACE_N3, 'ApprovalCode');
-            $this->avsResponse              = $this->firstElementByTagNSString($responseDoc, OrderService::NAMESPACE_N3, 'AVSResponse');
-            $this->brand                    = $this->firstElementByTagNSString($responseDoc, OrderService::NAMESPACE_N3, 'Brand');
-            $this->orderId                  = $this->firstElementByTagNSString($responseDoc, OrderService::NAMESPACE_N3, 'OrderId');
-            $this->paymentType              = $this->firstElementByTagNSString($responseDoc, OrderService::NAMESPACE_N3, 'PaymentType');
-            $this->processorApprovalCode    = $this->firstElementByTagNSString($responseDoc, OrderService::NAMESPACE_N3, 'ProcessorApprovalCode');
-            $this->processorReceiptNumber   = $this->firstElementByTagNSString($responseDoc, OrderService::NAMESPACE_N3, 'ProcessorReceiptNumber');
-            $this->processorReferenceNumber = $this->firstElementByTagNSString($responseDoc, OrderService::NAMESPACE_N3, 'ProcessorReferenceNumber');
-            $this->processorResponse        = $this->firstElementByTagNSString($responseDoc, OrderService::NAMESPACE_N3, 'ProcessorResponseMessage');
-            $this->processorResponseCode    = $this->firstElementByTagNSString($responseDoc, OrderService::NAMESPACE_N3, 'ProcessorResponseCode');
-            $this->processorTraceNumber     = $this->firstElementByTagNSString($responseDoc, OrderService::NAMESPACE_N3, 'ProcessorTraceNumber');
-            $this->provider                 = $this->firstElementByTagNSString($responseDoc, OrderService::NAMESPACE_N3, 'CommercialServiceProvider');
-            $this->tDate                    = $this->firstElementByTagNSString($responseDoc, OrderService::NAMESPACE_N3, 'TDate');
-            $this->terminalId               = $this->firstElementByTagNSString($responseDoc, OrderService::NAMESPACE_N3, 'TerminalID');
-            $this->transactionTime          = $this->firstElementByTagNSString($responseDoc, OrderService::NAMESPACE_N3, 'TransactionTime');
-            $this->transactionResult        = $this->firstElementByTagNSString($responseDoc, OrderService::NAMESPACE_N3, 'TransactionResult');
+            $this->approvalCode             = $this->firstElementByTagNSString(
+                $responseDoc,
+                OrderService::NAMESPACE_N3,
+                'ApprovalCode'
+            );
+            $this->avsResponse              = $this->firstElementByTagNSString(
+                $responseDoc,
+                OrderService::NAMESPACE_N3,
+                'AVSResponse'
+            );
+            $this->brand                    = $this->firstElementByTagNSString(
+                $responseDoc,
+                OrderService::NAMESPACE_N3,
+                'Brand'
+            );
+            $this->orderId                  = $this->firstElementByTagNSString(
+                $responseDoc,
+                OrderService::NAMESPACE_N3,
+                'OrderId'
+            );
+            $this->paymentType              = $this->firstElementByTagNSString(
+                $responseDoc,
+                OrderService::NAMESPACE_N3,
+                'PaymentType'
+            );
+            $this->processorApprovalCode    = $this->firstElementByTagNSString(
+                $responseDoc,
+                OrderService::NAMESPACE_N3,
+                'ProcessorApprovalCode'
+            );
+            $this->processorReceiptNumber   = $this->firstElementByTagNSString(
+                $responseDoc,
+                OrderService::NAMESPACE_N3,
+                'ProcessorReceiptNumber'
+            );
+            $this->processorReferenceNumber = $this->firstElementByTagNSString(
+                $responseDoc,
+                OrderService::NAMESPACE_N3,
+                'ProcessorReferenceNumber'
+            );
+            $this->processorResponse        = $this->firstElementByTagNSString(
+                $responseDoc,
+                OrderService::NAMESPACE_N3,
+                'ProcessorResponseMessage'
+            );
+            $this->processorResponseCode    = $this->firstElementByTagNSString(
+                $responseDoc,
+                OrderService::NAMESPACE_N3,
+                'ProcessorResponseCode'
+            );
+            $this->processorTraceNumber     = $this->firstElementByTagNSString(
+                $responseDoc,
+                OrderService::NAMESPACE_N3,
+                'ProcessorTraceNumber'
+            );
+            $this->provider                 = $this->firstElementByTagNSString(
+                $responseDoc,
+                OrderService::NAMESPACE_N3,
+                'CommercialServiceProvider'
+            );
+            $this->tDate                    = $this->firstElementByTagNSString(
+                $responseDoc,
+                OrderService::NAMESPACE_N3,
+                'TDate'
+            );
+            $this->terminalId               = $this->firstElementByTagNSString(
+                $responseDoc,
+                OrderService::NAMESPACE_N3,
+                'TerminalID'
+            );
+            $this->transactionTime          = $this->firstElementByTagNSString(
+                $responseDoc,
+                OrderService::NAMESPACE_N3,
+                'TransactionTime'
+            );
+            $this->transactionResult        = $this->firstElementByTagNSString(
+                $responseDoc,
+                OrderService::NAMESPACE_N3,
+                'TransactionResult'
+            );
         } else {
             $this->transactionResult     = Sell::TRANSACTION_RESULT_NOT_SUCCESSFUL;
-            $this->processorResponseCode = $responseDoc->getElementsByTagNameNS(OrderService::NAMESPACE_N2, 'Error')->item(0)->attributes->getNamedItem('Code')->nodeValue;
-            $this->processorResponse     = $responseDoc->getElementsByTagNameNS(OrderService::NAMESPACE_N2, 'ErrorMessage')->item(0)->nodeValue;
+            $this->processorResponseCode = $responseDoc->getElementsByTagNameNS(
+                OrderService::NAMESPACE_N2,
+                'Error'
+            )->item(0)->attributes->getNamedItem('Code')->nodeValue;
+            $this->processorResponse     = $responseDoc->getElementsByTagNameNS(
+                OrderService::NAMESPACE_N2,
+                'ErrorMessage'
+            )->item(0)->nodeValue;
         }
     }
 }

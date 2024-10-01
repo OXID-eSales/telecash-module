@@ -7,7 +7,6 @@ namespace OxidSolutionCatalysts\TeleCash\IPG\API;
  */
 abstract class AbstractResponse
 {
-
     /**
      * @param \DOMDocument $doc
      * @param string $namespace
@@ -23,6 +22,6 @@ abstract class AbstractResponse
             return $elements->item(0)->nodeValue;
         }
 
-        throw new \Exception("Tag " .$namespace . ':' . $tagName . " not found");
+        throw new \Exception("Tag " . $namespace . ':' . $tagName . " not found");
     }
 }

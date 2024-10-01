@@ -7,11 +7,10 @@ namespace OxidSolutionCatalysts\TeleCash\IPG\API\Model;
  */
 class RecurringPaymentInformation implements ElementInterface
 {
-
-    const PERIOD_DAY   = 'day';
-    const PERIOD_WEEK  = 'week';
-    const PERIOD_MONTH = 'month';
-    const PERIOD_YEAR  = 'year';
+    public const PERIOD_DAY   = 'day';
+    public const PERIOD_WEEK  = 'week';
+    public const PERIOD_MONTH = 'month';
+    public const PERIOD_YEAR  = 'year';
 
     /** @var \DateTime|null $startDate */
     private \DateTime|null $startDate;
@@ -28,8 +27,12 @@ class RecurringPaymentInformation implements ElementInterface
      * @param int|null       $installmentFrequency
      * @param string|null    $installmentPeriod
      */
-    public function __construct(\DateTime|null $startDate, int|null $installmentCount, int|null $installmentFrequency, string|null $installmentPeriod)
-    {
+    public function __construct(
+        \DateTime|null $startDate,
+        int|null $installmentCount,
+        int|null $installmentFrequency,
+        string|null $installmentPeriod
+    ) {
         $this->startDate            = $startDate;
         $this->installmentCount     = $installmentCount;
         $this->installmentFrequency = $installmentFrequency;

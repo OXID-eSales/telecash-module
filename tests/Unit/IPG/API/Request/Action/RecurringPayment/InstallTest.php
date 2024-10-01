@@ -11,7 +11,6 @@ use Prophecy\Prophet;
  */
 class InstallTest extends \PHPUnit\Framework\TestCase
 {
-
     /**
      * @param Payment                     $payment
      * @param RecurringPaymentInformation $paymentInformation
@@ -36,8 +35,13 @@ class InstallTest extends \PHPUnit\Framework\TestCase
             $children[$child->nodeName] = $child->nodeValue;
         }
 
-        $this->assertArrayHasKey('ns2:RecurringPaymentInformation', $children, 'Expected element RecurringPaymentInformation not found');
-        //no need to further test RecurringPaymentInformation, as this is already covered in RecurringPaymentInformationTest
+        $this->assertArrayHasKey(
+            'ns2:RecurringPaymentInformation',
+            $children,
+            'Expected element RecurringPaymentInformation not found'
+        );
+        // no need to further test RecurringPaymentInformation,
+        // as this is already covered in RecurringPaymentInformationTest
         $this->assertArrayHasKey('ns1:Payment', $children, 'Expected element Payment not found');
         //no need to further test Payment, as this is already covered in PaymentTest
         $this->assertArrayHasKey('ns2:Function', $children, 'Expected element Function not found');
@@ -53,7 +57,15 @@ class InstallTest extends \PHPUnit\Framework\TestCase
     public static function dataProvider(): array
     {
         return [
-            [new Payment('abc-def', 2), new RecurringPaymentInformation(new \DateTime(), 1, 1, RecurringPaymentInformation::PERIOD_MONTH)],
+            [
+                new Payment('abc-def', 2),
+                new RecurringPaymentInformation(
+                    new \DateTime(),
+                    1,
+                    1,
+                    RecurringPaymentInformation::PERIOD_MONTH
+                )
+            ],
         ];
     }
 }

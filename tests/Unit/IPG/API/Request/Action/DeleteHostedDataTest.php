@@ -10,7 +10,6 @@ use Prophecy\Prophet;
  */
 class DeleteHostedDataTest extends \PHPUnit\Framework\TestCase
 {
-
     /**
      * @param DataStorageItem $storageItem
      *

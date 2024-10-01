@@ -25,8 +25,7 @@ class Modify extends Action\RecurringPayment
         string $orderId,
         Payment $payment = null,
         RecurringPaymentInformation $paymentInformation = null
-    )
-    {
+    ) {
         parent::__construct($service, self::FUNCTION_MODIFY, $payment, $paymentInformation, $orderId);
     }
 
@@ -39,5 +38,4 @@ class Modify extends Action\RecurringPayment
     {
         return $this->execute();
     }
-
 }

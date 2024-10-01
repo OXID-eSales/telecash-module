@@ -7,8 +7,7 @@ namespace OxidSolutionCatalysts\TeleCash\IPG\API\Model;
  */
 class Payment implements ElementInterface
 {
-
-    const CURRENCY_EUR = "978";
+    public const CURRENCY_EUR = "978";
 
     /** @var string|null $hostedDataId */
     private string|null $hostedDataId;

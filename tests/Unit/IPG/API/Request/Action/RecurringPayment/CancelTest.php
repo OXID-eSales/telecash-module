@@ -9,7 +9,6 @@ use Prophecy\Prophet;
  */
 class CancelTest extends \PHPUnit\Framework\TestCase
 {
-
     /**
      * @param string $orderId
      *
@@ -33,14 +32,22 @@ class CancelTest extends \PHPUnit\Framework\TestCase
             $children[$child->nodeName] = $child->nodeValue;
         }
 
-        $this->assertArrayNotHasKey('ns2:RecurringPaymentInformation', $children, 'Unexpected element RecurringPaymentInformation was found');
-        //no need to further test RecurringPaymentInformation, as this is already covered in RecurringPaymentInformationTest
-        $this->assertArrayNotHasKey('ns1:Payment', $children, 'Unexpected element Payment was found');
+        $this->assertArrayNotHasKey(
+            'ns2:RecurringPaymentInformation',
+            $children,
+            'Unexpected element RecurringPaymentInformation was found'
+        );
+        // no need to further test RecurringPaymentInformation,
+        // as this is already covered in RecurringPaymentInformationTest
+        $this->assertArrayNotHasKey(
+            'ns1:Payment',
+            $children,
+            'Unexpected element Payment was found'
+        );
         //no need to further test Payment, as this is already covered in PaymentTest
         $this->assertArrayHasKey('ns2:Function', $children, 'Expected element Function not found');
         $this->assertEquals('cancel', $children['ns2:Function'], 'Function did not match');
         $this->assertArrayHasKey('ns2:OrderId', $children, 'Expected element OrderId not found');
-
     }
 
     /**

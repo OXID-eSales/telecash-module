@@ -9,7 +9,6 @@ use OxidSolutionCatalysts\TeleCash\IPG\API\AbstractResponse;
  */
 abstract class Action extends AbstractResponse
 {
-
     /**
      * @var bool $wasSuccessful
      */

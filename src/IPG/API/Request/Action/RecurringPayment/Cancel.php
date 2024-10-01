@@ -19,8 +19,7 @@ class Cancel extends Action\RecurringPayment
     public function __construct(
         OrderService $service,
         string $orderId
-    )
-    {
+    ) {
         parent::__construct($service, self::FUNCTION_CANCEL, null, null, $orderId);
     }
 
@@ -33,5 +32,4 @@ class Cancel extends Action\RecurringPayment
     {
         return $this->execute();
     }
-
 }

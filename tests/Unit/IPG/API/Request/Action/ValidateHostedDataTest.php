@@ -10,7 +10,6 @@ use Prophecy\Prophet;
  */
 class ValidateHostedDataTest extends \PHPUnit\Framework\TestCase
 {
-
     /**
      * @param Payment $payment
      *

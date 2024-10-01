@@ -9,7 +9,6 @@ namespace OxidSolutionCatalysts\TeleCash\IPG\API\Model;
  */
 class PaymentTest extends \PHPUnit\Framework\TestCase
 {
-
     /**
      * @param string|null $hostedDataId
      * @param float|null  $amount

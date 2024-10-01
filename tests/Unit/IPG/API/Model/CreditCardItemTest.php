@@ -9,7 +9,6 @@ namespace OxidSolutionCatalysts\TeleCash\IPG\API\Model;
  */
 class CreditCardItemTest extends \PHPUnit\Framework\TestCase
 {
-
     /**
      * @param CreditCardData $creditCardData
      * @param string|null    $hostedDataId
@@ -18,8 +17,12 @@ class CreditCardItemTest extends \PHPUnit\Framework\TestCase
      *
      * @dataProvider dataProvider
      */
-    public function testXMLGeneration(CreditCardData $creditCardData, string|null $hostedDataId, string|null $function, string|null $declineHostedDataDuplicates): void
-    {
+    public function testXMLGeneration(
+        CreditCardData $creditCardData,
+        string|null $hostedDataId,
+        string|null $function,
+        string|null $declineHostedDataDuplicates
+    ): void {
         $item     = new CreditCardItem($creditCardData, $hostedDataId, $function, $declineHostedDataDuplicates);
         $document = new \DOMDocument('1.0', 'UTF-8');
         $xml      = $item->getXML($document);
@@ -43,8 +46,16 @@ class CreditCardItemTest extends \PHPUnit\Framework\TestCase
         }
 
         if ($declineHostedDataDuplicates !== null) {
-            $this->assertArrayHasKey('ns2:DeclineHostedDataDuplicates', $children, 'Expected element DeclineHostedDataDuplicates not found');
-            $this->assertEquals($declineHostedDataDuplicates, $children['ns2:DeclineHostedDataDuplicates'], 'DeclineHostedDataDuplicates did not match');
+            $this->assertArrayHasKey(
+                'ns2:DeclineHostedDataDuplicates',
+                $children,
+                'Expected element DeclineHostedDataDuplicates not found'
+            );
+            $this->assertEquals(
+                $declineHostedDataDuplicates,
+                $children['ns2:DeclineHostedDataDuplicates'],
+                'DeclineHostedDataDuplicates did not match'
+            );
         }
 
         $this->assertArrayHasKey('ns2:CreditCardData', $children, 'Expected element CreditCardData not found');

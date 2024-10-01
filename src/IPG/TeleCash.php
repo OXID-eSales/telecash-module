@@ -12,7 +12,6 @@ use OxidSolutionCatalysts\TeleCash\IPG\API\Service\OrderService;
  */
 class TeleCash
 {
-
     private string $serviceUrl;
 
     private string $apiUser;
@@ -39,8 +38,15 @@ class TeleCash
      * @param string $clientKeyPassPhrase
      * @param string $serverCert
      */
-    public function __construct(string $serviceUrl, string $apiUser, string $apiPass, string $clientCert, string $clientKey, string $clientKeyPassPhrase, string $serverCert)
-    {
+    public function __construct(
+        string $serviceUrl,
+        string $apiUser,
+        string $apiPass,
+        string $clientCert,
+        string $clientKey,
+        string $clientKeyPassPhrase,
+        string $serverCert
+    ) {
         $this->serviceUrl          = $serviceUrl;
         $this->apiUser             = $apiUser;
         $this->apiPass             = $apiPass;
@@ -71,8 +77,12 @@ class TeleCash
      * @return Response\Action\Validation|Response\Error
      * @throws \Exception
      */
-    public function validate(string $ccNumber, string $ccValid, float $amount = 1.0, string $text = null): Response\Action\Validation|Response\Error
-    {
+    public function validate(
+        string $ccNumber,
+        string $ccValid,
+        float $amount = 1.0,
+        string $text = null
+    ): Response\Action\Validation|Response\Error {
         $service = $this->getService();
 
         $validMonth     = substr($ccValid, 0, 2);
@@ -93,8 +103,11 @@ class TeleCash
      * @return Response\Action\Confirm|Response\Error
      * @throws \Exception
      */
-    public function storeHostedData(string $ccNumber, string $ccValid, string $hostedDataId): Response\Action\Confirm|Response\Error
-    {
+    public function storeHostedData(
+        string $ccNumber,
+        string $ccValid,
+        string $hostedDataId
+    ): Response\Action\Confirm|Response\Error {
         $service = $this->getService();
 
         $validMonth  = substr($ccValid, 0, 2);
@@ -171,17 +184,29 @@ class TeleCash
      * @return Response\Order\Sell|Response\Error
      * @throws \Exception
      */
-    public function sellUsingHostedData(string $hostedDataId, float $amount, string|null $comments = null, string|null $invoiceNumber = null): Response\Order\Sell|Response\Error
-    {
+    public function sellUsingHostedData(
+        string $hostedDataId,
+        float $amount,
+        string|null $comments = null,
+        string|null $invoiceNumber = null
+    ): Response\Order\Sell|Response\Error {
         $service = $this->getService();
 
         $payment = new Model\Payment($hostedDataId, $amount);
         if (!empty($comments) || !empty($invoiceNumber)) {
-            $transactionDetails = new Model\TransactionDetails('ns1', $comments, $invoiceNumber);
+            $transactionDetails = new Model\TransactionDetails(
+                'ns1',
+                $comments,
+                $invoiceNumber
+            );
         } else {
             $transactionDetails = null;
         }
-        $sellAction = new Request\Transaction\SellHostedData($service, $payment, $transactionDetails);
+        $sellAction = new Request\Transaction\SellHostedData(
+            $service,
+            $payment,
+            $transactionDetails
+        );
 
         return $sellAction->sell();
     }
@@ -199,13 +224,28 @@ class TeleCash
      * @return Response\Order\Sell|Response\Error
      * @throws \Exception
      */
-    public function installRecurringPayment(string $hostedDataId, float $amount, \DateTime $startDate, int $count, int $frequency, string $period): Response\Order\Sell|Response\Error
-    {
+    public function installRecurringPayment(
+        string $hostedDataId,
+        float $amount,
+        \DateTime $startDate,
+        int $count,
+        int $frequency,
+        string $period
+    ): Response\Order\Sell|Response\Error {
         $service = $this->getService();
 
-        $paymentInformation     = new Model\RecurringPaymentInformation($startDate, $count, $frequency, $period);
+        $paymentInformation     = new Model\RecurringPaymentInformation(
+            $startDate,
+            $count,
+            $frequency,
+            $period
+        );
         $payment                = new Model\Payment($hostedDataId, $amount);
-        $recurringPaymentAction = new Request\Action\RecurringPayment\Install($service, $payment, $paymentInformation);
+        $recurringPaymentAction = new Request\Action\RecurringPayment\Install(
+            $service,
+            $payment,
+            $paymentInformation
+        );
 
         return $recurringPaymentAction->install();
     }
@@ -221,9 +261,18 @@ class TeleCash
      * @return Response\Order\Sell|Response\Error
      * @throws \Exception
      */
-    public function installOneTimeRecurringPayment(string $hostedDataId, float $amount): Response\Order\Sell|Response\Error
-    {
-        return $this->installRecurringPayment($hostedDataId, $amount, new \DateTime(), 1, 1, Model\RecurringPaymentInformation::PERIOD_MONTH);
+    public function installOneTimeRecurringPayment(
+        string $hostedDataId,
+        float $amount
+    ): Response\Order\Sell|Response\Error {
+        return $this->installRecurringPayment(
+            $hostedDataId,
+            $amount,
+            new \DateTime(),
+            1,
+            1,
+            Model\RecurringPaymentInformation::PERIOD_MONTH
+        );
     }
 
     /**
@@ -240,13 +289,30 @@ class TeleCash
      * @return Response\Action\ConfirmRecurring|Response\Error
      * @throws \Exception
      */
-    public function modifyRecurringPayment(string $orderId, string $hostedDataId, float $amount, \DateTime|null $startDate, int $count, int $frequency, string $period): Response\Action\ConfirmRecurring|Response\Error
-    {
+    public function modifyRecurringPayment(
+        string $orderId,
+        string $hostedDataId,
+        float $amount,
+        \DateTime|null $startDate,
+        int $count,
+        int $frequency,
+        string $period
+    ): Response\Action\ConfirmRecurring|Response\Error {
         $service = $this->getService();
 
-        $paymentInformation     = new Model\RecurringPaymentInformation($startDate, $count, $frequency, $period);
+        $paymentInformation     = new Model\RecurringPaymentInformation(
+            $startDate,
+            $count,
+            $frequency,
+            $period
+        );
         $payment                = new Model\Payment($hostedDataId, $amount);
-        $recurringPaymentAction = new Request\Action\RecurringPayment\Modify($service, $orderId, $payment, $paymentInformation);
+        $recurringPaymentAction = new Request\Action\RecurringPayment\Modify(
+            $service,
+            $orderId,
+            $payment,
+            $paymentInformation
+        );
 
         return $recurringPaymentAction->modify();
     }
@@ -284,10 +350,14 @@ class TeleCash
                 'sslKeyPasswd' => $this->clientKeyPassPhrase,
                 'caInfo'       => $this->serverCert
             ];
-            $this->myService = new OrderService($curlOptions, $this->apiUser, $this->apiPass, $this->debug);
+            $this->myService = new OrderService(
+                $curlOptions,
+                $this->apiUser,
+                $this->apiPass,
+                $this->debug
+            );
         }
 
         return $this->myService;
     }
-
 }

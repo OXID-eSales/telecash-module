@@ -1,6 +1,7 @@
 <?php
 
 namespace OxidSolutionCatalysts\TeleCash\IPG\API\Request\Action;
+
 use OxidSolutionCatalysts\TeleCash\IPG\API\Model\CreditCardData;
 use Prophecy\Prophet;
 
@@ -9,7 +10,6 @@ use Prophecy\Prophet;
  */
 class ValidateTest extends \PHPUnit\Framework\TestCase
 {
-
     /**
      * @param CreditCardData $ccData
      * @param float          $amount
@@ -53,7 +53,11 @@ class ValidateTest extends \PHPUnit\Framework\TestCase
         }
 
         if ($text !== null) {
-            $this->assertArrayHasKey('ns2:TransactionDetails', $children, 'Expected element TransactionDetails not found');
+            $this->assertArrayHasKey(
+                'ns2:TransactionDetails',
+                $children,
+                'Expected element TransactionDetails not found'
+            );
 
             $elementDetails  = $document->getElementsByTagName('ns2:TransactionDetails');
             $detailsChildren = [];
@@ -63,7 +67,11 @@ class ValidateTest extends \PHPUnit\Framework\TestCase
             }
             $this->assertEquals($text, $detailsChildren['ns1:Comments'], 'Comments did not match');
         } else {
-            $this->assertArrayNotHasKey('ns2:TransactionDetails', $children, 'Unexpected element TransactionDetails was found');
+            $this->assertArrayNotHasKey(
+                'ns2:TransactionDetails',
+                $children,
+                'Unexpected element TransactionDetails was found'
+            );
         }
     }
 

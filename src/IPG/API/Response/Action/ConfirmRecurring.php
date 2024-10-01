@@ -30,9 +30,17 @@ class ConfirmRecurring extends Validation
         parent::__construct($responseDoc);
 
         if ($this->wasSuccessful()) {
-            $this->orderId = $this->firstElementByTagNSString($responseDoc, OrderService::NAMESPACE_N3, 'OrderId');
+            $this->orderId = $this->firstElementByTagNSString(
+                $responseDoc,
+                OrderService::NAMESPACE_N3,
+                'OrderId'
+            );
         } else {
-            $this->errorMessage = $this->firstElementByTagNSString($responseDoc, OrderService::NAMESPACE_N2, 'ErrorMessage');
+            $this->errorMessage = $this->firstElementByTagNSString(
+                $responseDoc,
+                OrderService::NAMESPACE_N2,
+                'ErrorMessage'
+            );
         }
     }
 }

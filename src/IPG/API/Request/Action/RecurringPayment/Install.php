@@ -23,8 +23,7 @@ class Install extends Action\RecurringPayment
         OrderService $service,
         Payment $payment = null,
         RecurringPaymentInformation $paymentInformation = null
-    )
-    {
+    ) {
         parent::__construct($service, self::FUNCTION_INSTALL, $payment, $paymentInformation);
     }
 
@@ -37,5 +36,4 @@ class Install extends Action\RecurringPayment
     {
         return $this->execute();
     }
-
 }

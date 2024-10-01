@@ -15,10 +15,9 @@ use OxidSolutionCatalysts\TeleCash\IPG\API\Service\OrderService;
  */
 abstract class RecurringPayment extends Action
 {
-
-    const FUNCTION_INSTALL = 'install';
-    const FUNCTION_MODIFY  = 'modify';
-    const FUNCTION_CANCEL  = 'cancel';
+    public const FUNCTION_INSTALL = 'install';
+    public const FUNCTION_MODIFY  = 'modify';
+    public const FUNCTION_CANCEL  = 'cancel';
 
     /** @var string|null $function */
     private string|null $function;
@@ -42,8 +41,7 @@ abstract class RecurringPayment extends Action
         Payment|null $payment = null,
         RecurringPaymentInformation|null $paymentInformation = null,
         string|null $orderId = null
-    )
-    {
+    ) {
         parent::__construct($service);
 
         $this->function           = $function;
@@ -94,5 +92,4 @@ abstract class RecurringPayment extends Action
 
         return new ConfirmRecurring($response);
     }
-
 }

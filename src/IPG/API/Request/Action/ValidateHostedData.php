@@ -13,7 +13,6 @@ use OxidSolutionCatalysts\TeleCash\IPG\API\Service\OrderService;
  */
 class ValidateHostedData extends Action
 {
-
     /**
      * @param OrderService $service
      * @param Payment      $payment
@@ -38,5 +37,4 @@ class ValidateHostedData extends Action
 
         return $response instanceof Error ? $response : new Validation($response);
     }
-
 }
