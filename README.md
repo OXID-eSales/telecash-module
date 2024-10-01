@@ -18,7 +18,7 @@ Payment-Module for Payment-Provider Telecash.
 Twig only! (eg. no Smarty Support anymore)
 
 ## Installation
-Test to push
+
 * ...
 * ... 
 
@@ -102,3 +102,7 @@ $ bin/oe-console oe:database:reset --db-host=mysql --db-port=3306 --db-name=exam
 
 In case you have any complaints, suggestions, business cases you'd like an example for
 please contact us. Pull request are also welcome.  Every feedback we get will help us improve.
+
+### Kudos
+- Torsten Petersdorf (t.petersdorf@checkdomain.de) from Checkdomain GmbH for his API client, which we use as a base for our development.<br>
+  https://github.com/checkdomain/TeleCash/tree/master
