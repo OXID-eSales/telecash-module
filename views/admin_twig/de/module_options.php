@@ -42,4 +42,5 @@ $aLang = [
     'TELECASH_FILE_UPLOAD_SUCCESSFUL' => 'Datei %s erfolgreich hochgeladen',
     'TELECASH_FILE_UPLOAD_ERROR'      => 'Fehler beim Hochladen: %s',
     'TELECASH_FILE_UPLOAD_NOTVALID'   => 'Datei %s ist nicht valide',
+    'TELECASH_DELETE'                 => 'Datei löschen?',
 ];

@@ -22,15 +22,25 @@
             {% endset %}
             {{ script({ add: telecash_javascript.__toString, priority: 10, dynamic: __oxid_include_dynamic }) }}
 
-            {% for _teleCashFile in aTeleCashFiles %}
+            {% for _teleCashFileOption, _teleCashFileValue in aTeleCashFiles %}
                 <dl>
                     <dt>
-                        <input class="telecash_uploads" type="file" name="{{ _teleCashFile }}"
-                                {{ readonly }}>
-                        {% include "inputhelp.html.twig" with {'sHelpId': help_id("HELP_SHOP_MODULE_" ~ _teleCashFile), 'sHelpText': help_text("HELP_SHOP_MODULE_" ~ _teleCashFile)} %}
+                        {% if _teleCashFileValue %}
+                            <input type="text" style="width: 250px;" name="{{ _teleCashFileOption }}_readonly" value="{{ _teleCashFileValue|raw }}" readonly disabled />
+                        {% else %}
+                            <input class="telecash_uploads" type="file" name="{{ _teleCashFileOption }}"
+                                    {{ readonly }}>
+                        {% endif %}
+                        {% include "inputhelp.html.twig" with {'sHelpId': help_id("HELP_SHOP_MODULE_" ~ _teleCashFileOption), 'sHelpText': help_text("HELP_SHOP_MODULE_" ~ _teleCashFileOption)} %}
                     </dt>
                     <dd>
-                        {{ translate({ ident: "SHOP_MODULE_" ~ _teleCashFile }) }}
+                        {% if _teleCashFileValue %}
+                            <input type="checkbox" name="{{ _teleCashFileOption }}_delete" value="true" {{ readonly }}>
+                        {% endif %}
+                        {{ translate({ ident: "SHOP_MODULE_" ~ _teleCashFileOption }) }}
+                        {% if _teleCashFileValue %}
+                            {{ translate({ ident: "TELECASH_DELETE" }) }}
+                        {% endif %}
                     </dd>
                     <div class="spacer"></div>
                 </dl>

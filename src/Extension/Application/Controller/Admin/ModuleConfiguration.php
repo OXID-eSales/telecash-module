@@ -10,7 +10,6 @@ declare(strict_types=1);
 namespace OxidSolutionCatalysts\TeleCash\Extension\Application\Controller\Admin;
 
 use Exception;
-use OxidEsales\Eshop\Core\Registry;
 use OxidSolutionCatalysts\TeleCash\Core\Module;
 use OxidSolutionCatalysts\TeleCash\Core\Service\RegistryService;
 use OxidSolutionCatalysts\TeleCash\Settings\Service\ModuleFileSettingsService;
@@ -20,6 +19,16 @@ use Symfony\Component\HttpFoundation\File\UploadedFile;
 
 class ModuleConfiguration extends ModuleConfiguration_parent
 {
+    protected RegistryService $registryService;
+    protected ModuleFileSettingsServiceInterface $fileSettingsService;
+
+    public function __construct()
+    {
+        parent::__construct();
+        $this->fileSettingsService = $this->getService(ModuleFileSettingsServiceInterface::class);
+        $this->registryService = $this->getService(RegistryService::class);
+    }
+
     /**
      * OXID-Core
      * @inheritDoc
@@ -32,7 +41,14 @@ class ModuleConfiguration extends ModuleConfiguration_parent
         $this->_aViewData['sTeleCashModuleId'] = Module::MODULE_ID;
         $this->_aViewData['sTeleCashVarGroupAPI'] = ModuleSettingsServiceInterface::MODULE_CONFIG_API_VARGROUP;
         $this->_aViewData['sTeleCashOptionTrigger'] = ModuleSettingsServiceInterface::CLIENT_CERT_PRIVATEKEY_PASSWORD;
-        $this->_aViewData['aTeleCashFiles'] = array_keys(ModuleFileSettingsService::TELECASH_UPLOADS);
+
+        // collect setted options for template
+        $fileSettingsService = $this->getService(ModuleFileSettingsServiceInterface::class);
+        $aTeleCashFiles = [];
+        foreach (ModuleFileSettingsService::TELECASH_GET_FILENAME_METHODS as $teleCashFile => $teleCashGetMethod) {
+            $aTeleCashFiles[$teleCashFile] = $fileSettingsService->$teleCashGetMethod($teleCashFile);
+        }
+        $this->_aViewData['aTeleCashFiles'] = $aTeleCashFiles;
 
         return $result;
     }
@@ -46,29 +62,28 @@ class ModuleConfiguration extends ModuleConfiguration_parent
     {
         parent::saveConfVars();
         $this->storeTeleCashFiles();
+        $this->deleteTeleCashFiles();
     }
 
 
     /**
      * store the necessary telecash files
-     * @inheritDoc
+     *
      * @return void
      */
     protected function storeTeleCashFiles(): void
     {
-        $fileSettingsService = $this->getService(ModuleFileSettingsServiceInterface::class);
-        $registryService = $this->getService(RegistryService::class);
+        $lang = $this->registryService->getLang();
+        $config = $this->registryService->getConfig();
+        $utilsView = $this->registryService->getUtilsView();
 
-        $lang = $registryService->getLang();
-        $config = $registryService->getConfig();
-        $utilsView = $registryService->getUtilsView();
-
-        foreach (ModuleFileSettingsService::TELECASH_UPLOADS as $teleCashFile => $teleCashUploadMethod) {
+        foreach (ModuleFileSettingsService::TELECASH_STORE_METHODS as $teleCashFile => $teleCashStoreMethod) {
+            /** @var array<string, mixed> $aFile */
             $aFile = $config->getUploadedFile($teleCashFile);
             if ($aFile !== null && !empty($aFile['name'])) {
-                $sTmpName = $aFile['tmp_name'] ?: '';
+                $sTmpName = $aFile['tmp_name'] ?? '';
                 $sName = $aFile['name'];
-                $iError = $aFile['error'] ?: UPLOAD_ERR_NO_FILE;
+                $iError = $aFile['error'] ?? UPLOAD_ERR_NO_FILE;
 
                 if ($iError === UPLOAD_ERR_OK && is_uploaded_file($sTmpName)) {
                     try {
@@ -80,7 +95,7 @@ class ModuleConfiguration extends ModuleConfiguration_parent
                             true
                         );
 
-                        $fileSettingsService->$teleCashUploadMethod($uploadedFile);
+                        $this->fileSettingsService->$teleCashStoreMethod($uploadedFile);
                         /** @var string $translate */
                         $translate = $lang->translateString('TELECASH_FILE_UPLOAD_SUCCESSFUL');
                         $utilsView->addErrorToDisplay(sprintf(
@@ -103,6 +118,22 @@ class ModuleConfiguration extends ModuleConfiguration_parent
                         $sName
                     ));
                 }
+            }
+        }
+    }
+
+    /**
+     * delete the unnecessary telecash files
+     *
+     * @return void
+     */
+    protected function deleteTeleCashFiles(): void
+    {
+        $request = $this->registryService->getRequest();
+
+        foreach (ModuleFileSettingsService::TELECASH_DELETE_METHODS as $teleCashFile => $teleCashDeleteMethod) {
+            if ($request->getRequestParameter($teleCashFile . '_delete')) {
+                $this->fileSettingsService->$teleCashDeleteMethod();
             }
         }
     }

@@ -26,6 +26,9 @@ interface ModuleFileSettingsServiceInterface
 
     public function checkClientCertificateP12FileExists(): bool;
 
+
+    public function getClientCertificateP12FileName(): string;
+
     public function getClientCertificateP12FilePath(): string;
 
     public function deleteClientCertificateP12File(): bool;
@@ -33,6 +36,8 @@ interface ModuleFileSettingsServiceInterface
     public function storeClientCertificatePrivateKeyFile(UploadedFile $file): void;
 
     public function checkClientCertificatePrivateKeyFileExists(): bool;
+
+    public function getClientCertificatePrivateKeyFileName(): string;
 
     public function getClientCertificatePrivateKeyFilePath(): string;
 
@@ -42,6 +47,8 @@ interface ModuleFileSettingsServiceInterface
 
     public function checkClientCertificatePEMFileExists(): bool;
 
+    public function getClientCertificatePEMFileName(): string;
+
     public function getClientCertificatePEMFilePath(): string;
 
     public function deleteClientCertificatePEMFile(): bool;
@@ -49,6 +56,8 @@ interface ModuleFileSettingsServiceInterface
     public function storeTrustAnchorPEMFile(UploadedFile $file): void;
 
     public function checkTrustAnchorPEMFileExists(): bool;
+
+    public function getTrustAnchorPEMFileName(): string;
 
     public function getTrustAnchorPEMFilePath(): string;
 

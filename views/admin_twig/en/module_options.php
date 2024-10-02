@@ -42,4 +42,5 @@ $aLang = [
     'TELECASH_FILE_UPLOAD_SUCCESSFUL' => 'File %s uploaded successfully',
     'TELECASH_FILE_UPLOAD_ERROR'      => 'Error uploading: %s',
     'TELECASH_FILE_UPLOAD_NOTVALID'   => 'File %s is not valid',
-    ];
+    'TELECASH_DELETE'                 => 'Delete File?',
+];

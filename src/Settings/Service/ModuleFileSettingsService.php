@@ -36,11 +36,25 @@ class ModuleFileSettingsService implements ModuleFileSettingsServiceInterface
 
     private Config $config;
 
-    public const TELECASH_UPLOADS = [
+    public const TELECASH_STORE_METHODS = [
         self::CLIENT_CERT_P12_FILE        => 'storeClientCertificateP12File',
         self::CLIENT_CERT_PRIVATEKEY_FILE => 'storeClientCertificatePrivateKeyFile',
         self::CLIENT_CERT_PEM_FILE        => 'storeClientCertificatePEMFile',
         self::TRUST_ANCHOR_PEM_FILE       => 'storeTrustAnchorPEMFile',
+    ];
+
+    public const TELECASH_GET_FILENAME_METHODS = [
+        self::CLIENT_CERT_P12_FILE        => 'getClientCertificateP12FileName',
+        self::CLIENT_CERT_PRIVATEKEY_FILE => 'getClientCertificatePrivateKeyFileName',
+        self::CLIENT_CERT_PEM_FILE        => 'getClientCertificatePEMFileName',
+        self::TRUST_ANCHOR_PEM_FILE       => 'getTrustAnchorPEMFileName',
+    ];
+
+    public const TELECASH_DELETE_METHODS = [
+        self::CLIENT_CERT_P12_FILE        => 'deleteClientCertificateP12File',
+        self::CLIENT_CERT_PRIVATEKEY_FILE => 'deleteClientCertificatePrivateKeyFile',
+        self::CLIENT_CERT_PEM_FILE        => 'deleteClientCertificatePEMFile',
+        self::TRUST_ANCHOR_PEM_FILE       => 'deleteTrustAnchorPEMFile',
     ];
 
     /**
@@ -210,6 +224,16 @@ class ModuleFileSettingsService implements ModuleFileSettingsServiceInterface
     }
 
     /**
+     * Get the name of to the Client Certificate P12 File.
+     *
+     * @return string The name of the P12 file
+     */
+    public function getClientCertificateP12FileName(): string
+    {
+        return (string)$this->moduleSettingService->getString(self::CLIENT_CERT_P12_FILE, Module::MODULE_ID);
+    }
+
+    /**
      * Get the path to the Client Certificate P12 File.
      *
      * @return string The full path to the P12 file
@@ -249,6 +273,16 @@ class ModuleFileSettingsService implements ModuleFileSettingsServiceInterface
     public function checkClientCertificatePrivateKeyFileExists(): bool
     {
         return $this->checkFileExists(self::CLIENT_CERT_PRIVATEKEY_FILE);
+    }
+
+    /**
+     * Get the name of to the Client Certificate Private Key File.
+     *
+     * @return string The name of the private key file
+     */
+    public function getClientCertificatePrivateKeyFileName(): string
+    {
+        return (string)$this->moduleSettingService->getString(self::CLIENT_CERT_PRIVATEKEY_FILE, Module::MODULE_ID);
     }
 
     /**
@@ -294,6 +328,16 @@ class ModuleFileSettingsService implements ModuleFileSettingsServiceInterface
     }
 
     /**
+     * Get the name of to the Client Certificate PEM File.
+     *
+     * @return string The name of the PEM file
+     */
+    public function getClientCertificatePEMFileName(): string
+    {
+        return (string)$this->moduleSettingService->getString(self::CLIENT_CERT_PEM_FILE, Module::MODULE_ID);
+    }
+
+    /**
      * Get the path to the Client Certificate PEM File.
      *
      * @return string The full path to the PEM file
@@ -333,6 +377,16 @@ class ModuleFileSettingsService implements ModuleFileSettingsServiceInterface
     public function checkTrustAnchorPEMFileExists(): bool
     {
         return $this->checkFileExists(self::TRUST_ANCHOR_PEM_FILE);
+    }
+
+    /**
+     * Get the name of to the Trust Anchor PEM File.
+     *
+     * @return string The name of the trust anchor file
+     */
+    public function getTrustAnchorPEMFileName(): string
+    {
+        return (string)$this->moduleSettingService->getString(self::TRUST_ANCHOR_PEM_FILE, Module::MODULE_ID);
     }
 
     /**

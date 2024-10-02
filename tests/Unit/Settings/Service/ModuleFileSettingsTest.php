@@ -65,6 +65,7 @@ class ModuleFileSettingsTest extends TestCase
                 'storeMethod'       => 'storeClientCertificateP12File',
                 'deleteMethod'      => 'deleteClientCertificateP12File',
                 'checkExistsMethod' => 'checkClientCertificateP12FileExists',
+                'getNameMethod'     => 'getClientCertificateP12FileName',
                 'getPathMethod'     => 'getClientCertificateP12FilePath',
                 'settingName'       => ModuleFileSettingsServiceInterface::CLIENT_CERT_P12_FILE,
                 'filename'          => 'test.p12',
@@ -73,6 +74,7 @@ class ModuleFileSettingsTest extends TestCase
                 'storeMethod'       => 'storeClientCertificatePrivateKeyFile',
                 'deleteMethod'      => 'deleteClientCertificatePrivateKeyFile',
                 'checkExistsMethod' => 'checkClientCertificatePrivateKeyFileExists',
+                'getNameMethod'     => 'getClientCertificatePrivateKeyFileName',
                 'getPathMethod'     => 'getClientCertificatePrivateKeyFilePath',
                 'settingName'       => ModuleFileSettingsServiceInterface::CLIENT_CERT_PRIVATEKEY_FILE,
                 'filename'          => 'test.key',
@@ -81,6 +83,7 @@ class ModuleFileSettingsTest extends TestCase
                 'storeMethod'       => 'storeClientCertificatePEMFile',
                 'deleteMethod'      => 'deleteClientCertificatePEMFile',
                 'checkExistsMethod' => 'checkClientCertificatePEMFileExists',
+                'getNameMethod'     => 'getClientCertificatePEMFileName',
                 'getPathMethod'     => 'getClientCertificatePEMFilePath',
                 'settingName'       => ModuleFileSettingsServiceInterface::CLIENT_CERT_PEM_FILE,
                 'filename'          => 'test.pem',
@@ -89,6 +92,7 @@ class ModuleFileSettingsTest extends TestCase
                 'storeMethod'       => 'storeTrustAnchorPEMFile',
                 'deleteMethod'      => 'deleteTrustAnchorPEMFile',
                 'checkExistsMethod' => 'checkTrustAnchorPEMFileExists',
+                'getNameMethod'     => 'getTrustAnchorPEMFileName',
                 'getPathMethod'     => 'getTrustAnchorPEMFilePath',
                 'settingName'       => ModuleFileSettingsServiceInterface::TRUST_ANCHOR_PEM_FILE,
                 'filename'          => 'trust_anchor.pem',
@@ -103,6 +107,7 @@ class ModuleFileSettingsTest extends TestCase
         string $storeMethod,
         string $deleteMethod,
         string $checkExistsMethod,
+        string $getNameMethod,
         string $getPathMethod,
         string $settingName,
         string $filename
@@ -133,6 +138,9 @@ class ModuleFileSettingsTest extends TestCase
             ->willReturn(true);
 
         $this->assertTrue($this->service->$checkExistsMethod());
+
+        // Test get name method
+        $this->assertEquals($filename, $this->service->$getNameMethod());
 
         // Test get path method
         $expectedPath = $this->uploadPath . '/' . $filename;
