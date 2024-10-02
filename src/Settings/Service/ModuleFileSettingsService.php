@@ -140,7 +140,7 @@ class ModuleFileSettingsService implements ModuleFileSettingsServiceInterface
      */
     private function getSafeFilename(string $filename): string
     {
-        $safeFilename = preg_replace('/[^a-z.-_]/', '', $filename);
+        $safeFilename = preg_replace('/[^a-z\d\-_.]/', '', strtolower($filename));
         if ($safeFilename === null || $safeFilename === '') {
             return 'file_' . time();
         }
