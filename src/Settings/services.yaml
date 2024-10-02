@@ -6,3 +6,7 @@ services:
   OxidSolutionCatalysts\TeleCash\Settings\Service\ModuleSettingsServiceInterface:
     class: OxidSolutionCatalysts\TeleCash\Settings\Service\ModuleSettingsService
     public: true
+
+  OxidSolutionCatalysts\TeleCash\Settings\Service\ModuleFileSettingsServiceInterface:
+    class: OxidSolutionCatalysts\TeleCash\Settings\Service\ModuleFileSettingsService
+    public: true

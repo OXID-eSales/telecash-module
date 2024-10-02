@@ -1,0 +1,50 @@
+{% extends 'module_config.html.twig' %}
+
+{% block admin_module_config_var %}
+
+    {{ parent() }}
+
+    {% if oModule.getInfo('id') == sTeleCashModuleId %}
+        {% if var_group == sTeleCashVarGroupAPI and module_var == sTeleCashOptionTrigger %}
+
+            {% set telecash_javascript %}
+                {% if phpStorm %}<script type="text/javascript">{% endif %}
+                let telecash_file_inputs = document.getElementsByClassName('telecash_uploads');
+                for (let telecash_file_input of telecash_file_inputs) {
+                    telecash_file_input.addEventListener('click', function() {
+                        let form = this.closest('form');
+                        if (form) {
+                            form.setAttribute('enctype', 'multipart/form-data');
+                        }
+                    });
+                }
+                {% if phpStorm %}</script>{% endif %}
+            {% endset %}
+            {{ script({ add: telecash_javascript.__toString, priority: 10, dynamic: __oxid_include_dynamic }) }}
+
+            {% for _teleCashFileOption, _teleCashFileValue in aTeleCashFiles %}
+                <dl>
+                    <dt>
+                        {% if _teleCashFileValue %}
+                            <input type="text" style="width: 250px;" name="{{ _teleCashFileOption }}_readonly" value="{{ _teleCashFileValue|raw }}" readonly disabled />
+                        {% else %}
+                            <input class="telecash_uploads" type="file" name="{{ _teleCashFileOption }}"
+                                    {{ readonly }}>
+                        {% endif %}
+                        {% include "inputhelp.html.twig" with {'sHelpId': help_id("HELP_SHOP_MODULE_" ~ _teleCashFileOption), 'sHelpText': help_text("HELP_SHOP_MODULE_" ~ _teleCashFileOption)} %}
+                    </dt>
+                    <dd>
+                        {% if _teleCashFileValue %}
+                            <input type="checkbox" name="{{ _teleCashFileOption }}_delete" value="true" {{ readonly }}>
+                        {% endif %}
+                        {{ translate({ ident: "SHOP_MODULE_" ~ _teleCashFileOption }) }}
+                        {% if _teleCashFileValue %}
+                            {{ translate({ ident: "TELECASH_DELETE" }) }}
+                        {% endif %}
+                    </dd>
+                    <div class="spacer"></div>
+                </dl>
+            {% endfor %}
+        {% endif %}
+    {% endif %}
+{% endblock %}

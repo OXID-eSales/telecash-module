@@ -104,4 +104,154 @@ final class ModuleSettingsTest extends TestCase
         $sut = new ModuleSettingsService($mssMock);
         $sut->saveApiMode($value);
     }
+
+    /**
+     * @throws Exception
+     */
+    public function testGetStoreId(): void
+    {
+        $expectedValue = 'testStoreId';
+        $mssMock = $this->createPartialMock(ModuleSettingService::class, ['getString']);
+        $mssMock->method('getString')->willReturn(new UnicodeString($expectedValue));
+
+        $sut = new ModuleSettingsService($mssMock);
+        $this->assertSame($expectedValue, $sut->getStoreId());
+    }
+
+    /**
+     * @throws Exception
+     */
+    public function testSaveStoreId(): void
+    {
+        $value = 'newStoreId';
+        $mssMock = $this->createPartialMock(ModuleSettingService::class, ['saveString']);
+        $mssMock->expects($this->once())->method('saveString')->with(
+            ModuleSettingsServiceInterface::STORE_ID,
+            $value,
+            Module::MODULE_ID
+        );
+
+        $sut = new ModuleSettingsService($mssMock);
+        $sut->saveStoreId($value);
+    }
+
+    /**
+     * @throws Exception
+     */
+    public function testGetUserId(): void
+    {
+        $expectedValue = 'testUserId';
+        $mssMock = $this->createPartialMock(ModuleSettingService::class, ['getString']);
+        $mssMock->method('getString')->willReturn(new UnicodeString($expectedValue));
+
+        $sut = new ModuleSettingsService($mssMock);
+        $this->assertSame($expectedValue, $sut->getUserId());
+    }
+
+    /**
+     * @throws Exception
+     */
+    public function testSaveUserId(): void
+    {
+        $value = 'newUserId';
+        $mssMock = $this->createPartialMock(ModuleSettingService::class, ['saveString']);
+        $mssMock->expects($this->once())->method('saveString')->with(
+            ModuleSettingsServiceInterface::USER_ID,
+            $value,
+            Module::MODULE_ID
+        );
+
+        $sut = new ModuleSettingsService($mssMock);
+        $sut->saveUserId($value);
+    }
+
+    /**
+     * @throws Exception
+     */
+    public function testGetBasicAuthPassword(): void
+    {
+        $expectedValue = 'testPassword';
+        $mssMock = $this->createPartialMock(ModuleSettingService::class, ['getString']);
+        $mssMock->method('getString')->willReturn(new UnicodeString($expectedValue));
+
+        $sut = new ModuleSettingsService($mssMock);
+        $this->assertSame($expectedValue, $sut->getBasicAuthPassword());
+    }
+
+    /**
+     * @throws Exception
+     */
+    public function testSaveBasicAuthPassword(): void
+    {
+        $value = 'newPassword';
+        $mssMock = $this->createPartialMock(ModuleSettingService::class, ['saveString']);
+        $mssMock->expects($this->once())->method('saveString')->with(
+            ModuleSettingsServiceInterface::BASIC_AUTH_PASSWORD,
+            $value,
+            Module::MODULE_ID
+        );
+
+        $sut = new ModuleSettingsService($mssMock);
+        $sut->saveBasicAuthPassword($value);
+    }
+
+    /**
+     * @throws Exception
+     */
+    public function testGetClientCertificateInstallationPassword(): void
+    {
+        $expectedValue = 'testCertPassword';
+        $mssMock = $this->createPartialMock(ModuleSettingService::class, ['getString']);
+        $mssMock->method('getString')->willReturn(new UnicodeString($expectedValue));
+
+        $sut = new ModuleSettingsService($mssMock);
+        $this->assertSame($expectedValue, $sut->getClientCertificateInstallationPassword());
+    }
+
+    /**
+     * @throws Exception
+     */
+    public function testSaveClientCertificateInstallationPassword(): void
+    {
+        $value = 'newCertPassword';
+        $mssMock = $this->createPartialMock(ModuleSettingService::class, ['saveString']);
+        $mssMock->expects($this->once())->method('saveString')->with(
+            ModuleSettingsServiceInterface::CLIENT_CERT_INSTALL_PASSWORD,
+            $value,
+            Module::MODULE_ID
+        );
+
+        $sut = new ModuleSettingsService($mssMock);
+        $sut->saveClientCertificateInstallationPassword($value);
+    }
+
+    /**
+     * @throws Exception
+     */
+    public function testGetClientCertificatePrivateKeyPassword(): void
+    {
+        $expectedValue = 'testPrivateKeyPassword';
+        $mssMock = $this->createPartialMock(ModuleSettingService::class, ['getString']);
+        $mssMock->method('getString')->willReturn(new UnicodeString($expectedValue));
+
+        $sut = new ModuleSettingsService($mssMock);
+        $this->assertSame($expectedValue, $sut->getClientCertificatePrivateKeyPassword());
+    }
+
+    /**
+     * @throws Exception
+     */
+    public function testSaveClientCertificatePrivateKeyPassword(): void
+    {
+        $value = 'newPrivateKeyPassword';
+        $mssMock = $this->createPartialMock(ModuleSettingService::class, ['saveString']);
+        $mssMock->expects($this->once())->method('saveString')->with(
+            ModuleSettingsServiceInterface::CLIENT_CERT_PRIVATEKEY_PASSWORD,
+            $value,
+            Module::MODULE_ID
+        );
+
+        $sut = new ModuleSettingsService($mssMock);
+        $sut->saveClientCertificatePrivateKeyPassword($value);
+    }
 }
