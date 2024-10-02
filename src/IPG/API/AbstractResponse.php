@@ -21,7 +21,7 @@ abstract class AbstractResponse
         if ($elements->length > 0) {
             $item0 = $elements->item(0);
             if ($item0) {
-                return (string)$item0->nodeValue;
+                return trim((string)$item0->nodeValue);
             }
         }
 

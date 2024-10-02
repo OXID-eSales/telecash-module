@@ -9,13 +9,13 @@ use OxidSolutionCatalysts\TeleCash\IPG\API\Service\OrderService;
  */
 class ConfirmRecurring extends Validation
 {
-    /** @var string $orderId */
-    private string $orderId;
+    /** @var string|null $orderId */
+    private string|null $orderId;
 
     /**
      * @return string
      */
-    public function getOrderId(): string
+    public function getOrderId(): string|null
     {
         return $this->orderId;
     }
@@ -41,6 +41,7 @@ class ConfirmRecurring extends Validation
                 OrderService::NAMESPACE_N2,
                 'ErrorMessage'
             );
+            $this->orderId = null;
         }
     }
 }

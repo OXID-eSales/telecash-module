@@ -11,40 +11,40 @@ use OxidSolutionCatalysts\TeleCash\IPG\API\Service\OrderService;
 class Display extends Action
 {
     /**
-     * @var string
+     * @var string|null
      */
-    protected string $ccNumber;
+    protected string|null $ccNumber;
 
     /**
-     * @var string
+     * @var string|null
      */
-    protected string $ccValid;
+    protected string|null $ccValid;
 
     /**
-     * @var string
+     * @var string|null
      */
-    protected string $hostedDataId;
+    protected string|null $hostedDataId;
 
     /**
-     * @return string
+     * @return string|null
      */
-    public function getCCNumber(): string
+    public function getCCNumber(): string|null
     {
         return $this->ccNumber;
     }
 
     /**
-     * @return string
+     * @return string|null
      */
-    public function getCCValid(): string
+    public function getCCValid(): string|null
     {
         return $this->ccValid;
     }
 
     /**
-     * @return string
+     * @return string|null
      */
-    public function getHostedDataId(): string
+    public function getHostedDataId(): string|null
     {
         return $this->hostedDataId;
     }
@@ -56,6 +56,10 @@ class Display extends Action
      */
     public function __construct(\DOMDocument $responseDoc)
     {
+        $this->ccNumber = null;
+        $this->ccValid = null;
+        $this->hostedDataId = null;
+
         $actionResponse = $responseDoc->getElementsByTagNameNS(OrderService::NAMESPACE_N3, 'IPGApiActionResponse');
         $success        = $this->firstElementByTagNSString($responseDoc, OrderService::NAMESPACE_N3, 'successfully');
         $error          = $responseDoc->getElementsByTagNameNS(OrderService::NAMESPACE_N2, 'Error');

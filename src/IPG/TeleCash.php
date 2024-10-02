@@ -1,6 +1,6 @@
 <?php
 
-namespace OxidSolutionCatalysts\TeleCash\IPG\API;
+namespace OxidSolutionCatalysts\TeleCash\IPG;
 
 use OxidSolutionCatalysts\TeleCash\IPG\API\Model;
 use OxidSolutionCatalysts\TeleCash\IPG\API\Request;
