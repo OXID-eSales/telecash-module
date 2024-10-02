@@ -56,13 +56,13 @@ class RecurringPaymentInformation implements ElementInterface
 
         if ($this->installmentCount !== null) {
             $installmentCount              = $document->createElement('ns2:InstallmentCount');
-            $installmentCount->textContent = $this->installmentCount;
+            $installmentCount->textContent = (string)$this->installmentCount;
             $xml->appendChild($installmentCount);
         }
 
         if ($this->installmentFrequency !== null) {
             $installmentFrequency              = $document->createElement('ns2:InstallmentFrequency');
-            $installmentFrequency->textContent = $this->installmentFrequency;
+            $installmentFrequency->textContent = (string)$this->installmentFrequency;
             $xml->appendChild($installmentFrequency);
         }
 

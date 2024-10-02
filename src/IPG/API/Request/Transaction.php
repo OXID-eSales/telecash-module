@@ -22,9 +22,9 @@ class Transaction extends OrderRequest
     /**
      * Set the transaction type
      *
-     * @return \DOMElement
+     * @return \DOMElement|null
      */
-    protected function getTransactionElement(): \DOMElement
+    protected function getTransactionElement(): \DOMElement|null
     {
         return $this->element->getElementsByTagName('ns1:Transaction')->item(0);
     }

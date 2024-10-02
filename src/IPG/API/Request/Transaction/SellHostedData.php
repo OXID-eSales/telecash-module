@@ -28,12 +28,15 @@ class SellHostedData extends Transaction
         $ccType->nodeValue = 'sale';
         $ccTxType->appendChild($ccType);
         $paymentData = $payment->getXML($this->document);
-        $this->getTransactionElement()->appendChild($ccTxType);
-        $this->getTransactionElement()->appendChild($paymentData);
+        $transActElem = $this->getTransactionElement();
+        if ($transActElem) {
+            $transActElem->appendChild($ccTxType);
+            $transActElem->appendChild($paymentData);
 
-        if (null !== $transactionDetails) {
-            $transactionDetailsData = $transactionDetails->getXML($this->document);
-            $this->getTransactionElement()->appendChild($transactionDetailsData);
+            if (null !== $transactionDetails) {
+                $transactionDetailsData = $transactionDetails->getXML($this->document);
+                $transActElem->appendChild($transactionDetailsData);
+            }
         }
     }
 

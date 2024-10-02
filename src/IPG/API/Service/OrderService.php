@@ -26,7 +26,7 @@ class OrderService extends SoapClientCurl
     private bool $debug;
 
     /**
-     * @param array  $curlOptions CURL config values
+     * @param array<int|string, mixed>  $curlOptions CURL config values
      * @param string $username    API user
      * @param string $password    API pass
      * @param bool   $debug       Flag, debug mode
@@ -41,9 +41,11 @@ class OrderService extends SoapClientCurl
     /**
      * @param \DOMNode $element
      */
-    public function dumpDOMElement(\DOMNode $element)
+    public function dumpDOMElement(\DOMNode $element): void
     {
-        var_dump($element->ownerDocument->saveXML($element));
+        if ($element->ownerDocument !== null) {
+            var_dump($element->ownerDocument->saveXML($element));
+        }
     }
 
     /**
@@ -84,7 +86,10 @@ class OrderService extends SoapClientCurl
             var_dump($xml);
         }
 
-        $response = $this->doRequest($xml);
+        $response = false;
+        if ($xml) {
+            $response = $this->doRequest($xml);
+        }
 
         if ($this->debug) {
             var_dump($response);

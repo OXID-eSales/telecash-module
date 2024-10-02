@@ -20,163 +20,163 @@ class Sell extends AbstractResponse
 
     /** @var bool */
     protected bool $wasSuccessful;
-    /** @var string  */
-    protected string $approvalCode;
-    /** @var string  */
-    protected string $avsResponse;
-    /** @var string  */
-    protected string $brand;
-    /** @var string  */
-    protected string $orderId;
-    /** @var string  */
-    protected string $paymentType;
-    /** @var string  */
-    protected string $processorApprovalCode;
-    /** @var string  */
-    protected string $processorReceiptNumber;
-    /** @var string  */
-    protected string $processorReferenceNumber;
-    /** @var string  */
-    protected string $processorResponse;
-    /** @var string  */
-    protected string $processorResponseCode;
-    /** @var string  */
-    protected string $processorTraceNumber;
-    /** @var string  */
-    protected string $provider;
-    /** @var string  */
-    protected string $tDate;
-    /** @var string  */
-    protected string $terminalId;
-    /** @var string  */
-    protected string $transactionResult;
-    /** @var string  */
-    protected string $transactionTime;
+    /** @var string|null  */
+    protected string|null $approvalCode;
+    /** @var string|null  */
+    protected string|null $avsResponse;
+    /** @var string|null  */
+    protected string|null $brand;
+    /** @var string|null  */
+    protected string|null $orderId;
+    /** @var string|null  */
+    protected string|null $paymentType;
+    /** @var string|null  */
+    protected string|null $processorApprovalCode;
+    /** @var string|null  */
+    protected string|null $processorReceiptNumber;
+    /** @var string|null  */
+    protected string|null $processorReferenceNumber;
+    /** @var string|null  */
+    protected string|null $processorResponse;
+    /** @var string|null  */
+    protected string|null $processorResponseCode;
+    /** @var string|null  */
+    protected string|null $processorTraceNumber;
+    /** @var string|null  */
+    protected string|null $provider;
+    /** @var string|null  */
+    protected string|null $tDate;
+    /** @var string|null  */
+    protected string|null $terminalId;
+    /** @var string|null  */
+    protected string|null $transactionResult;
+    /** @var string|null  */
+    protected string|null $transactionTime;
 
     /**
-     * @return string
+     * @return string|null
      */
-    public function getApprovalCode(): string
+    public function getApprovalCode(): string|null
     {
         return $this->approvalCode;
     }
 
     /**
-     * @return string
+     * @return string|null
      */
-    public function getAvsResponse(): string
+    public function getAvsResponse(): string|null
     {
         return $this->avsResponse;
     }
 
     /**
-     * @return string
+     * @return string|null
      */
-    public function getBrand(): string
+    public function getBrand(): string|null
     {
         return $this->brand;
     }
 
     /**
-     * @return string
+     * @return string|null
      */
-    public function getOrderId(): string
+    public function getOrderId(): string|null
     {
         return $this->orderId;
     }
 
     /**
-     * @return string
+     * @return string|null
      */
-    public function getPaymentType(): string
+    public function getPaymentType(): string|null
     {
         return $this->paymentType;
     }
 
     /**
-     * @return string
+     * @return string|null
      */
-    public function getProcessorApprovalCode(): string
+    public function getProcessorApprovalCode(): string|null
     {
         return $this->processorApprovalCode;
     }
 
     /**
-     * @return string
+     * @return string|null
      */
-    public function getProcessorReceiptNumber(): string
+    public function getProcessorReceiptNumber(): string|null
     {
         return $this->processorReceiptNumber;
     }
 
     /**
-     * @return string
+     * @return string|null
      */
-    public function getProcessorReferenceNumber(): string
+    public function getProcessorReferenceNumber(): string|null
     {
         return $this->processorReferenceNumber;
     }
 
     /**
-     * @return string
+     * @return string|null
      */
-    public function getProcessorResponse(): string
+    public function getProcessorResponse(): string|null
     {
         return $this->processorResponse;
     }
 
     /**
-     * @return string
+     * @return string|null
      */
-    public function getProcessorResponseCode(): string
+    public function getProcessorResponseCode(): string|null
     {
         return $this->processorResponseCode;
     }
 
     /**
-     * @return string
+     * @return string|null
      */
-    public function getProcessorTraceNumber(): string
+    public function getProcessorTraceNumber(): string|null
     {
         return $this->processorTraceNumber;
     }
 
     /**
-     * @return string
+     * @return string|null
      */
-    public function getProvider(): string
+    public function getProvider(): string|null
     {
         return $this->provider;
     }
 
     /**
-     * @return string
+     * @return string|null
      */
-    public function getTerminalId(): string
+    public function getTerminalId(): string|null
     {
         return $this->terminalId;
     }
 
     /**
-     * @return string
+     * @return string|null
      */
-    public function getTDate(): string
+    public function getTDate(): string|null
     {
         return $this->tDate;
     }
 
     /**
-     * @return string
+     * @return string|null
      */
-    public function getTransactionResult(): string
+    public function getTransactionResult(): string|null
     {
         return $this->transactionResult;
     }
 
     /**
-     * @return string
+     * @return string|null
      */
-    public function getTransactionTime(): string
+    public function getTransactionTime(): string|null
     {
         return $this->transactionTime;
     }
@@ -205,7 +205,11 @@ class Sell extends AbstractResponse
             $success = $responseDoc->getElementsByTagNameNS(
                 OrderService::NAMESPACE_N3,
                 'successfully'
-            )->item(0)->nodeValue;
+            )->item(0);
+            if ($success) {
+                $success = $success->nodeValue;
+            }
+
 
             $this->wasSuccessful = ($success === 'true');
         } else {
@@ -214,7 +218,11 @@ class Sell extends AbstractResponse
                 'ProcessorResponseMessage'
             );
             if ($list->length > 0) {
-                $this->wasSuccessful = ($list->item(0)->nodeValue === Sell::RESPONSE_SUCCESS);
+                $item0 = $list->item(0);
+                $this->wasSuccessful = false;
+                if ($item0) {
+                    $this->wasSuccessful = ($item0->nodeValue === Sell::RESPONSE_SUCCESS);
+                }
             }
 
             if ($this->wasSuccessful === false) {
@@ -223,7 +231,11 @@ class Sell extends AbstractResponse
                     'TransactionResult'
                 );
                 if ($list->length > 0) {
-                    $this->wasSuccessful = ($list->item(0)->nodeValue === Sell::TRANSACTION_RESULT_APPROVED);
+                    $item0 = $list->item(0);
+                    $this->wasSuccessful = false;
+                    if ($item0) {
+                        $this->wasSuccessful = ($item0->nodeValue === Sell::TRANSACTION_RESULT_APPROVED);
+                    }
                 }
             }
         }
@@ -321,14 +333,25 @@ class Sell extends AbstractResponse
             );
         } else {
             $this->transactionResult     = Sell::TRANSACTION_RESULT_NOT_SUCCESSFUL;
-            $this->processorResponseCode = $responseDoc->getElementsByTagNameNS(
+            $item0 = $responseDoc->getElementsByTagNameNS(
                 OrderService::NAMESPACE_N2,
                 'Error'
-            )->item(0)->attributes->getNamedItem('Code')->nodeValue;
-            $this->processorResponse     = $responseDoc->getElementsByTagNameNS(
+            )->item(0);
+            if ($item0) {
+                $item1 = $item0->attributes->getNamedItem('Code');
+                if ($item1) {
+                    $this->processorResponseCode = $item1->nodeValue;
+                }
+            }
+            unset($item0);
+
+            $item0 = $responseDoc->getElementsByTagNameNS(
                 OrderService::NAMESPACE_N2,
                 'ErrorMessage'
-            )->item(0)->nodeValue;
+            )->item(0);
+            if ($item0) {
+                $this->processorResponse = $item0->nodeValue;
+            }
         }
     }
 }

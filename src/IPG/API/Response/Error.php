@@ -91,13 +91,21 @@ class Error extends AbstractResponse
         if ($errorElement->length > 0) {
             $response = new Error();
 
-            $faultCode              = $document->getElementsByTagName('faultcode');
-            $response->errorMessage = $document->getElementsByTagName('faultstring')->item(0)->nodeValue;
+            $faultCode = $document->getElementsByTagName('faultcode');
+            $item0     = $document->getElementsByTagName('faultstring')->item(0);
+            if ($item0) {
+                $response->errorMessage = (string)$item0->nodeValue;
+            }
+            unset($item0);
 
-            switch ($faultCode->item(0)->nodeValue) {
+            $item0 = $faultCode->item(0);
+            $faultCodeValue = '';
+            if ($item0) {
+                $faultCodeValue = (string)$item0->nodeValue;
+            }
+            switch ($faultCodeValue) {
                 case self::SOAP_ERROR_SERVER:
                     $response->errorType = self::ERROR_TYPE_SERVER;
-
                     break;
 
                 case self::SOAP_ERROR_CLIENT:
@@ -116,7 +124,10 @@ class Error extends AbstractResponse
 
                     switch ($response->clientErrorType) {
                         case self::SOAP_CLIENT_ERROR_MERCHANT:
-                            $response->clientErrorDetail = $errorDetail->item(0)->nodeValue;
+                            $item0 = $errorDetail->item(0);
+                            if ($item0) {
+                                $response->clientErrorDetail = (string)$item0->nodeValue;
+                            }
                             break;
 
                         case self::SOAP_CLIENT_ERROR_PROCESSING:

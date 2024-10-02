@@ -41,7 +41,10 @@ class Validate extends Action
             $xml->appendChild($transactionDetailsData);
         }
 
-        $this->element->getElementsByTagName('ns2:Action')->item(0)->appendChild($xml);
+        $item0 = $this->element->getElementsByTagName('ns2:Action')->item(0);
+        if ($item0) {
+            $item0->appendChild($xml);
+        }
     }
 
     /**

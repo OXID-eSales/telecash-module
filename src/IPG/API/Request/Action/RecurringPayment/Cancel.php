@@ -5,6 +5,7 @@ namespace OxidSolutionCatalysts\TeleCash\IPG\API\Request\Action\RecurringPayment
 use OxidSolutionCatalysts\TeleCash\IPG\API\Request\Action;
 use OxidSolutionCatalysts\TeleCash\IPG\API\Response\Action\ConfirmRecurring;
 use OxidSolutionCatalysts\TeleCash\IPG\API\Response\Error;
+use OxidSolutionCatalysts\TeleCash\IPG\API\Response\Order\Sell;
 use OxidSolutionCatalysts\TeleCash\IPG\API\Service\OrderService;
 
 /**
@@ -26,9 +27,9 @@ class Cancel extends Action\RecurringPayment
     /**
      * Cancel a recurring payment
      *
-     * @return ConfirmRecurring|Error
+     * @return ConfirmRecurring|Sell|Error
      */
-    public function cancel(): ConfirmRecurring|Error
+    public function cancel(): ConfirmRecurring|Sell|Error
     {
         return $this->execute();
     }

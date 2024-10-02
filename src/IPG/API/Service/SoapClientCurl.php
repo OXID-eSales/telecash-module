@@ -11,26 +11,26 @@ namespace OxidSolutionCatalysts\TeleCash\IPG\API\Service;
 class SoapClientCurl
 {
     /** @var null|string User name for HTTP Basic authentication */
-    private $username = null;
+    private string|null $username = null;
     /** @var null|string Password for HTTP Basic authentication */
-    private $password = null;
+    private string|null $password = null;
 
-    /** @var array Options for CURL. */
-    private $curlOptions;
+    /** @var array<int|string, mixed> Options for CURL. */
+    private array $curlOptions;
 
     /** @var mixed $curlStatusCode */
-    private $curlStatusCode;
+    private mixed $curlStatusCode;
     /** @var int $curlErrorNumber */
-    private $curlErrorNumber;
+    private int $curlErrorNumber;
     /** @var string $curlErrorMsg */
-    private $curlErrorMsg;
+    private string $curlErrorMsg;
 
     /**
-     * @param array  $curlOptions
+     * @param array<int|string, mixed>  $curlOptions
      * @param string $username
      * @param string $password
      */
-    public function __construct($curlOptions, $username = null, $password = null)
+    public function __construct(array $curlOptions, $username = null, $password = null)
     {
         $this->username = $username;
         $this->password = $password;

@@ -61,7 +61,7 @@ class DataStorageItem implements ElementInterface
     /**
      * @param string $function
      */
-    public function setFunction(string $function)
+    public function setFunction(string $function): void
     {
         $this->function = $function;
     }

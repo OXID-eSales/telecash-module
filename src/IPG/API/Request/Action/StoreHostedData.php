@@ -24,7 +24,10 @@ class StoreHostedData extends Action
         $xml         = $this->document->createElement('ns2:StoreHostedData');
         $storageData = $storageItem->getXML($this->document);
         $xml->appendChild($storageData);
-        $this->element->getElementsByTagName('ns2:Action')->item(0)->appendChild($xml);
+        $item0 = $this->element->getElementsByTagName('ns2:Action')->item(0);
+        if ($item0) {
+            $item0->appendChild($xml);
+        }
     }
 
     /**

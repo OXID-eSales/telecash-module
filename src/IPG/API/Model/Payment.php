@@ -42,7 +42,7 @@ class Payment implements ElementInterface
 
         if (!empty($this->amount)) {
             $amount                = $document->createElement('ns1:ChargeTotal');
-            $amount->textContent   = $this->amount;
+            $amount->textContent   = (string)$this->amount;
             $currency              = $document->createElement('ns1:Currency');
             $currency->textContent = self::CURRENCY_EUR;
 

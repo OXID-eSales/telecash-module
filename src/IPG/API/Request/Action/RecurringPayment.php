@@ -51,12 +51,12 @@ abstract class RecurringPayment extends Action
 
         $xml                   = $this->document->createElement('ns2:RecurringPayment');
         $function              = $this->document->createElement('ns2:Function');
-        $function->textContent = $this->function;
+        $function->textContent = (string)$this->function;
         $xml->appendChild($function);
 
         if ($this->function === self::FUNCTION_MODIFY || $this->function === self::FUNCTION_CANCEL) {
             $orderId              = $this->document->createElement('ns2:OrderId');
-            $orderId->textContent = $this->orderId;
+            $orderId->textContent = (string)$this->orderId;
             $xml->appendChild($orderId);
         }
 
@@ -70,7 +70,10 @@ abstract class RecurringPayment extends Action
             $xml->appendChild($payment);
         }
 
-        $this->element->getElementsByTagName('ns2:Action')->item(0)->appendChild($xml);
+        $item0 = $this->element->getElementsByTagName('ns2:Action')->item(0);
+        if ($item0) {
+            $item0->appendChild($xml);
+        }
     }
 
     /**

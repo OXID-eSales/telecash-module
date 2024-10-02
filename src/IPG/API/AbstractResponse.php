@@ -19,7 +19,10 @@ abstract class AbstractResponse
         $elements = $doc->getElementsByTagNameNS($namespace, $tagName);
 
         if ($elements->length > 0) {
-            return $elements->item(0)->nodeValue;
+            $item0 = $elements->item(0);
+            if ($item0) {
+                return (string)$item0->nodeValue;
+            }
         }
 
         throw new \Exception("Tag " . $namespace . ':' . $tagName . " not found");

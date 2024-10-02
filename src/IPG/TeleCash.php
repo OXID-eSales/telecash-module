@@ -61,7 +61,7 @@ class TeleCash
      *
      * @param bool $debug
      */
-    public function setDebugMode(bool $debug)
+    public function setDebugMode(bool $debug): void
     {
         $this->debug = $debug;
     }
@@ -221,7 +221,7 @@ class TeleCash
      * @param int       $frequency
      * @param string    $period
      *
-     * @return Response\Order\Sell|Response\Error
+     * @return Response\Action\ConfirmRecurring|Response\Order\Sell|Response\Error
      * @throws \Exception
      */
     public function installRecurringPayment(
@@ -231,7 +231,7 @@ class TeleCash
         int $count,
         int $frequency,
         string $period
-    ): Response\Order\Sell|Response\Error {
+    ): Response\Action\ConfirmRecurring|Response\Order\Sell|Response\Error {
         $service = $this->getService();
 
         $paymentInformation     = new Model\RecurringPaymentInformation(
@@ -258,13 +258,13 @@ class TeleCash
      * @param string $hostedDataId
      * @param float  $amount
      *
-     * @return Response\Order\Sell|Response\Error
+     * @return Response\Action\ConfirmRecurring|Response\Order\Sell|Response\Error
      * @throws \Exception
      */
     public function installOneTimeRecurringPayment(
         string $hostedDataId,
         float $amount
-    ): Response\Order\Sell|Response\Error {
+    ): Response\Action\ConfirmRecurring|Response\Order\Sell|Response\Error {
         return $this->installRecurringPayment(
             $hostedDataId,
             $amount,
@@ -286,7 +286,7 @@ class TeleCash
      * @param int            $frequency
      * @param string         $period
      *
-     * @return Response\Action\ConfirmRecurring|Response\Error
+     * @return Response\Action\ConfirmRecurring|Response\Order\Sell|Response\Error
      * @throws \Exception
      */
     public function modifyRecurringPayment(
@@ -297,7 +297,7 @@ class TeleCash
         int $count,
         int $frequency,
         string $period
-    ): Response\Action\ConfirmRecurring|Response\Error {
+    ): Response\Action\ConfirmRecurring|Response\Order\Sell|Response\Error {
         $service = $this->getService();
 
         $paymentInformation     = new Model\RecurringPaymentInformation(
@@ -322,11 +322,12 @@ class TeleCash
      *
      * @param string $orderId
      *
-     * @return Response\Action\ConfirmRecurring|Response\Error
+     * @return Response\Action\ConfirmRecurring|Response\Order\Sell|Response\Error
      * @throws \Exception
      */
-    public function cancelRecurringPayment(string $orderId): Response\Action\ConfirmRecurring|Response\Error
-    {
+    public function cancelRecurringPayment(
+        string $orderId
+    ): Response\Action\ConfirmRecurring|Response\Order\Sell|Response\Error {
         $service = $this->getService();
 
         $recurringPaymentAction = new Request\Action\RecurringPayment\Cancel($service, $orderId);
