@@ -97,14 +97,14 @@ class Error extends AbstractResponse
             $faultCode = $document->getElementsByTagName('faultcode');
             $item0     = $document->getElementsByTagName('faultstring')->item(0);
             if ($item0) {
-                $response->errorMessage = (string)$item0->nodeValue;
+                $response->errorMessage = trim((string)$item0->nodeValue);
             }
             unset($item0);
 
             $item0 = $faultCode->item(0);
             $faultCodeValue = '';
             if ($item0) {
-                $faultCodeValue = (string)$item0->nodeValue;
+                $faultCodeValue = trim((string)$item0->nodeValue);
             }
             switch ($faultCodeValue) {
                 case self::SOAP_ERROR_SERVER:
@@ -129,7 +129,7 @@ class Error extends AbstractResponse
                         case self::SOAP_CLIENT_ERROR_MERCHANT:
                             $item0 = $errorDetail->item(0);
                             if ($item0) {
-                                $response->clientErrorDetail = (string)$item0->nodeValue;
+                                $response->clientErrorDetail = trim((string)$item0->nodeValue);
                             }
                             break;
 
