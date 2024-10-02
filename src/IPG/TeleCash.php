@@ -9,6 +9,9 @@ use OxidSolutionCatalysts\TeleCash\IPG\API\Service\OrderService;
 
 /**
  * Class TeleCash
+ *
+ * @SuppressWarnings(PHPMD.TooManyPublicMethods)
+ * @SuppressWarnings(PHPMD.CouplingBetweenObjects)
  */
 class TeleCash
 {

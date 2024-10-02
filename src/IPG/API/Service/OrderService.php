@@ -53,6 +53,8 @@ class OrderService extends SoapClientCurl
      *
      * @return Error|null
      * @throws \Exception
+     *
+     * @SuppressWarnings(PHPMD.StaticAccess)
      */
     private function checkForSoapFault(\DOMDocument $responseDoc): Error|null
     {

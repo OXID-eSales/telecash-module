@@ -54,34 +54,34 @@ class SoapClientCurl
     protected function doRequest($request)
     {
         //Basic curl setup for SOAP call
-        $ch = curl_init();
-        curl_setopt($ch, CURLOPT_URL, $this->curlOptions['url']);
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-        curl_setopt($ch, CURLINFO_HEADER_OUT, 1);
-        curl_setopt($ch, CURLOPT_HTTPHEADER, ['Content-Type: text/xml']);
-        curl_setopt($ch, CURLOPT_POSTFIELDS, $request);
-        curl_setopt($ch, CURLOPT_TIMEOUT, 30);
-        curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 5);
+        $curlHandle = curl_init();
+        curl_setopt($curlHandle, CURLOPT_URL, $this->curlOptions['url']);
+        curl_setopt($curlHandle, CURLOPT_RETURNTRANSFER, 1);
+        curl_setopt($curlHandle, CURLINFO_HEADER_OUT, 1);
+        curl_setopt($curlHandle, CURLOPT_HTTPHEADER, ['Content-Type: text/xml']);
+        curl_setopt($curlHandle, CURLOPT_POSTFIELDS, $request);
+        curl_setopt($curlHandle, CURLOPT_TIMEOUT, 30);
+        curl_setopt($curlHandle, CURLOPT_CONNECTTIMEOUT, 5);
 
         //SSL
-        curl_setopt($ch, CURLOPT_CAINFO, $this->curlOptions['caInfo']);
-        curl_setopt($ch, CURLOPT_SSLVERSION, 'CURL_SSLVERSION_TLSv1');
-        curl_setopt($ch, CURLOPT_SSLCERT, $this->curlOptions['sslCert']);
-        curl_setopt($ch, CURLOPT_SSLKEY, $this->curlOptions['sslKey']);
-        curl_setopt($ch, CURLOPT_SSLKEYPASSWD, $this->curlOptions['sslKeyPasswd']);
-        curl_setopt($ch, CURLOPT_HTTPAUTH, CURLAUTH_BASIC);
-        curl_setopt($ch, CURLOPT_USERPWD, sprintf('%1$s:%2$s', $this->username, $this->password));
+        curl_setopt($curlHandle, CURLOPT_CAINFO, $this->curlOptions['caInfo']);
+        curl_setopt($curlHandle, CURLOPT_SSLVERSION, 'CURL_SSLVERSION_TLSv1');
+        curl_setopt($curlHandle, CURLOPT_SSLCERT, $this->curlOptions['sslCert']);
+        curl_setopt($curlHandle, CURLOPT_SSLKEY, $this->curlOptions['sslKey']);
+        curl_setopt($curlHandle, CURLOPT_SSLKEYPASSWD, $this->curlOptions['sslKeyPasswd']);
+        curl_setopt($curlHandle, CURLOPT_HTTPAUTH, CURLAUTH_BASIC);
+        curl_setopt($curlHandle, CURLOPT_USERPWD, sprintf('%1$s:%2$s', $this->username, $this->password));
 
-        $response               = curl_exec($ch);
-        $this->curlErrorNumber  = curl_errno($ch);
+        $response               = curl_exec($curlHandle);
+        $this->curlErrorNumber  = curl_errno($curlHandle);
 
         if ($this->curlErrorNumber == CURLE_OK) {
-            $this->curlStatusCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+            $this->curlStatusCode = curl_getinfo($curlHandle, CURLINFO_HTTP_CODE);
         }
-        $this->curlErrorMsg  = curl_error($ch);
+        $this->curlErrorMsg  = curl_error($curlHandle);
 
         //Close connection
-        curl_close($ch);
+        curl_close($curlHandle);
 
         //Return response info
         return $response;

@@ -82,6 +82,8 @@ class Error extends AbstractResponse
      *
      * @return Error|null
      * @throws \Exception
+     *
+     * @SuppressWarnings(PHPMD.CyclomaticComplexity)
      */
     public static function createFromSoapFault(\DOMDocument $document): Error|null
     {
@@ -91,6 +93,7 @@ class Error extends AbstractResponse
         if ($errorElement->length > 0) {
             $response = new Error();
 
+            $response->errorMessage = '';
             $faultCode = $document->getElementsByTagName('faultcode');
             $item0     = $document->getElementsByTagName('faultstring')->item(0);
             if ($item0) {
