@@ -21,6 +21,7 @@ use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\Filesystem\Filesystem;
 use OxidEsales\Facts\Facts;
 use OxidEsales\Eshop\Core\Registry;
+use Symfony\Component\String\UnicodeString;
 
 class ModuleFileSettingsTest extends TestCase
 {
@@ -132,7 +133,7 @@ class ModuleFileSettingsTest extends TestCase
 
         // Test check exists method
         $this->moduleSettingService->method('getString')
-            ->willReturn($filename);
+            ->willReturn(new UnicodeString($filename));
 
         $this->filesystem->method('exists')
             ->willReturn(true);
@@ -161,7 +162,7 @@ class ModuleFileSettingsTest extends TestCase
     public function testDeleteNonExistentFile(): void
     {
         $this->moduleSettingService->method('getString')
-            ->willReturn('');
+            ->willReturn(new UnicodeString(''));
 
         $this->assertFalse($this->service->deleteClientCertificateP12File());
     }
@@ -169,7 +170,7 @@ class ModuleFileSettingsTest extends TestCase
     public function testDeleteFileIOException(): void
     {
         $this->moduleSettingService->method('getString')
-            ->willReturn('test.p12');
+            ->willReturn(new UnicodeString('test.p12'));
 
         $this->filesystem->method('exists')
             ->willReturn(true);
