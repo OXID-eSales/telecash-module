@@ -21,7 +21,8 @@
     "require": {
         "php": "^8.1",
         "symfony/filesystem": "^6.0",
-        "ext-curl": "*"
+        "ext-curl": "*",
+        "symfony/http-foundation": "^6.0"
     },
     "minimum-stability": "dev",
     "require-dev": {
@@ -32,11 +33,11 @@
         "phpspec/prophecy-phpunit": "^v2.0.1",
         "phpunit/phpunit": "^10.5",
         "mikey179/vfsstream": "~1.6.8",
-        "codeception/codeception": "*",
-        "codeception/module-asserts": "*",
-        "codeception/module-db": "*",
-        "codeception/module-filesystem": "*",
-        "codeception/module-webdriver": "*",
+        "codeception/codeception": "^5.1",
+        "codeception/module-asserts": "^3.0",
+        "codeception/module-db": "^3.1",
+        "codeception/module-filesystem": "^3.0",
+        "codeception/module-webdriver": "^3.2",
         "oxid-esales/codeception-modules": "dev-b-7.1.x",
         "oxid-esales/codeception-page-objects": "dev-b-7.1.x",
         "oxid-esales/developer-tools": "dev-b-7.1.x"

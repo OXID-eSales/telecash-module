@@ -1,9 +1,9 @@
 parameters:
+    treatPhpDocTypesAsCertain: false
     bootstrapFiles:
         - phpstan-bootstrap.php
     stubFiles:
-        - stubs/EshopUser.stub
-        - stubs/StartController.stub
+        - stubs/ModuleConfiguration.stub
     level: 8
     scanFiles:
 

@@ -1,0 +1,12 @@
+services:
+  _defaults:
+    public: false
+    autowire: true
+
+  OxidSolutionCatalysts\TeleCash\Core\Service\OxNewService:
+    class: OxidSolutionCatalysts\TeleCash\Core\Service\OxNewService
+    public: true
+
+  OxidSolutionCatalysts\TeleCash\Core\Service\RegistryService:
+    class: OxidSolutionCatalysts\TeleCash\Core\Service\RegistryService
+    public: true

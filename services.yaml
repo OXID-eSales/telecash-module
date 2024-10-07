@@ -3,7 +3,7 @@ parameters:
 
 imports:
   - { resource: src/Settings/services.yaml }
-
+  - { resource: src/Core/services.yaml }
 services:
 
   _defaults:
