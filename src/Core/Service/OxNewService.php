@@ -7,9 +7,6 @@
 
 namespace OxidSolutionCatalysts\TeleCash\Core\Service;
 
-/**
- * use this service as an alternative to oxid core oxNew, for writing more readable code and better unit tests
- */
 class OxNewService
 {
     /**
@@ -20,6 +17,10 @@ class OxNewService
      */
     public function oxNew(string $fqcn, array $constructorArgs = []): object
     {
-        return oxNew($fqcn, ...$constructorArgs);
+        if (function_exists('oxNew')) {
+            return oxNew($fqcn, ...$constructorArgs);
+        }
+
+        return new $fqcn(...$constructorArgs);
     }
 }

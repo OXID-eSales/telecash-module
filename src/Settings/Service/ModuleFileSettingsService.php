@@ -145,7 +145,8 @@ class ModuleFileSettingsService implements ModuleFileSettingsServiceInterface
             return 'file_' . time();
         }
 
-        if ($this->filesystem->exists($this->uploadPath . '/' . $safeFilename)) {
+        $fullPath = $this->uploadPath . '/' . $safeFilename;
+        if ($this->filesystem->exists($fullPath)) {
             $pathInfo = pathinfo($safeFilename);
             $extension = isset($pathInfo['extension']) ? '.' . $pathInfo['extension'] : '';
             return $pathInfo['filename'] . '_' . time() . $extension;
@@ -192,11 +193,10 @@ class ModuleFileSettingsService implements ModuleFileSettingsServiceInterface
         try {
             if ($this->filesystem->exists($filePath)) {
                 $this->filesystem->remove($filePath);
+                $this->moduleSettingService->saveString($settingName, '', Module::MODULE_ID);
+                return true;
             }
-
-            $this->moduleSettingService->saveString($settingName, '', Module::MODULE_ID);
-
-            return true;
+            return false; // File doesn't exist, so we couldn't delete it
         } catch (IOExceptionInterface) {
             return false;
         }
