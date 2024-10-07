@@ -22,6 +22,10 @@
 
     <rule ref="rulesets/codesize.xml" />
     <rule ref="rulesets/design.xml" />
-    <rule ref="rulesets/naming.xml" />
+    <rule ref="rulesets/naming.xml/LongVariable">
+        <properties>
+            <property name="maximum" value="30" />
+        </properties>
+    </rule>
     <rule ref="rulesets/unusedcode.xml" />
 </ruleset>
