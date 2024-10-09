@@ -16,11 +16,11 @@ use OxidSolutionCatalysts\TeleCash\Settings\Service\ModuleFileSettingsServiceInt
 use PHPUnit\Framework\TestCase;
 use ReflectionException;
 use ReflectionMethod;
+use RuntimeException;
 use Symfony\Component\Filesystem\Exception\IOException;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\Filesystem\Filesystem;
 use OxidEsales\Facts\Facts;
-use OxidEsales\Eshop\Core\Registry;
 use Symfony\Component\String\UnicodeString;
 
 /**
@@ -293,5 +293,21 @@ class ModuleFileSettingsTest extends TestCase
         $safeFilename = $method->invoke($this->service, $filename);
         $this->assertStringStartsWith('test_', $safeFilename);
         $this->assertStringEndsWith('.txt', $safeFilename);
+    }
+
+    public function testCreateDirectoryMotExistsWithExpectedException()
+    {
+        $foldername = '/home/root/test';
+
+        $this->filesystem->method('exists')
+            ->willThrowException(new IOException('Test exception'));
+
+        $method = new ReflectionMethod(
+            ModuleFileSettingsService::class,
+            'createDirectoryIfNotExists'
+        );
+
+        $this->expectException(RuntimeException::class);
+        $method->invoke($this->service, $foldername);
     }
 }

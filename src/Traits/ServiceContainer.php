@@ -10,6 +10,7 @@ declare(strict_types=1);
 namespace OxidSolutionCatalysts\TeleCash\Traits;
 
 use OxidEsales\EshopCommunity\Internal\Container\ContainerFactory;
+use Psr\Container\ContainerInterface;
 use Psr\Container\ContainerExceptionInterface;
 use Psr\Container\NotFoundExceptionInterface;
 
@@ -20,6 +21,8 @@ use Psr\Container\NotFoundExceptionInterface;
  */
 trait ServiceContainer
 {
+    protected ?ContainerInterface $container = null;
+
     /**
      * @template T
      * @psalm-param class-string<T> $serviceName
@@ -30,8 +33,19 @@ trait ServiceContainer
      */
     protected function getServiceFromContainer(string $serviceName)
     {
-        return ContainerFactory::getInstance()
-            ->getContainer()
-            ->get($serviceName);
+        if ($this->container === null) {
+            $this->container = $this->getContainer();
+        }
+        return $this->container->get($serviceName);
+    }
+
+    protected function getContainer(): ContainerInterface
+    {
+        return $this->getContainerFactory()->getContainer();
+    }
+
+    protected function getContainerFactory(): ContainerFactory
+    {
+        return ContainerFactory::getInstance();
     }
 }

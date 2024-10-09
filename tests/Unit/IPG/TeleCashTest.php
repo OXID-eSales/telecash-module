@@ -11,6 +11,7 @@ use OxidSolutionCatalysts\TeleCash\IPG\API\Response\Order\Sell;
 use OxidSolutionCatalysts\TeleCash\IPG\API\Response\Action\ConfirmRecurring;
 use OxidSolutionCatalysts\TeleCash\IPG\API\Response\Error;
 use PHPUnit\Framework\TestCase;
+use ReflectionClass;
 
 class TeleCashTest extends TestCase
 {
@@ -87,6 +88,12 @@ d56feaaf-2d96-4159-8fd6-887e07fc9052
         return $xml;
     }
 
+    public function testSetDebugMode()
+    {
+        $this->teleCash->setDebugMode(true);
+        $this->assertTrue(true);
+    }
+
     public function testValidate()
     {
         $domDocument = new \DOMDocument();
@@ -133,6 +140,37 @@ d56feaaf-2d96-4159-8fd6-887e07fc9052
         $this->assertEquals('411111******1111', $result->getCCNumber());
     }
 
+
+    public function testValidateHostedData()
+    {
+        $domDocument = new \DOMDocument();
+        $domDocument->loadXML($this->createSuccessfulResponseXML('IPGApiActionResponse', '411111******1111'));
+
+        $this->orderServiceMock->expects($this->once())
+            ->method('IPGApiAction')
+            ->willReturn($domDocument);
+
+        $result = $this->teleCash->validateHostedData('hosted_data_id');
+
+        $this->assertInstanceOf(Validation::class, $result);
+        $this->assertTrue($result->wasSuccessful());
+    }
+
+    public function testDeleteHostedData()
+    {
+        $domDocument = new \DOMDocument();
+        $domDocument->loadXML($this->createSuccessfulResponseXML('IPGApiActionResponse', '411111******1111'));
+
+        $this->orderServiceMock->expects($this->once())
+            ->method('IPGApiAction')
+            ->willReturn($domDocument);
+
+        $result = $this->teleCash->deleteHostedData('hosted_data_id');
+
+        $this->assertInstanceOf(Confirm::class, $result);
+        $this->assertTrue($result->wasSuccessful());
+    }
+
     public function testSellUsingHostedData()
     {
         $domDocument = new \DOMDocument();
@@ -143,6 +181,25 @@ d56feaaf-2d96-4159-8fd6-887e07fc9052
             ->willReturn($domDocument);
 
         $result = $this->teleCash->sellUsingHostedData('hosted_data_id', 100.00);
+
+        $this->assertInstanceOf(Sell::class, $result);
+        $this->assertTrue($result->wasSuccessful());
+    }
+
+    public function testSellUsingHostedDataWithComment()
+    {
+        $domDocument = new \DOMDocument();
+        $domDocument->loadXML($this->createSuccessfulResponseXML());
+
+        $this->orderServiceMock->expects($this->once())
+            ->method('IPGApiOrder')
+            ->willReturn($domDocument);
+
+        $result = $this->teleCash->sellUsingHostedData(
+            'hosted_data_id',
+            100.00,
+            'Comment'
+        );
 
         $this->assertInstanceOf(Sell::class, $result);
         $this->assertTrue($result->wasSuccessful());
@@ -166,9 +223,76 @@ d56feaaf-2d96-4159-8fd6-887e07fc9052
             'MONTH'
         );
 
-        //$this->assertInstanceOf(ConfirmRecurring::class, $result);
+        $this->assertInstanceOf(Sell::class, $result);
         $this->assertTrue($result->wasSuccessful());
     }
 
-    // Weitere Tests für die anderen Methoden...
+    public function testInstallOneTimeRecurringPayment()
+    {
+        $domDocument = new \DOMDocument();
+        $domDocument->loadXML($this->createSuccessfulResponseXML());
+
+        $this->orderServiceMock->expects($this->once())
+            ->method('IPGApiAction')
+            ->willReturn($domDocument);
+
+        $result = $this->teleCash->installOneTimeRecurringPayment(
+            'hosted_data_id',
+            100.00
+        );
+
+        $this->assertInstanceOf(Sell::class, $result);
+        $this->assertTrue($result->wasSuccessful());
+    }
+
+    public function testModifyRecurringPayment()
+    {
+        $domDocument = new \DOMDocument();
+        $domDocument->loadXML($this->createSuccessfulResponseXML());
+
+        $this->orderServiceMock->expects($this->once())
+            ->method('IPGApiAction')
+            ->willReturn($domDocument);
+
+        $result = $this->teleCash->modifyRecurringPayment(
+            'order_id',
+            'hosted_data_id',
+            100.00,
+            new \DateTime(),
+            12,
+            1,
+            'MONTH'
+        );
+
+        $this->assertInstanceOf(ConfirmRecurring::class, $result);
+        $this->assertTrue($result->wasSuccessful());
+    }
+
+    public function testCancelRecurringPayment()
+    {
+        $domDocument = new \DOMDocument();
+        $domDocument->loadXML($this->createSuccessfulResponseXML());
+
+        $this->orderServiceMock->expects($this->once())
+            ->method('IPGApiAction')
+            ->willReturn($domDocument);
+
+        $result = $this->teleCash->cancelRecurringPayment(
+            'order_id'
+        );
+
+        $this->assertInstanceOf(ConfirmRecurring::class, $result);
+        $this->assertTrue($result->wasSuccessful());
+    }
+
+    public function testGetService()
+    {
+        $reflection = new ReflectionClass(TeleCash::class);
+        $method = $reflection->getMethod('getService');
+        $method->setAccessible(true);
+
+        $result = $method->invoke($this->teleCash);
+
+        $this->assertInstanceOf(OrderService::class, $result);
+    }
 }
