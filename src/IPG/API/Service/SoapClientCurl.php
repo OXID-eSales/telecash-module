@@ -27,10 +27,10 @@ class SoapClientCurl
 
     /**
      * @param array<int|string, mixed>  $curlOptions
-     * @param string $username
-     * @param string $password
+     * @param string|null $username
+     * @param string|null $password
      */
-    public function __construct(array $curlOptions, $username = null, $password = null)
+    public function __construct(array $curlOptions, string|null $username = null, string|null $password = null)
     {
         $this->username = $username;
         $this->password = $password;
@@ -44,6 +44,9 @@ class SoapClientCurl
         ];
 
         $this->curlOptions = array_merge($defaults, $curlOptions);
+        $this->curlErrorMsg = '';
+        $this->curlErrorNumber = 0;
+        $this->curlStatusCode = 0;
     }
 
     /**
@@ -54,34 +57,41 @@ class SoapClientCurl
     protected function doRequest($request)
     {
         //Basic curl setup for SOAP call
-        $curlHandle = curl_init();
-        curl_setopt($curlHandle, CURLOPT_URL, $this->curlOptions['url']);
-        curl_setopt($curlHandle, CURLOPT_RETURNTRANSFER, 1);
-        curl_setopt($curlHandle, CURLINFO_HEADER_OUT, 1);
-        curl_setopt($curlHandle, CURLOPT_HTTPHEADER, ['Content-Type: text/xml']);
-        curl_setopt($curlHandle, CURLOPT_POSTFIELDS, $request);
-        curl_setopt($curlHandle, CURLOPT_TIMEOUT, 30);
-        curl_setopt($curlHandle, CURLOPT_CONNECTTIMEOUT, 5);
+        $curlHandle = $this->curlInit();
+        $this->curlSetopt($curlHandle, CURLOPT_URL, $this->curlOptions['url']);
+        $this->curlSetopt($curlHandle, CURLOPT_RETURNTRANSFER, 1);
+        $this->curlSetopt($curlHandle, CURLINFO_HEADER_OUT, 1);
+        $this->curlSetopt($curlHandle, CURLOPT_HTTPHEADER, ['Content-Type: text/xml']);
+        $this->curlSetopt($curlHandle, CURLOPT_POSTFIELDS, $request);
+        $this->curlSetopt($curlHandle, CURLOPT_TIMEOUT, 30);
+        $this->curlSetopt($curlHandle, CURLOPT_CONNECTTIMEOUT, 5);
 
         //SSL
-        curl_setopt($curlHandle, CURLOPT_CAINFO, $this->curlOptions['caInfo']);
-        curl_setopt($curlHandle, CURLOPT_SSLVERSION, 'CURL_SSLVERSION_TLSv1');
-        curl_setopt($curlHandle, CURLOPT_SSLCERT, $this->curlOptions['sslCert']);
-        curl_setopt($curlHandle, CURLOPT_SSLKEY, $this->curlOptions['sslKey']);
-        curl_setopt($curlHandle, CURLOPT_SSLKEYPASSWD, $this->curlOptions['sslKeyPasswd']);
-        curl_setopt($curlHandle, CURLOPT_HTTPAUTH, CURLAUTH_BASIC);
-        curl_setopt($curlHandle, CURLOPT_USERPWD, sprintf('%1$s:%2$s', $this->username, $this->password));
+        $this->curlSetopt($curlHandle, CURLOPT_SSLCERT, $this->curlOptions['sslCert']);
+        $pathinfo = pathinfo($this->curlOptions['sslCert']);
+        if (isset($pathinfo['extension']) && strtolower($pathinfo['extension']) == 'p12') {
+            $this->curlSetopt($curlHandle, CURLOPT_SSLCERTTYPE, "P12");
+            $this->curlSetopt($curlHandle, CURLOPT_SSLCERTPASSWD, $this->curlOptions['sslKeyPasswd']);
+        } else {
+            $this->curlSetopt($curlHandle, CURLOPT_SSLKEY, $this->curlOptions['sslKey']);
+            $this->curlSetopt($curlHandle, CURLOPT_SSLKEYPASSWD, $this->curlOptions['sslKeyPasswd']);
+        }
 
-        $response               = curl_exec($curlHandle);
-        $this->curlErrorNumber  = curl_errno($curlHandle);
+        $this->curlSetopt($curlHandle, CURLOPT_SSL_VERIFYPEER, true);
+        $this->curlSetopt($curlHandle, CURLOPT_SSL_VERIFYHOST, 2);
+        $this->curlSetopt($curlHandle, CURLOPT_HTTPAUTH, CURLAUTH_BASIC);
+        $this->curlSetopt($curlHandle, CURLOPT_USERPWD, sprintf('%1$s:%2$s', $this->username, $this->password));
+
+        $response               = $this->curlExec($curlHandle);
+        $this->curlErrorNumber  = $this->curlErrno($curlHandle);
 
         if ($this->curlErrorNumber == CURLE_OK) {
-            $this->curlStatusCode = curl_getinfo($curlHandle, CURLINFO_HTTP_CODE);
+            $this->curlStatusCode = $this->curlGetinfo($curlHandle, CURLINFO_HTTP_CODE);
         }
-        $this->curlErrorMsg  = curl_error($curlHandle);
+        $this->curlErrorMsg  = $this->curlError($curlHandle);
 
         //Close connection
-        curl_close($curlHandle);
+        $this->curlClose($curlHandle);
 
         //Return response info
         return $response;
@@ -90,8 +100,43 @@ class SoapClientCurl
     /**
      * @return string
      */
-    public function getErrorMessage()
+    public function getErrorMessage(): string
     {
         return $this->curlStatusCode . ': ' . $this->curlErrorMsg;
+    }
+
+    protected function curlInit(): \CurlHandle|false
+    {
+        return curl_init();
+    }
+
+    protected function curlSetopt(mixed $handle, int $option, mixed $value): bool
+    {
+        return curl_setopt($handle, $option, $value);
+    }
+
+    protected function curlExec(mixed $handle): bool|string
+    {
+        return curl_exec($handle);
+    }
+
+    protected function curlErrno(mixed $handle): int
+    {
+        return curl_errno($handle);
+    }
+
+    protected function curlGetinfo(mixed $handle, mixed $opt = null): mixed
+    {
+        return curl_getinfo($handle, $opt);
+    }
+
+    protected function curlError(mixed $handle): string
+    {
+        return curl_error($handle);
+    }
+
+    protected function curlClose(mixed $handle): void
+    {
+        curl_close($handle);
     }
 }
