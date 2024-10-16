@@ -68,6 +68,4 @@ class SoapClientCurlTest extends TestCase
 
         $this->assertEquals('0: Could not connect', $this->soapClientCurl->getErrorMessage());
     }
-
-    // ... andere Testmethoden bleiben unverändert ...
 }

@@ -141,4 +141,28 @@ class OrderServiceTest extends TestCase
 
         $this->assertStringContainsString('<test>content</test>', $output);
     }
+
+    public function testIGPApiActionWithDebug()
+    {
+        $actionRequest = $this->createMock(ActionRequest::class);
+        $actionRequest->method('getDocument')->willReturn(new \DOMDocument());
+        $actionRequest->method('getElement')->willReturn(new \DOMElement('dummy'));
+
+        $actionXml = '<SOAP-ENV:Envelope
+        xmlns:SOAP-ENV="' . OrderService::NAMESPACE_SOAP . '"
+        xmlns:ns1="' . OrderService::NAMESPACE_N1 . '"
+        xmlns:ns2="' . OrderService::NAMESPACE_N2 . '"
+        xmlns:ns3="' . OrderService::NAMESPACE_N3 . '">
+        <SOAP-ENV:Body>
+        <ns3:IPGApiActionResponse></ns3:IPGApiActionResponse>
+        </SOAP-ENV:Body>
+        </SOAP-ENV:Envelope>';
+        $this->orderService->expects($this->once())
+            ->method('doRequest')
+            ->willReturn($actionXml);
+
+        $result = $this->orderService->IPGApiAction($actionRequest);
+
+        $this->assertInstanceOf(\DOMDocument::class, $result);
+    }
 }

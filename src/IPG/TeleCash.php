@@ -364,4 +364,15 @@ class TeleCash
 
         return $this->myService;
     }
+
+    public function sendEMailNotification(
+        string $orderId,
+        string $tDate,
+        string|null $email = null
+    ): Response\Action\Validation|Response\Error {
+        $service = $this->getService();
+        $emailNotificationAction = new Request\Action\TriggerEmailNotification($service, $orderId, $tDate, $email);
+
+        return $emailNotificationAction->send();
+    }
 }

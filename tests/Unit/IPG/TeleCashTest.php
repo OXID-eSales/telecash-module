@@ -295,4 +295,32 @@ d56feaaf-2d96-4159-8fd6-887e07fc9052
 
         $this->assertInstanceOf(OrderService::class, $result);
     }
+
+    public function testGetServiceWithNull()
+    {
+        $reflection = new ReflectionClass(TeleCash::class);
+        $attribute = $reflection->getProperty('myService');
+        $attribute->setAccessible(true);
+        $attribute->setValue($this->teleCash, null);
+
+        $method = $reflection->getMethod('getService');
+        $method->setAccessible(true);
+
+        $result = $method->invoke($this->teleCash);
+        $this->assertInstanceOf(OrderService::class, $result);
+    }
+
+    public function testSendEMailNotification()
+    {
+        $domDocument = new \DOMDocument();
+        $domDocument->loadXML($this->createSuccessfulResponseXML());
+
+        $this->orderServiceMock->expects($this->once())
+            ->method('IPGApiAction')
+            ->willReturn($domDocument);
+
+        $result = $this->teleCash->sendEMailNotification('order_id', '', null);
+        $this->assertInstanceOf(Validation::class, $result);
+        $this->assertTrue($result->wasSuccessful());
+    }
 }
