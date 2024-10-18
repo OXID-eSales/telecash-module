@@ -10,3 +10,7 @@ services:
   OxidSolutionCatalysts\TeleCash\Core\Service\RegistryService:
     class: OxidSolutionCatalysts\TeleCash\Core\Service\RegistryService
     public: true
+
+  OxidSolutionCatalysts\TeleCash\Core\Service\TranslateServiceInterface:
+    class: OxidSolutionCatalysts\TeleCash\Core\Service\TranslateService
+    public: true

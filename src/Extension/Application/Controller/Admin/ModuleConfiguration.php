@@ -12,10 +12,13 @@ namespace OxidSolutionCatalysts\TeleCash\Extension\Application\Controller\Admin;
 use Exception;
 use OxidSolutionCatalysts\TeleCash\Core\Module;
 use OxidSolutionCatalysts\TeleCash\Core\Service\RegistryService;
+use OxidSolutionCatalysts\TeleCash\Core\Service\TranslateService;
 use OxidSolutionCatalysts\TeleCash\Settings\Service\ModuleFileSettingsService;
 use OxidSolutionCatalysts\TeleCash\Settings\Service\ModuleFileSettingsServiceInterface;
 use OxidSolutionCatalysts\TeleCash\Settings\Service\ModuleSettingsServiceInterface;
 use OxidSolutionCatalysts\TeleCash\Traits\ServiceContainer;
+use Psr\Container\ContainerExceptionInterface;
+use Psr\Container\NotFoundExceptionInterface;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 
 class ModuleConfiguration extends ModuleConfiguration_parent
@@ -24,12 +27,18 @@ class ModuleConfiguration extends ModuleConfiguration_parent
 
     protected RegistryService $registryService;
     protected ModuleFileSettingsServiceInterface $fileSettingsService;
+    protected TranslateService $translateService;
 
+    /**
+     * @throws NotFoundExceptionInterface
+     * @throws ContainerExceptionInterface
+     */
     public function __construct()
     {
         parent::__construct();
         $this->fileSettingsService = $this->getServiceFromContainer(ModuleFileSettingsServiceInterface::class);
         $this->registryService = $this->getServiceFromContainer(RegistryService::class);
+        $this->translateService = $this->getServiceFromContainer(TranslateService::class);
     }
 
     /**
@@ -75,7 +84,6 @@ class ModuleConfiguration extends ModuleConfiguration_parent
      */
     protected function storeTeleCashFiles(): void
     {
-        $lang = $this->registryService->getLang();
         $config = $this->registryService->getConfig();
         $utilsView = $this->registryService->getUtilsView();
 
@@ -98,19 +106,14 @@ class ModuleConfiguration extends ModuleConfiguration_parent
                         );
 
                         $this->fileSettingsService->$teleCashStoreMethod($uploadedFile);
-                        /** @var string $translate */
                         $translate = '';
-                        $transRet = $lang->translateString('TELECASH_FILE_UPLOAD_SUCCESSFUL');
-                        if (is_string($transRet)) {
-                            $translate = (string) $transRet;
-                        }
+                        $translate = $this->translateService->translateString('TELECASH_FILE_UPLOAD_SUCCESSFUL');
                         $utilsView->addErrorToDisplay(sprintf(
                             $translate,
                             $sName
                         ));
                     } catch (Exception $e) {
-                        /** @var string $translate */
-                        $translate = $lang->translateString('TELECASH_FILE_UPLOAD_ERROR');
+                        $translate = $this->translateService->translateString('TELECASH_FILE_UPLOAD_ERROR');
                         $utilsView->addErrorToDisplay(sprintf(
                             $translate,
                             $e->getMessage()
@@ -118,7 +121,7 @@ class ModuleConfiguration extends ModuleConfiguration_parent
                     }
                 } else {
                     /** @var string $translate */
-                    $translate = $lang->translateString('TELECASH_FILE_UPLOAD_NOTVALID');
+                    $translate = $this->translateService->translateString('TELECASH_FILE_UPLOAD_NOTVALID');
                     $utilsView->addErrorToDisplay(sprintf(
                         $translate,
                         $sName
