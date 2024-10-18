@@ -67,8 +67,8 @@ class TeleCashPayment extends BaseModel
         $shopId = $this->getShopId();
 
         $query = $this->buildSelectString([
-            $table . '.oxpaymentid' => $paymentId,
-            $table . '.oxshopid'    => $shopId
+            $table . '.' . Module::TELECASH_PAYMENT_EXTENSION_TABLE_OXPAYMENTID => $paymentId,
+            $table . '.oxshopid'                                                => $shopId
         ]);
 
         try {
@@ -79,5 +79,45 @@ class TeleCashPayment extends BaseModel
         }
 
         return $this->isLoaded();
+    }
+
+    /** setter for PaymentId */
+    public function setPaymentId(string $paymentId): void
+    {
+        $this->assign([Module::TELECASH_PAYMENT_EXTENSION_TABLE_OXPAYMENTID => $paymentId]);
+    }
+
+    public function getPaymentId(): string
+    {
+        return $this->getFieldStringData(Module::TELECASH_PAYMENT_EXTENSION_TABLE_OXPAYMENTID);
+    }
+
+    public function setTeleCashIdent(string $ident = ''): void
+    {
+        $ident = in_array($ident, Module::TELECASH_PAYMENT_IDENTS, true) ?
+            $ident :
+            Module::TELECASH_PAYMENT_IDENT_DEFAULT;
+
+        $this->assign([Module::TELECASH_PAYMENT_EXTENSION_TABLE_IDENT => $ident]);
+    }
+
+    public function getTeleCashIdent(): string
+    {
+        return $this->getFieldStringData(Module::TELECASH_PAYMENT_EXTENSION_TABLE_IDENT);
+    }
+
+    public function setTeleCashCaptureType(string $captureType = ''): void
+    {
+        $captureTypes = Module::TELECASH_CAPTURE_TYPES[$this->getTeleCashIdent()];
+        $captureType = in_array($captureType, $captureTypes, true) ?
+            $captureType :
+            Module::TELECASH_CAPTURE_TYPE_DIRECT;
+
+        $this->assign([Module::TELECASH_PAYMENT_EXTENSION_TABLE_CAPTURETYPE => $captureType]);
+    }
+
+    public function getTeleCashCaptureType(): string
+    {
+        return $this->getFieldStringData(Module::TELECASH_PAYMENT_EXTENSION_TABLE_CAPTURETYPE);
     }
 }

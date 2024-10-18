@@ -14,6 +14,9 @@ final class Module
     public const MODULE_ID = 'osc_telecash';
 
     public const TELECASH_PAYMENT_EXTENSION_TABLE = 'osc_telecash_payment';
+    public const TELECASH_PAYMENT_EXTENSION_TABLE_OXPAYMENTID = 'oxpaymentid';
+    public const TELECASH_PAYMENT_EXTENSION_TABLE_IDENT = 'telecashident';
+    public const TELECASH_PAYMENT_EXTENSION_TABLE_CAPTURETYPE = 'telecashcapturetype';
 
 
     public const TELECASH_PAYMENT_IDENT_DEFAULT = 'none';
@@ -35,23 +38,25 @@ final class Module
     public const TELECASH_CAPTURE_TYPE_ONDELIVERY = 'ondelivery';
     public const TELECASH_CAPTURE_TYPE_MANUALLY = 'manually';
 
-    public const TELECASH_CAPTURE_CREDITCARD_TYPES = [
-        self::TELECASH_CAPTURE_TYPE_DIRECT,
-        self::TELECASH_CAPTURE_TYPE_ONDELIVERY,
-        self::TELECASH_CAPTURE_TYPE_MANUALLY
-    ];
-
-    public const TELECASH_CAPTURE_PAYPAL_TYPES = [
-        self::TELECASH_CAPTURE_TYPE_DIRECT,
-        self::TELECASH_CAPTURE_TYPE_ONDELIVERY,
-        self::TELECASH_CAPTURE_TYPE_MANUALLY
-    ];
-
-    public const TELECASH_CAPTURE_SEPA_TYPES = [
-        self::TELECASH_CAPTURE_TYPE_DIRECT
-    ];
-
-    public const TELECASH_CAPTURE_SOFORT_TYPES = [
-        self::TELECASH_CAPTURE_TYPE_DIRECT
+    public const TELECASH_CAPTURE_TYPES = [
+        self::TELECASH_PAYMENT_IDENT_DEFAULT => [
+            self::TELECASH_CAPTURE_TYPE_DIRECT
+        ],
+        self::TELECASH_PAYMENT_IDENT_CREDITCARD => [
+            self::TELECASH_CAPTURE_TYPE_DIRECT,
+            self::TELECASH_CAPTURE_TYPE_ONDELIVERY,
+            self::TELECASH_CAPTURE_TYPE_MANUALLY
+        ],
+        self::TELECASH_PAYMENT_IDENT_PAYPAL => [
+            self::TELECASH_CAPTURE_TYPE_DIRECT,
+            self::TELECASH_CAPTURE_TYPE_ONDELIVERY,
+            self::TELECASH_CAPTURE_TYPE_MANUALLY
+        ],
+        self::TELECASH_PAYMENT_IDENT_SEPA => [
+            self::TELECASH_CAPTURE_TYPE_DIRECT
+        ],
+        self::TELECASH_PAYMENT_IDENT_SOFORT => [
+            self::TELECASH_CAPTURE_TYPE_DIRECT
+        ]
     ];
 }

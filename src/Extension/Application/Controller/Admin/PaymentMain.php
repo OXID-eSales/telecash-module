@@ -10,7 +10,10 @@ declare(strict_types=1);
 namespace OxidSolutionCatalysts\TeleCash\Extension\Application\Controller\Admin;
 
 use Exception;
+use OxidEsales\Eshop\Core\Registry;
 use OxidSolutionCatalysts\TeleCash\Application\Model\TeleCashPayment;
+use OxidSolutionCatalysts\TeleCash\Core\Service\OxNewService;
+use OxidSolutionCatalysts\TeleCash\Core\Service\TranslateServiceInterface;
 use OxidSolutionCatalysts\TeleCash\Traits\ServiceContainer;
 use Psr\Container\ContainerExceptionInterface;
 use Psr\Container\NotFoundExceptionInterface;
@@ -19,7 +22,7 @@ class PaymentMain extends PaymentMain_parent
 {
     use ServiceContainer;
 
-    protected TeleCashPayment $teleCashPayment;
+    protected TranslateServiceInterface $translateService;
 
     /**
      * @throws NotFoundExceptionInterface
@@ -28,7 +31,7 @@ class PaymentMain extends PaymentMain_parent
     public function __construct()
     {
         parent::__construct();
-        $this->teleCashPayment = $this->getServiceFromContainer(TeleCashPayment::class);
+        $this->translateService = $this->getServiceFromContainer(TranslateServiceInterface::class);
     }
 
     /**
@@ -39,9 +42,13 @@ class PaymentMain extends PaymentMain_parent
      */
     public function save()
     {
+        $createTeleCashPaymentData =
+            $this->getEditObjectId() === '-1'
+            && !$this->isTeleCashPaymentDataExists();
+
         parent::save();
 
-        if (!$this->isTeleCashPaymentDataExists()) {
+        if ($createTeleCashPaymentData) {
             $this->createTeleCashPaymentData();
         }
     }
@@ -52,19 +59,40 @@ class PaymentMain extends PaymentMain_parent
     private function isTeleCashPaymentDataExists(): bool
     {
         $oxid = $this->getEditObjectId();
-        return $this->teleCashPayment->loadByPaymentId($oxid);
+        return (bool) $this->getTeleCashPaymentModel()?->loadByPaymentId($oxid);
     }
 
     /**
      * create TeleCashPayment Datas
-     * @throws Exception
      */
-    private function createTeleCashPaymentData(): void
+    private function createTeleCashPaymentData(): bool
     {
-        $params = [
-            'oxpaymentid' => $this->getEditObjectId()
-        ];
-        $this->teleCashPayment->assign($params);
-        $this->teleCashPayment->save();
+        $result = false;
+        $teleCashPayment = $this->getTeleCashPaymentModel();
+        try {
+            if ($teleCashPayment) {
+                $teleCashPayment->setPaymentId($this->getEditObjectId());
+                $teleCashPayment->setTeleCashIdent();
+                $teleCashPayment->setTeleCashCaptureType();
+                $result = (bool) $teleCashPayment->save();
+            }
+        } catch (Exception $e) {
+            Registry::getUtilsView()->addErrorToDisplay(
+                $this->translateService->translateString('OSC_TELECASH_PAYMENT_DATA_INITIAL_ERROR') . $e->getMessage()
+            );
+            return false;
+        }
+        return $result;
+    }
+
+    private function getTeleCashPaymentModel(): ?TeleCashPayment
+    {
+        try {
+            return $this
+                ->getServiceFromContainer(OxNewService::class)
+                ->oxNew(TeleCashPayment::class);
+        } catch (NotFoundExceptionInterface | ContainerExceptionInterface) {
+            return null;
+        }
     }
 }

@@ -34,8 +34,6 @@ $aLang = [
     'HELP_SHOP_MODULE_' . ModuleFileSettingsServiceInterface::CLIENT_CERT_P12_FILE        => 'Das Client-Zertifikat und der private Schlüssel, gespeichert in einer p12-Datei mit dem Benennungsschema WSshopID._.benutzerID.p12. Zum Beispiel wäre dies bei den oben genannten Shop-ID / Benutzer-ID-Beispielen WS101._.007.p12. Diese Datei wird zur Authentifizierung des Clients am Gateway verwendet.',
     'SHOP_MODULE_' . ModuleFileSettingsServiceInterface::CLIENT_CERT_PRIVATEKEY_FILE      => 'Privater Schlüssel des Client-Zertifikats',
     'HELP_SHOP_MODULE_' . ModuleFileSettingsServiceInterface::CLIENT_CERT_PRIVATEKEY_FILE => 'Der private Schlüssel des Client-Zertifikats, gespeichert in einer Schlüsseldatei mit dem Benennungsschema WSshopID._.benutzerID.key. Zum Beispiel wäre dies bei den oben genannten Shop-ID / Benutzer-ID-Beispielen WS10012345678._.1.key.',
-    'SHOP_MODULE_' . ModuleFileSettingsServiceInterface::CLIENT_CERT_PEM_FILE             => 'Client-Zertifikat PEM-Datei',
-    'HELP_SHOP_MODULE_' . ModuleFileSettingsServiceInterface::CLIENT_CERT_PEM_FILE        => 'Die Liste der Client-Zertifikate, gespeichert in einer PEM-Datei mit dem Benennungsschema WSshopID._.benutzerID.pem. Zum Beispiel wäre dies bei den oben genannten Shop-ID / Benutzer-ID-Beispielen WS10012345678._.1.pem.',
     'SHOP_MODULE_' . ModuleFileSettingsServiceInterface::TRUST_ANCHOR_PEM_FILE            => 'Vertrauensanker',
     'HELP_SHOP_MODULE_' . ModuleFileSettingsServiceInterface::TRUST_ANCHOR_PEM_FILE       => 'als verkettete PEM-Datei (tlstrust.pem): Die Datei enthält eine Liste von Client-Zertifikaten, denen Sie vertrauen sollten, um eine vertrauenswürdige Verbindung zur laufenden Web Service API herzustellen.',
 

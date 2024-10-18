@@ -34,8 +34,6 @@ $aLang = [
     'HELP_SHOP_MODULE_' . ModuleFileSettingsServiceInterface::CLIENT_CERT_P12_FILE        => 'The client certificate and private key stored in a p12 file having the naming scheme WSstoreID._.userID.p12, e.g. in case of the above store ID / user ID examples, this would be WS101._.007.p12. This file is used for authenticating the client at the Gateway.',
     'SHOP_MODULE_' . ModuleFileSettingsServiceInterface::CLIENT_CERT_PRIVATEKEY_FILE      => 'Client Certificate Private Key',
     'HELP_SHOP_MODULE_' . ModuleFileSettingsServiceInterface::CLIENT_CERT_PRIVATEKEY_FILE => 'The private key of the client certificate stored in a key file having the naming scheme WSstoreID._.userID.key, e.g. in case of the above store ID / user ID examples, this would be WS10012345678._.1.key.',
-    'SHOP_MODULE_' . ModuleFileSettingsServiceInterface::CLIENT_CERT_PEM_FILE             => 'Client Certificate PEM File',
-    'HELP_SHOP_MODULE_' . ModuleFileSettingsServiceInterface::CLIENT_CERT_PEM_FILE        => 'The list of client certificates stored in a PEM file having the naming scheme WSstoreID._.userID.pem, e.g. in case of the above store ID / user ID examples, this would be WS10012345678._.1.pem.',
     'SHOP_MODULE_' . ModuleFileSettingsServiceInterface::TRUST_ANCHOR_PEM_FILE            => 'Trust Anchor',
     'HELP_SHOP_MODULE_' . ModuleFileSettingsServiceInterface::TRUST_ANCHOR_PEM_FILE       => 'as concatenated PEM File (tlstrust.pem): The file contains a list of client certificates you should trust to establish a trusted connection to the running the Web Service API. ',
 

@@ -68,9 +68,10 @@ final class Version20241018134600 extends AbstractMigration
             );
         }
 
-        if (!$paymentTable->hasColumn('OXPAYMENTID')) {
+        $oxPaymentIdColName = strtoupper(Module::TELECASH_PAYMENT_EXTENSION_TABLE_OXPAYMENTID);
+        if (!$paymentTable->hasColumn($oxPaymentIdColName)) {
             $paymentTable->addColumn(
-                'OXPAYMENTID',
+                $oxPaymentIdColName,
                 Types::STRING,
                 [
                     'columnDefinition' => 'char(32) collate latin1_general_ci',
@@ -79,34 +80,38 @@ final class Version20241018134600 extends AbstractMigration
             );
         }
 
-        if (!$paymentTable->hasColumn('TELECASHIDENT')) {
+        $oxIdentColName = strtoupper(Module::TELECASH_PAYMENT_EXTENSION_TABLE_IDENT);
+        if (!$paymentTable->hasColumn($oxIdentColName)) {
             $paymentTable->addColumn(
-                'TELECASHIDENT',
+                $oxIdentColName,
                 Types::STRING,
                 [
                     'columnDefinition' => sprintf(
-                        "ENUM('%s') COLLATE 'latin1_general_ci'",
-                        implode("','", Module::TELECASH_PAYMENT_IDENTS)
+                        "ENUM('%s') COLLATE 'latin1_general_ci' NOT NULL DEFAULT '%s'",
+                        implode("','", Module::TELECASH_PAYMENT_IDENTS),
+                        Module::TELECASH_PAYMENT_IDENT_DEFAULT
                     ),
-                    'comment' => 'ident for TeleCash-Payment. The default is none',
-                    'default' => Module::TELECASH_PAYMENT_IDENT_DEFAULT
+                    'comment' => 'ident for TeleCash-Payment. The default is '
+                        . Module::TELECASH_PAYMENT_IDENT_DEFAULT
                 ]
             );
         }
 
-        if (!$paymentTable->hasColumn('TELECASHCAPTURETYPE')) {
+        $oxCaptureTypeColName = strtoupper(Module::TELECASH_PAYMENT_EXTENSION_TABLE_CAPTURETYPE);
+        if (!$paymentTable->hasColumn($oxCaptureTypeColName)) {
             // For the column definition we use the credit card types,
             // as they represent the maximum of possible variants.
             $paymentTable->addColumn(
-                'TELECASHCAPTURETYPE',
+                $oxCaptureTypeColName,
                 Types::STRING,
                 [
                     'columnDefinition' => sprintf(
-                        "ENUM('%s') COLLATE 'latin1_general_ci'",
-                        implode("','", Module::TELECASH_CAPTURE_CREDITCARD_TYPES)
+                        "ENUM('%s') COLLATE 'latin1_general_ci' NOT NULL DEFAULT '%s'",
+                        implode("','", Module::TELECASH_CAPTURE_TYPES[Module::TELECASH_PAYMENT_IDENT_CREDITCARD]),
+                        Module::TELECASH_CAPTURE_TYPE_DIRECT
                     ),
-                    'comment' => 'ident for TeleCash-Payment. The default is none',
-                    'default' => Module::TELECASH_CAPTURE_TYPE_DIRECT
+                    'comment' => 'Capture-Type for TeleCash-Payment. The default is none'
+                        . Module::TELECASH_CAPTURE_TYPE_DIRECT
                 ]
             );
         }
@@ -125,7 +130,7 @@ final class Version20241018134600 extends AbstractMigration
 
         if (!$paymentTable->hasIndex('UNIQUE_ENTRY')) {
             $paymentTable->addUniqueIndex(
-                ['OXSHOPID', 'OXPAYMENTID', 'TELECASHIDENT', 'TELECASHCAPTURETYPE'],
+                ['OXSHOPID', $oxPaymentIdColName, $oxIdentColName, $oxCaptureTypeColName],
                 'UNIQUE_ENTRY'
             );
         }
