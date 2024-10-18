@@ -96,12 +96,6 @@ $aModule = [
         ],
         [
             'group' => null,
-            'name'  => ModuleFileSettingsServiceInterface::CLIENT_CERT_PEM_FILE,
-            'type'  => 'str',
-            'value' => '',
-        ],
-        [
-            'group' => null,
             'name'  => ModuleFileSettingsServiceInterface::TRUST_ANCHOR_PEM_FILE,
             'type'  => 'str',
             'value' => '',
