@@ -6,8 +6,10 @@
  */
 
 use OxidEsales\Eshop\Application\Controller\Admin\ModuleConfiguration as oxModuleConfiguration;
+use OxidEsales\Eshop\Application\Model\Payment as oxPayment;
 use OxidSolutionCatalysts\TeleCash\Core\Module;
 use OxidSolutionCatalysts\TeleCash\Extension\Application\Controller\Admin\ModuleConfiguration;
+use OxidSolutionCatalysts\TeleCash\Extension\Application\Model\Payment;
 use OxidSolutionCatalysts\TeleCash\Settings\Service\ModuleFileSettingsServiceInterface;
 use OxidSolutionCatalysts\TeleCash\Settings\Service\ModuleSettingsServiceInterface;
 
@@ -41,7 +43,10 @@ $aModule = [
         'onDeactivate' => '\OxidSolutionCatalysts\TeleCash\Core\ModuleEvents::onDeactivate'
     ],
     'extend' => [
+        // Controller
         oxModuleConfiguration::class => ModuleConfiguration::class,
+        // Models
+        oxPayment::class => Payment::class,
     ],
     'settings' => [
         [
