@@ -17,7 +17,6 @@ use OxidSolutionCatalysts\TeleCash\Settings\Service\ModuleFileSettingsServiceInt
 use OxidSolutionCatalysts\TeleCash\Settings\Service\ModuleSettingsServiceInterface;
 use OxidSolutionCatalysts\TeleCash\Traits\ServiceContainer;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
-use OxidEsales\Eshop\Application\Controller\Admin\ModuleConfiguration as ModuleConfiguration_parent;
 
 class ModuleConfiguration extends ModuleConfiguration_parent
 {
