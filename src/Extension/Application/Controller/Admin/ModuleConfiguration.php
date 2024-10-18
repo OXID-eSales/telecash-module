@@ -12,7 +12,7 @@ namespace OxidSolutionCatalysts\TeleCash\Extension\Application\Controller\Admin;
 use Exception;
 use OxidSolutionCatalysts\TeleCash\Core\Module;
 use OxidSolutionCatalysts\TeleCash\Core\Service\RegistryService;
-use OxidSolutionCatalysts\TeleCash\Core\Service\TranslateService;
+use OxidSolutionCatalysts\TeleCash\Core\Service\TranslateServiceInterface;
 use OxidSolutionCatalysts\TeleCash\Settings\Service\ModuleFileSettingsService;
 use OxidSolutionCatalysts\TeleCash\Settings\Service\ModuleFileSettingsServiceInterface;
 use OxidSolutionCatalysts\TeleCash\Settings\Service\ModuleSettingsServiceInterface;
@@ -20,6 +20,7 @@ use OxidSolutionCatalysts\TeleCash\Traits\ServiceContainer;
 use Psr\Container\ContainerExceptionInterface;
 use Psr\Container\NotFoundExceptionInterface;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
+use OxidEsales\Eshop\Application\Controller\Admin\ModuleConfiguration as ModuleConfiguration_parent;
 
 class ModuleConfiguration extends ModuleConfiguration_parent
 {
@@ -27,7 +28,7 @@ class ModuleConfiguration extends ModuleConfiguration_parent
 
     protected RegistryService $registryService;
     protected ModuleFileSettingsServiceInterface $fileSettingsService;
-    protected TranslateService $translateService;
+    protected TranslateServiceInterface $translateService;
 
     /**
      * @throws NotFoundExceptionInterface
@@ -38,7 +39,7 @@ class ModuleConfiguration extends ModuleConfiguration_parent
         parent::__construct();
         $this->fileSettingsService = $this->getServiceFromContainer(ModuleFileSettingsServiceInterface::class);
         $this->registryService = $this->getServiceFromContainer(RegistryService::class);
-        $this->translateService = $this->getServiceFromContainer(TranslateService::class);
+        $this->translateService = $this->getServiceFromContainer(TranslateServiceInterface::class);
     }
 
     /**
