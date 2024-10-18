@@ -9,15 +9,22 @@ declare(strict_types=1);
 
 namespace OxidSolutionCatalysts\TeleCash\Application\Model;
 
+use Doctrine\DBAL\Connection;
+use Doctrine\DBAL\Exception;
 use OxidEsales\Eshop\Core\Model\BaseModel;
+use OxidEsales\EshopCommunity\Internal\Framework\Database\ConnectionProviderInterface;
 use OxidSolutionCatalysts\TeleCash\Core\Module;
 use OxidSolutionCatalysts\TeleCash\Traits\DataGetter;
 use OxidSolutionCatalysts\TeleCash\Traits\ServiceContainer;
+use Psr\Container\ContainerExceptionInterface;
+use Psr\Container\NotFoundExceptionInterface;
 
 class TeleCashPayment extends BaseModel
 {
     use ServiceContainer;
     use DataGetter;
+
+    protected Connection $connection;
 
     /**
      * Current class name
@@ -33,9 +40,44 @@ class TeleCashPayment extends BaseModel
      */
     protected $_sCoreTable = Module::TELECASH_PAYMENT_EXTENSION_TABLE;
 
+    /**
+     * @throws ContainerExceptionInterface
+     * @throws NotFoundExceptionInterface
+     */
     public function __construct()
     {
         parent::__construct();
         $this->init($this->_sCoreTable);
+        $this->connection = $this->getServiceFromContainer(ConnectionProviderInterface::class)->get();
+    }
+
+    /**
+     * Loads TeleCash-Payment by using paymentid instead of oxid.
+     *
+     * @param string $paymentId content load ID
+     *
+     * @return bool
+     */
+    public function loadByPaymentId(string $paymentId = ''): bool
+    {
+        //getting at least one field before lazy loading the object
+        $this->addField('oxid', 0);
+
+        $table = $this->getViewName();
+        $shopId = $this->getShopId();
+
+        $query = $this->buildSelectString([
+            $table . '.oxpaymentid' => $paymentId,
+            $table . '.oxshopid'    => $shopId
+        ]);
+
+        try {
+            $result = $this->connection->fetchAssociative($query);
+            $this->_isLoaded = is_array($result) && $this->assign($result);
+        } catch (Exception) {
+            $this->_isLoaded = false;
+        }
+
+        return $this->isLoaded();
     }
 }
