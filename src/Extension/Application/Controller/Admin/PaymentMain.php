@@ -11,16 +11,18 @@ namespace OxidSolutionCatalysts\TeleCash\Extension\Application\Controller\Admin;
 
 use Exception;
 use OxidEsales\Eshop\Core\Registry;
+use OxidSolutionCatalysts\TeleCash\Exception\TeleCashException;
 use OxidSolutionCatalysts\TeleCash\Application\Model\TeleCashPayment;
+use OxidSolutionCatalysts\TeleCash\Core\Module;
 use OxidSolutionCatalysts\TeleCash\Core\Service\OxNewService;
 use OxidSolutionCatalysts\TeleCash\Core\Service\TranslateServiceInterface;
-use OxidSolutionCatalysts\TeleCash\Traits\ServiceContainer;
+use OxidSolutionCatalysts\TeleCash\Traits\RequestGetter;
 use Psr\Container\ContainerExceptionInterface;
 use Psr\Container\NotFoundExceptionInterface;
 
 class PaymentMain extends PaymentMain_parent
 {
-    use ServiceContainer;
+    use RequestGetter;
 
     protected TranslateServiceInterface $translateService;
 
@@ -36,36 +38,96 @@ class PaymentMain extends PaymentMain_parent
 
     /**
      * OXID-Core
+     * {@inheritDoc}
+     *
+     * @return string
+     */
+    public function render()
+    {
+        $result = parent::render();
+
+        $this->addTeleCashToTemplate();
+
+        return $result;
+    }
+
+    /**
+     * OXID-Core
      * @inheritDoc
      * @return void
      * @throws Exception
      */
     public function save()
     {
-        $createTeleCashPaymentData =
+        // check whether creation of TeleCash is necessary
+        $createTeleCashPayment =
             $this->getEditObjectId() === '-1'
-            && !$this->isTeleCashPaymentDataExists();
+            && !$this->getTeleCashPayment();
 
         parent::save();
 
-        if ($createTeleCashPaymentData) {
-            $this->createTeleCashPaymentData();
+        if ($createTeleCashPayment) {
+            $this->createTeleCashPayment();
+            return;
+        }
+
+        $this->saveTeleCashPayment();
+    }
+
+    private function addTeleCashToTemplate(): void
+    {
+        $teleCashPayment = $this->getTeleCashPayment();
+        if ($teleCashPayment) {
+            $teleCashIdentValue = $teleCashPayment->getTeleCashIdent();
+            $this->addTplParam(
+                'isTeleCashPayment',
+                true
+            );
+            $this->addTplParam(
+                'teleCashIdentDBField',
+                Module::TELECASH_DB_FIELD_IDENT
+            );
+            $this->addTplParam(
+                'teleCashIdents',
+                $teleCashPayment->getPossibleTeleCashIdents()
+            );
+            $this->addTplParam(
+                'teleCashIdentValue',
+                $teleCashIdentValue
+            );
+            $this->addTplParam(
+                'teleCashCaptureTypeDbField',
+                Module::TELECASH_DB_FIELD_CAPTURETYPE
+            );
+            $this->addTplParam(
+                'teleCashCaptureTypes',
+                $teleCashPayment->getPossibleTeleCashCaptureTypes($teleCashIdentValue)
+            );
+            $this->addTplParam(
+                'teleCashCaptureTypeValue',
+                $teleCashPayment->getTeleCashCaptureType()
+            );
         }
     }
 
-    /**
-     * check if TeleCashPayment still exists
-     */
-    private function isTeleCashPaymentDataExists(): bool
+    private function getTeleCashPayment(): ?TeleCashPayment
     {
+        $result = null;
+
         $oxid = $this->getEditObjectId();
-        return (bool) $this->getTeleCashPaymentModel()?->loadByPaymentId($oxid);
+        if (
+            $this->getTeleCashPaymentModel()
+            && $this->getTeleCashPaymentModel()->loadByPaymentId($oxid)
+        ) {
+            $result = $this->getTeleCashPaymentModel();
+        }
+        return $result;
     }
 
     /**
      * create TeleCashPayment Datas
      */
-    private function createTeleCashPaymentData(): bool
+    private function createTeleCashPayment(): bool
     {
         $result = false;
         $teleCashPayment = $this->getTeleCashPaymentModel();
@@ -82,6 +144,35 @@ class PaymentMain extends PaymentMain_parent
             );
             return false;
         }
+        return $result;
+    }
+
+    /**
+     * save TeleCashPayment if exists
+     */
+    private function saveTeleCashPayment(): bool
+    {
+        $result = true;
+
+        $params = $this->getArrayRequestEscapedData('editval');
+
+        $ident = $params[Module::TELECASH_DB_FIELD_IDENT] ?? '';
+        $captureType = $params[Module::TELECASH_DB_FIELD_CAPTURETYPE] ?? '';
+
+        $teleCashPayment = $this->getTeleCashPayment();
+
+        if ($teleCashPayment && $ident && $captureType) {
+            $teleCashPayment->setTeleCashIdent($ident);
+            $teleCashPayment->setTeleCashCaptureType($captureType);
+            try {
+                $result = (bool) $teleCashPayment->save();
+            } catch (TeleCashException | Exception $e) {
+                Registry::getUtilsView()->addErrorToDisplay(
+                    $e->getMessage()
+                );
+            }
+        }
+
         return $result;
     }
 

@@ -1,0 +1,38 @@
+{% extends 'payment_main.html.twig' %}
+
+{% block admin_payment_main_form %}
+
+    {{ parent() }}
+    {% if isTeleCashPayment %}
+        <tr>
+            <td class="edittext">
+                {{ translate({ ident: "OSC_TELECASH_PAYMENT_IDENT" }) }}
+            </td>
+            <td class="edittext">
+                <label>
+                    <select name="editval[{{ teleCashIdentDBField }}]" class="editinput" {{ readonly }}>
+                        {% for teleCashIdent in teleCashIdents %}
+                            <option value="{{ teleCashIdent }}" {% if teleCashIdent == teleCashIdentValue %}SELECTED{% endif %}>{{ translate({ ident: "OSC_TELECASH_PAYMENT_IDENT_" ~ teleCashIdent }) }}</option>
+                        {% endfor %}
+                    </select>
+                </label>
+                {% include "inputhelp.html.twig" with {'sHelpId': help_id("HELP_OSC_TELECASH_PAYMENT_IDENT"), 'sHelpText': help_text("HELP_OSC_TELECASH_PAYMENT_IDENT")} %}
+            </td>
+        </tr>
+        <tr>
+            <td class="edittext">
+                {{ translate({ ident: "OSC_TELECASH_PAYMENT_CAPTURETYPE" }) }}
+            </td>
+            <td class="edittext">
+                <label>
+                    <select name="editval[{{ teleCashCaptureTypeDbField }}]" class="editinput" {{ readonly }}>
+                        {% for teleCashCaptureType in teleCashCaptureTypes %}
+                            <option value="{{ teleCashCaptureType }}" {% if teleCashCaptureType == teleCashCaptureTypeValue %}SELECTED{% endif %}>{{ translate({ ident: "OSC_TELECASH_PAYMENT_CAPTURETYPE_" ~ teleCashCaptureType }) }}</option>
+                        {% endfor %}
+                    </select>
+                </label>
+                {% include "inputhelp.html.twig" with {'sHelpId': help_id("HELP_OSC_TELECASH_PAYMENT_CAPTURETYPE"), 'sHelpText': help_text("HELP_OSC_TELECASH_PAYMENT_CAPTURETYPE")} %}
+            </td>
+        </tr>
+    {% endif %}
+{% endblock %}

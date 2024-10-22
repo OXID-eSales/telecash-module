@@ -17,7 +17,10 @@ final class Module
     public const TELECASH_PAYMENT_EXTENSION_TABLE_OXPAYMENTID = 'oxpaymentid';
     public const TELECASH_PAYMENT_EXTENSION_TABLE_IDENT = 'telecashident';
     public const TELECASH_PAYMENT_EXTENSION_TABLE_CAPTURETYPE = 'telecashcapturetype';
-
+    public const TELECASH_DB_FIELD_IDENT = self::TELECASH_PAYMENT_EXTENSION_TABLE .
+        '__' . self::TELECASH_PAYMENT_EXTENSION_TABLE_IDENT;
+    public const TELECASH_DB_FIELD_CAPTURETYPE = self::TELECASH_PAYMENT_EXTENSION_TABLE .
+    '__' . self::TELECASH_PAYMENT_EXTENSION_TABLE_CAPTURETYPE;
 
     public const TELECASH_PAYMENT_IDENT_DEFAULT = 'none';
     public const TELECASH_PAYMENT_IDENT_CREDITCARD = 'creditcard';
@@ -32,7 +35,6 @@ final class Module
         self::TELECASH_PAYMENT_IDENT_SEPA,
         self::TELECASH_PAYMENT_IDENT_SOFORT,
     ];
-
 
     public const TELECASH_CAPTURE_TYPE_DIRECT = 'direct';
     public const TELECASH_CAPTURE_TYPE_ONDELIVERY = 'ondelivery';
