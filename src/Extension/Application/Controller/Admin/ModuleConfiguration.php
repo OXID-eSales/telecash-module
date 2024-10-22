@@ -16,7 +16,7 @@ use OxidSolutionCatalysts\TeleCash\Core\Service\TranslateServiceInterface;
 use OxidSolutionCatalysts\TeleCash\Settings\Service\ModuleFileSettingsService;
 use OxidSolutionCatalysts\TeleCash\Settings\Service\ModuleFileSettingsServiceInterface;
 use OxidSolutionCatalysts\TeleCash\Settings\Service\ModuleSettingsServiceInterface;
-use OxidSolutionCatalysts\TeleCash\Traits\ServiceContainer;
+use OxidSolutionCatalysts\TeleCash\Traits\RequestGetter;
 use Psr\Container\ContainerExceptionInterface;
 use Psr\Container\NotFoundExceptionInterface;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
@@ -24,7 +24,7 @@ use OxidEsales\Eshop\Application\Controller\Admin\ModuleConfiguration as ModuleC
 
 class ModuleConfiguration extends ModuleConfiguration_parent
 {
-    use ServiceContainer;
+    use RequestGetter;
 
     protected RegistryService $registryService;
     protected ModuleFileSettingsServiceInterface $fileSettingsService;
@@ -139,10 +139,8 @@ class ModuleConfiguration extends ModuleConfiguration_parent
      */
     protected function deleteTeleCashFiles(): void
     {
-        $request = $this->registryService->getRequest();
-
         foreach (ModuleFileSettingsService::TELECASH_DELETE_METHODS as $teleCashFile => $teleCashDeleteMethod) {
-            if ($request->getRequestParameter($teleCashFile . '_delete')) {
+            if ($this->getBoolRequestData($teleCashFile . '_delete')) {
                 $this->fileSettingsService->$teleCashDeleteMethod();
             }
         }
