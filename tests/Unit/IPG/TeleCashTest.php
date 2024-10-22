@@ -50,9 +50,7 @@ class TeleCashTest extends TestCase
 <ns1:ExpMonth>12</ns1:ExpMonth>
 <ns1:ExpYear>27</ns1:ExpYear>
 </ns2:CreditCardData>
-<ns2:HostedDataID>
-d56feaaf-2d96-4159-8fd6-887e07fc9052
-</ns2:HostedDataID>
+<ns2:HostedDataID>d56feaaf-2d96-4159-8fd6-887e07fc9052</ns2:HostedDataID>
 </ns3:DataStorageItem>';
         }
 
@@ -86,6 +84,41 @@ d56feaaf-2d96-4159-8fd6-887e07fc9052
         </SOAP-ENV:Envelope>';
 
         return $xml;
+    }
+
+    private function createUnsuccessfulResponseXML(): string
+    {
+        return '<SOAP-ENV:Envelope 
+            xmlns:SOAP-ENV="' . OrderService::NAMESPACE_SOAP . '"
+            xmlns:ns1="' . OrderService::NAMESPACE_N1 . '"
+            xmlns:ns2="' . OrderService::NAMESPACE_N2 . '"
+            xmlns:ns3="' . OrderService::NAMESPACE_N3 . '">
+            <SOAP-ENV:Body>
+                <ns3:IPGApiActionResponse>
+                    <ns3:successfully>false</ns3:successfully>
+                    <ns3:ErrorCode>123</ns3:ErrorCode>
+                    <ns2:Error>
+                        <ns2:ErrorMessage>Error occurred</ns2:ErrorMessage>
+                    </ns2:Error>
+                </ns3:IPGApiActionResponse>
+            </SOAP-ENV:Body>
+        </SOAP-ENV:Envelope>';
+    }
+
+    private function createSoapFault()
+    {
+        return '<SOAP-ENV:Envelope
+   xmlns:SOAP-ENV = "http://schemas.xmlsoap.org/soap/envelope/"
+   xmlns:xsi = "http://www.w3.org/1999/XMLSchema-instance"
+   xmlns:xsd = "http://www.w3.org/1999/XMLSchema">
+
+   <SOAP-ENV:Body>
+      <SOAP-ENV:Fault>
+         <faultcode xsi:type="xsd:string">SOAP-ENV:Client</faultcode>
+         <faultstring xsi:type="xsd:string">Some error mesage</faultstring>
+      </SOAP-ENV:Fault>
+   </SOAP-ENV:Body>
+</SOAP-ENV:Envelope>';
     }
 
     public function testSetDebugMode()
@@ -268,6 +301,27 @@ d56feaaf-2d96-4159-8fd6-887e07fc9052
         $this->assertTrue($result->wasSuccessful());
     }
 
+    public function testRecurringPaymentWithError()
+    {
+        $mockError = $this->createMock(Error::class);
+
+        $this->orderServiceMock->expects($this->once())
+            ->method('IPGApiAction')
+            ->willReturn($mockError);
+
+        $result = $this->teleCash->modifyRecurringPayment(
+            'order_id',
+            'hosted_data_id',
+            100.00,
+            new \DateTime(),
+            12,
+            1,
+            'MONTH'
+        );
+
+        $this->assertInstanceOf(Error::class, $result);
+    }
+
     public function testCancelRecurringPayment()
     {
         $domDocument = new \DOMDocument();
@@ -322,5 +376,61 @@ d56feaaf-2d96-4159-8fd6-887e07fc9052
         $result = $this->teleCash->sendEMailNotification('order_id', '', null);
         $this->assertInstanceOf(Validation::class, $result);
         $this->assertTrue($result->wasSuccessful());
+    }
+
+    public function testGetLastTransactions()
+    {
+        $domDocument = new \DOMDocument();
+        $domDocument->loadXML($this->createSuccessfulResponseXML());
+
+        $this->orderServiceMock->expects($this->once())
+            ->method('IPGApiAction')
+            ->willReturn($domDocument);
+
+        $result = $this->teleCash->getLastTransactions(10, '123');
+
+        $this->assertInstanceOf(Validation::class, $result);
+    }
+
+    public function testGetLastOrders()
+    {
+        $domDocument = new \DOMDocument();
+        $domDocument->loadXML($this->createSuccessfulResponseXML());
+
+        $this->orderServiceMock->expects($this->once())
+            ->method('IPGApiAction')
+            ->willReturn($domDocument);
+
+        $result = $this->teleCash->getLastOrders(10, '123');
+
+        $this->assertInstanceOf(Validation::class, $result);
+    }
+
+    public function testGetInquiryByTransactionId()
+    {
+        $domDocument = new \DOMDocument();
+        $domDocument->loadXML($this->createSuccessfulResponseXML());
+
+        $this->orderServiceMock->expects($this->once())
+            ->method('IPGApiAction')
+            ->willReturn($domDocument);
+
+        $result = $this->teleCash->getInquiryByIPGTransactionId('123');
+
+        $this->assertInstanceOf(Validation::class, $result);
+    }
+
+    public function testGetInquiryByOrderIdAndTDate()
+    {
+        $domDocument = new \DOMDocument();
+        $domDocument->loadXML($this->createSuccessfulResponseXML());
+
+        $this->orderServiceMock->expects($this->once())
+            ->method('IPGApiAction')
+            ->willReturn($domDocument);
+
+        $result = $this->teleCash->getInquiryByOrderIdAndTDate('123', '123');
+
+        $this->assertInstanceOf(Validation::class, $result);
     }
 }

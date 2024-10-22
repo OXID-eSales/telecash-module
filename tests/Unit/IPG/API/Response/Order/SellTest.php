@@ -58,6 +58,26 @@ class SellTest extends TestCase
         </SOAP-ENV:Envelope>';
     }
 
+    private function createFaultyResponseXML(): string
+    {
+        return '<SOAP-ENV:Envelope 
+            xmlns:SOAP-ENV="' . OrderService::NAMESPACE_SOAP . '"
+            xmlns:ns1="' . OrderService::NAMESPACE_N1 . '"
+            xmlns:ns2="' . OrderService::NAMESPACE_N2 . '"
+            xmlns:ns3="' . OrderService::NAMESPACE_N3 . '">
+            <SOAP-ENV:Body>
+                <ns3:IPGApiOrderResponse>
+                    <ns2:Error Code="50">
+                        <ns2:ErrorMessage>Declined</ns2:ErrorMessage>
+                    </ns2:Error>
+                    <ns3:TransactionResult>' . Sell::TRANSACTION_RESULT_DECLINED . '</ns3:TransactionResult>
+                    <ns3:ProcessorResponseCode>00</ns3:ProcessorResponseCode>
+                    <ns3:ProcessorResponseMessage>Function performed NOT error-free</ns3:ProcessorResponseMessage>
+                </ns3:IPGApiOrderResponse>
+            </SOAP-ENV:Body>
+        </SOAP-ENV:Envelope>';
+    }
+
     public function testSuccessfulSell()
     {
         $xml = $this->createSuccessfulResponseXML();
@@ -109,5 +129,17 @@ class SellTest extends TestCase
         $sell = new Sell($doc);
 
         $this->assertTrue($sell->wasSuccessful());
+    }
+
+    public function testCheckIfSuccessfulWithoutSuccessfully()
+    {
+        $xml = $this->createFaultyResponseXML();
+
+        $doc = new \DOMDocument();
+        $doc->loadXML($xml);
+
+        $sell = new Sell($doc);
+
+        $this->assertFalse($sell->wasSuccessful());
     }
 }

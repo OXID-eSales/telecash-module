@@ -144,6 +144,11 @@ class OrderServiceTest extends TestCase
 
     public function testIGPApiActionWithDebug()
     {
+        $orderMock = $this->getMockBuilder(OrderService::class)
+            ->setConstructorArgs([$this->curlOptions, 'username', 'password', true])
+            ->onlyMethods(['doRequest'])
+            ->getMock();
+
         $actionRequest = $this->createMock(ActionRequest::class);
         $actionRequest->method('getDocument')->willReturn(new \DOMDocument());
         $actionRequest->method('getElement')->willReturn(new \DOMElement('dummy'));
@@ -157,12 +162,59 @@ class OrderServiceTest extends TestCase
         <ns3:IPGApiActionResponse></ns3:IPGApiActionResponse>
         </SOAP-ENV:Body>
         </SOAP-ENV:Envelope>';
-        $this->orderService->expects($this->once())
+
+        $orderMock->expects($this->any())
             ->method('doRequest')
             ->willReturn($actionXml);
 
-        $result = $this->orderService->IPGApiAction($actionRequest);
+        ob_start();
+        $result = $orderMock->IPGApiAction($actionRequest);
+        ob_end_clean();
 
         $this->assertInstanceOf(\DOMDocument::class, $result);
+    }
+
+    public function testExceptionWithFalseFromDoRequest()
+    {
+        $actionRequest = $this->createMock(ActionRequest::class);
+        $actionRequest->method('getDocument')->willReturn(new \DOMDocument());
+        $actionRequest->method('getElement')->willReturn(new \DOMElement('dummy'));
+
+        $this->orderService->expects($this->once())
+            ->method('doRequest')
+            ->willReturn(false);
+
+        $this->expectException(\Exception::class);
+        $result = $this->orderService->IPGApiAction($actionRequest);
+    }
+
+    public function testExceptionWithNullFromDoRequest()
+    {
+        $actionRequest = $this->createMock(ActionRequest::class);
+        $actionRequest->method('getDocument')->willReturn(new \DOMDocument());
+        $actionRequest->method('getElement')->willReturn(new \DOMElement('dummy'));
+
+        $this->orderService->expects($this->once())
+            ->method('doRequest')
+            ->willReturn(null);
+
+        $this->expectException(\Exception::class);
+        $result = $this->orderService->IPGApiAction($actionRequest);
+    }
+
+    public function testDumpXML()
+    {
+        $xml = '<level1><inner>value</inner></level1>';
+
+        ob_start();
+        $this->orderService->dumpXML($xml);
+        $output = ob_get_clean();
+
+        $this->assertEquals('string(64) "<?xml version="1.0"?>
+<level1>
+  <inner>value</inner>
+</level1>
+"
+', $output);
     }
 }

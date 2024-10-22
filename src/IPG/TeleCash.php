@@ -375,4 +375,45 @@ class TeleCash
 
         return $emailNotificationAction->send();
     }
+
+    public function getLastTransactions(
+        int $count,
+        string|null $orderId = null,
+        string|null $tDate = null
+    ): Response\Action\Validation|Response\Error {
+        $service = $this->getService();
+        $lastTransactionsAction = new Request\Action\LastTransactions($service, $count, $orderId, $tDate);
+
+        return $lastTransactionsAction->get();
+    }
+
+    public function getLastOrders(
+        int $count,
+        string|null $orderId = null,
+        string|null $dtFrom = null,
+        string|null $dtTo = null
+    ): Response\Action\Validation|Response\Error {
+        $service = $this->getService();
+        $lastTransactionsAction = new Request\Action\LastOrders($service, $count, $orderId, $dtFrom, $dtTo);
+
+        return $lastTransactionsAction->get();
+    }
+
+    public function getInquiryByIPGTransactionId(string $ipgTransactionId): Response\Action\Validation|Response\Error
+    {
+        $service = $this->getService();
+        $inquiryTransactionAction = new Request\Action\InquiryTransaction($service);
+
+        return $inquiryTransactionAction->getByIPGTransactionId($ipgTransactionId);
+    }
+
+    public function getInquiryByOrderIdAndTDate(
+        string $orderId,
+        string $tDate
+    ): Response\Action\Validation|Response\Error {
+        $service = $this->getService();
+        $inquiryTransactionAction = new Request\Action\InquiryTransaction($service);
+
+        return $inquiryTransactionAction->getByOrderIdAndTDate($orderId, $tDate);
+    }
 }

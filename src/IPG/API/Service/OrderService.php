@@ -48,6 +48,15 @@ class OrderService extends SoapClientCurl
         }
     }
 
+    public function dumpXML(string $source): void
+    {
+        $xml = new \DOMDocument();
+        $xml->loadXML($source);
+        $xml->preserveWhiteSpace = false;
+        $xml->formatOutput = true;
+        var_dump($xml->saveXML());
+    }
+
     /**
      * @param \DOMDocument $responseDoc
      *
@@ -85,7 +94,7 @@ class OrderService extends SoapClientCurl
         $xml = $request->saveXML();
 
         if ($this->debug) {
-            var_dump($xml);
+            $this->dumpXML((string)$xml);
         }
 
         $response = false;
@@ -94,7 +103,7 @@ class OrderService extends SoapClientCurl
         }
 
         if ($this->debug) {
-            var_dump($response);
+            $this->dumpXML((string)$response);
         }
 
         if ($response === false) {
