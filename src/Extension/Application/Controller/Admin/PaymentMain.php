@@ -14,26 +14,26 @@ use OxidEsales\Eshop\Core\Registry;
 use OxidSolutionCatalysts\TeleCash\Exception\TeleCashException;
 use OxidSolutionCatalysts\TeleCash\Application\Model\TeleCashPayment;
 use OxidSolutionCatalysts\TeleCash\Core\Module;
-use OxidSolutionCatalysts\TeleCash\Core\Service\OxNewService;
 use OxidSolutionCatalysts\TeleCash\Core\Service\TranslateServiceInterface;
+use OxidSolutionCatalysts\TeleCash\Traits\ControllerGetter;
 use OxidSolutionCatalysts\TeleCash\Traits\RequestGetter;
-use Psr\Container\ContainerExceptionInterface;
-use Psr\Container\NotFoundExceptionInterface;
+use OxidSolutionCatalysts\TeleCash\Traits\ServiceContainer;
 
 class PaymentMain extends PaymentMain_parent
 {
     use RequestGetter;
+    use ControllerGetter;
+    use ServiceContainer;
 
     protected TranslateServiceInterface $translateService;
 
-    /**
-     * @throws NotFoundExceptionInterface
-     * @throws ContainerExceptionInterface
-     */
     public function __construct()
     {
         parent::__construct();
-        $this->translateService = $this->getServiceFromContainer(TranslateServiceInterface::class);
+        $this->translateService = $this->getRequiredService(
+            TranslateServiceInterface::class,
+            'TranslateService'
+        );
     }
 
     /**
@@ -174,16 +174,5 @@ class PaymentMain extends PaymentMain_parent
         }
 
         return $result;
-    }
-
-    private function getTeleCashPaymentModel(): ?TeleCashPayment
-    {
-        try {
-            return $this
-                ->getServiceFromContainer(OxNewService::class)
-                ->oxNew(TeleCashPayment::class);
-        } catch (NotFoundExceptionInterface | ContainerExceptionInterface) {
-            return null;
-        }
     }
 }
