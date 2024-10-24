@@ -49,16 +49,19 @@ class AdminTeleCashJsonEndpoint extends BaseController
      * Initializes the controller with required dependencies and optionally
      * calls the parent constructor.
      *
-     * @param RegistryService $registryService The registry service for accessing shop components
      * @param bool $initParent Whether to initialize the parent controller (default: true)
      */
     public function __construct(
-        private readonly RegistryService $registryService,
         bool $initParent = true
     ) {
         if ($initParent) {
             parent::__construct();
         }
+        $this->setContainer($this->getContainer());
+        $this->registryService = $this->getRequiredService(
+            RegistryService::class,
+            'RegistryService'
+        );
     }
 
     /**

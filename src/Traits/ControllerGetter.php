@@ -11,6 +11,7 @@ namespace OxidSolutionCatalysts\TeleCash\Traits;
 
 use OxidSolutionCatalysts\TeleCash\Application\Model\TeleCashPayment;
 use OxidSolutionCatalysts\TeleCash\Core\Service\OxNewService;
+use OxidSolutionCatalysts\TeleCash\Core\Service\TeleCashPaymentValidatorServiceInterface;
 
 /**
  * Convenience trait to work with Controller-Models.
@@ -24,6 +25,10 @@ trait ControllerGetter
             return null;
         }
 
-        return $oxNewService->oxNew(TeleCashPayment::class);
+        $validator = $this->getRequiredService(
+            TeleCashPaymentValidatorServiceInterface::class,
+            'TeleCashPaymentValidatorService'
+        );
+        return $oxNewService->oxNew(TeleCashPayment::class, [$validator]);
     }
 }

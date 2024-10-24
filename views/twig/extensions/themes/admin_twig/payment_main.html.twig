@@ -10,7 +10,7 @@
             </td>
             <td class="edittext">
                 <label>
-                    <select name="editval[{{ teleCashIdentDBField }}]" class="editinput" {{ readonly }}>
+                    <select id="teleCashIdent" name="editval[{{ teleCashIdentDBField }}]" class="editinput" {{ readonly }}>
                         {% for teleCashIdent in teleCashIdents %}
                             <option value="{{ teleCashIdent }}" {% if teleCashIdent == teleCashIdentValue %}SELECTED{% endif %}>{{ translate({ ident: "OSC_TELECASH_PAYMENT_IDENT_" ~ teleCashIdent }) }}</option>
                         {% endfor %}
@@ -25,7 +25,7 @@
             </td>
             <td class="edittext">
                 <label>
-                    <select name="editval[{{ teleCashCaptureTypeDbField }}]" class="editinput" {{ readonly }}>
+                    <select id ="teleCashCaptureType" name="editval[{{ teleCashCaptureTypeDbField }}]" class="editinput" {{ readonly }}>
                         {% for teleCashCaptureType in teleCashCaptureTypes %}
                             <option value="{{ teleCashCaptureType }}" {% if teleCashCaptureType == teleCashCaptureTypeValue %}SELECTED{% endif %}>{{ translate({ ident: "OSC_TELECASH_PAYMENT_CAPTURETYPE_" ~ teleCashCaptureType }) }}</option>
                         {% endfor %}

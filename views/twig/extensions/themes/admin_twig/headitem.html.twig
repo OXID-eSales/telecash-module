@@ -1,0 +1,21 @@
+{% extends "headitem.html.twig" %}
+{% block admin_headitem_incjs %}
+    {{ parent() }}
+    {% if oViewConf.getTopActiveClassName()|lower=="payment_main" %}
+        {{ script({ include: oViewConf.getModuleUrl(teleCashModuleId, 'src/js/telecash_admin.js'), priority: 10, dynamic: __oxid_include_dynamic }) }}
+        <script>
+            var oTeleCashDefinitions =
+                {
+                    AdminTeleCashJsonEndpoint: "{{ oViewConf.getSelfLink()|replace({"&amp;": "&"})|raw }}cl=AdminTeleCashJsonEndpoint&fnc=",
+                    teleCashIdentKey: "{{ teleCashIdentDBField }}",
+                    getPossibleTeleCashCaptureTypes: "getPossibleTeleCashCaptureTypes",
+                };
+            var oTeleCashTranslations =
+                {
+                    OSC_TELECASH_PAYMENT_CAPTURETYPE_{{ teleCashCaptureTypeDirect }} : "{{ translate({ ident: "OSC_TELECASH_PAYMENT_CAPTURETYPE_" ~ teleCashCaptureTypeDirect }) }}",
+                    OSC_TELECASH_PAYMENT_CAPTURETYPE_{{ teleCashCaptureTypeOnDelivery }} : "{{ translate({ ident: "OSC_TELECASH_PAYMENT_CAPTURETYPE_" ~ teleCashCaptureTypeOnDelivery }) }}",
+                    OSC_TELECASH_PAYMENT_CAPTURETYPE_{{ teleCashCaptureTypeManually }} : "{{ translate({ ident: "OSC_TELECASH_PAYMENT_CAPTURETYPE_" ~ teleCashCaptureTypeManually }) }}",
+                };
+        </script>
+    {% endif %}
+{% endblock %}

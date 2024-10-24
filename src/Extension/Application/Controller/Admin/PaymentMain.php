@@ -30,9 +30,10 @@ class PaymentMain extends PaymentMain_parent
     public function __construct()
     {
         parent::__construct();
+        $this->setContainer($this->getContainer());
         $this->translateService = $this->getRequiredService(
             TranslateServiceInterface::class,
-            'TranslateService'
+            'TranslateServiceInterface'
         );
     }
 
@@ -77,16 +78,20 @@ class PaymentMain extends PaymentMain_parent
     private function addTeleCashToTemplate(): void
     {
         $teleCashPayment = $this->getTeleCashPayment();
+
+        // this variables are needed in any case
+        $this->addTplParam('teleCashModuleId', Module::MODULE_ID);
+        $this->addTplParam('teleCashCaptureTypeDirect', Module::TELECASH_CAPTURE_TYPE_DIRECT);
+        $this->addTplParam('teleCashCaptureTypeOnDelivery', Module::TELECASH_CAPTURE_TYPE_ONDELIVERY);
+        $this->addTplParam('teleCashCaptureTypeManually', Module::TELECASH_CAPTURE_TYPE_MANUALLY);
+        $this->addTplParam('teleCashIdentDBField', Module::TELECASH_DB_FIELD_IDENT);
+        $this->addTplParam('teleCashCaptureTypeDbField', Module::TELECASH_DB_FIELD_CAPTURETYPE);
+
         if ($teleCashPayment) {
             $teleCashIdentValue = $teleCashPayment->getTeleCashIdent();
-            $this->addTplParam(
-                'isTeleCashPayment',
-                true
-            );
-            $this->addTplParam(
-                'teleCashIdentDBField',
-                Module::TELECASH_DB_FIELD_IDENT
-            );
+
+            // this variables are needed, if we have a valid teleCashPayment
+            $this->addTplParam('isTeleCashPayment', true);
             $this->addTplParam(
                 'teleCashIdents',
                 $teleCashPayment->getPossibleTeleCashIdents()
@@ -94,10 +99,6 @@ class PaymentMain extends PaymentMain_parent
             $this->addTplParam(
                 'teleCashIdentValue',
                 $teleCashIdentValue
-            );
-            $this->addTplParam(
-                'teleCashCaptureTypeDbField',
-                Module::TELECASH_DB_FIELD_CAPTURETYPE
             );
             $this->addTplParam(
                 'teleCashCaptureTypes',
@@ -115,12 +116,15 @@ class PaymentMain extends PaymentMain_parent
         $result = null;
 
         $oxid = $this->getEditObjectId();
+        $teleCashPayment = $this->getTeleCashPaymentModel();
+
         if (
-            $this->getTeleCashPaymentModel()
-            && $this->getTeleCashPaymentModel()->loadByPaymentId($oxid)
+            $teleCashPayment
+            && $teleCashPayment->loadByPaymentId($oxid)
         ) {
-            $result = $this->getTeleCashPaymentModel();
+            $result = $teleCashPayment;
         }
+
         return $result;
     }
 
@@ -162,6 +166,7 @@ class PaymentMain extends PaymentMain_parent
         $teleCashPayment = $this->getTeleCashPayment();
 
         if ($teleCashPayment && $ident && $captureType) {
+            $teleCashPayment->setPaymentId($this->getEditObjectId());
             $teleCashPayment->setTeleCashIdent($ident);
             $teleCashPayment->setTeleCashCaptureType($captureType);
             try {

@@ -58,6 +58,7 @@ class TeleCashPayment extends BaseModel implements TeleCashPaymentInterface
         }
 
         $this->init($this->_sCoreTable);
+        $this->setContainer($this->getContainer());
 
         if ($connection !== null) {
             $this->connection = $connection;
@@ -204,6 +205,10 @@ class TeleCashPayment extends BaseModel implements TeleCashPaymentInterface
     /** validate the TeleCash Ident */
     public function validTeleCashCaptureType(string $captureType = '', string $ident = ''): string
     {
+        if (!$ident && $this->telecashIdent) {
+            $ident = (string) $this->telecashIdent;
+        }
+
         $ident = $this->validTeleCashIdent($ident);
         $captureTypes = $this->getPossibleTeleCashCaptureTypes($ident);
         return $captureType && in_array($captureType, $captureTypes, true) ?
@@ -213,6 +218,7 @@ class TeleCashPayment extends BaseModel implements TeleCashPaymentInterface
 
     /**
      * Validates if the payment exists before saving
+     * @throws TeleCashException
      */
     public function validateBeforeSave(): bool
     {
