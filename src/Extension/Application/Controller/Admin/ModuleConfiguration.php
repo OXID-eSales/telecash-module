@@ -35,6 +35,7 @@ class ModuleConfiguration extends ModuleConfiguration_parent
     public function __construct()
     {
         parent::__construct();
+        $this->setContainer($this->getContainer());
         $this->fileSettingsService = $this->getRequiredService(
             ModuleFileSettingsServiceInterface::class,
             'ModuleFileSettingsService'
