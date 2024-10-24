@@ -8,6 +8,7 @@
 use OxidEsales\Eshop\Application\Controller\Admin\ModuleConfiguration as oxModuleConfiguration;
 use OxidEsales\Eshop\Application\Controller\Admin\PaymentMain as oxPaymentMain;
 use OxidEsales\Eshop\Application\Model\Payment as oxPayment;
+use OxidSolutionCatalysts\TeleCash\Application\Controller\Admin\AdminTeleCashJsonEndpoint;
 use OxidSolutionCatalysts\TeleCash\Core\Module;
 use OxidSolutionCatalysts\TeleCash\Extension\Application\Controller\Admin\ModuleConfiguration;
 use OxidSolutionCatalysts\TeleCash\Extension\Application\Controller\Admin\PaymentMain;
@@ -39,6 +40,8 @@ $aModule = [
     'url'         => '',
     'email'       => '',
     'controllers' => [
+        // Admin
+        'AdminTeleCashJsonEndpoint' => AdminTeleCashJsonEndpoint::class,
     ],
     'events' => [
         'onActivate' => '\OxidSolutionCatalysts\TeleCash\Core\ModuleEvents::onActivate',
