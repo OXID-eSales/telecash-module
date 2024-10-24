@@ -17,29 +17,36 @@ use OxidSolutionCatalysts\TeleCash\Settings\Service\ModuleFileSettingsService;
 use OxidSolutionCatalysts\TeleCash\Settings\Service\ModuleFileSettingsServiceInterface;
 use OxidSolutionCatalysts\TeleCash\Settings\Service\ModuleSettingsServiceInterface;
 use OxidSolutionCatalysts\TeleCash\Traits\RequestGetter;
-use Psr\Container\ContainerExceptionInterface;
-use Psr\Container\NotFoundExceptionInterface;
+use OxidSolutionCatalysts\TeleCash\Traits\ServiceContainer;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 use OxidEsales\Eshop\Application\Controller\Admin\ModuleConfiguration as ModuleConfiguration_parent;
 
 class ModuleConfiguration extends ModuleConfiguration_parent
 {
     use RequestGetter;
+    use ServiceContainer;
 
     protected RegistryService $registryService;
     protected ModuleFileSettingsServiceInterface $fileSettingsService;
     protected TranslateServiceInterface $translateService;
 
     /**
-     * @throws NotFoundExceptionInterface
-     * @throws ContainerExceptionInterface
      */
     public function __construct()
     {
         parent::__construct();
-        $this->fileSettingsService = $this->getServiceFromContainer(ModuleFileSettingsServiceInterface::class);
-        $this->registryService = $this->getServiceFromContainer(RegistryService::class);
-        $this->translateService = $this->getServiceFromContainer(TranslateServiceInterface::class);
+        $this->fileSettingsService = $this->getRequiredService(
+            ModuleFileSettingsServiceInterface::class,
+            'ModuleFileSettingsService'
+        );
+        $this->registryService = $this->getRequiredService(
+            RegistryService::class,
+            'RegistryService'
+        );
+        $this->translateService = $this->getRequiredService(
+            TranslateServiceInterface::class,
+            'TranslateService'
+        );
     }
 
     /**

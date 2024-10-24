@@ -19,8 +19,6 @@ use OxidSolutionCatalysts\TeleCash\Core\Module;
 use OxidSolutionCatalysts\TeleCash\Core\Service\TeleCashPaymentValidatorService;
 use OxidSolutionCatalysts\TeleCash\Traits\DataGetter;
 use OxidSolutionCatalysts\TeleCash\Traits\ServiceContainer;
-use Psr\Container\ContainerExceptionInterface;
-use Psr\Container\NotFoundExceptionInterface;
 
 class TeleCashPayment extends BaseModel implements TeleCashPaymentInterface
 {
@@ -49,9 +47,6 @@ class TeleCashPayment extends BaseModel implements TeleCashPaymentInterface
      * @param bool                           $initParent  Whether to initialize the parent BaseModel.
      *                                                    Set to false in test environment to avoid
      *                                                    OXID framework dependencies. Default is true.
-     *
-     * @throws ContainerExceptionInterface     If there's an error with the service container
-     * @throws NotFoundExceptionInterface      If a required service is not found in the container
      */
     public function __construct(
         private readonly TeleCashPaymentValidatorService $validator,
@@ -63,7 +58,16 @@ class TeleCashPayment extends BaseModel implements TeleCashPaymentInterface
         }
 
         $this->init($this->_sCoreTable);
-        $this->connection = $connection ?? $this->getServiceFromContainer(ConnectionProviderInterface::class)->get();
+
+        if ($connection !== null) {
+            $this->connection = $connection;
+        } else {
+            $connectionProvider = $this->getRequiredService(
+                ConnectionProviderInterface::class,
+                'ConnectionProviderInterface'
+            );
+            $this->connection = $connectionProvider->get();
+        }
     }
 
     /**
