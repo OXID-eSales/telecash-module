@@ -11,17 +11,30 @@ namespace OxidSolutionCatalysts\TeleCash\Traits;
 
 use OxidEsales\Eshop\Core\Request;
 use OxidSolutionCatalysts\TeleCash\Core\Service\RegistryService;
-use Psr\Container\ContainerExceptionInterface;
-use Psr\Container\NotFoundExceptionInterface;
 
 /**
  * Convenience trait to work with Request-Data
  */
 trait RequestGetter
 {
-    use ServiceContainer;
+    private ?Request $request = null;
 
-    protected ?Request $request;
+    /**
+     * Helper Method to get the Request-Object
+     * Initializes the request object if not already set
+     *
+     * @return Request|null
+     */
+    private function getRequest(): ?Request
+    {
+        if ($this->request === null) {
+            $registryService = $this->getServiceFromContainer(RegistryService::class);
+            if ($registryService instanceof RegistryService) {
+                $this->request = $registryService->getRequest();
+            }
+        }
+        return $this->request;
+    }
 
     /**
      * return a requested Integer
@@ -32,9 +45,14 @@ trait RequestGetter
      */
     public function getIntegerRequestData(string $key, int $default = 0): int
     {
+        $request = $this->getRequest();
+        if (!$request instanceof Request) {
+            return 0;
+        }
+
         /** @var string $oxidDefault */
         $oxidDefault = $default;
-        $value = $this->getRequest() ? $this->getRequest()->getRequestParameter($key, $oxidDefault) : $default;
+        $value = $request->getRequestParameter($key, $oxidDefault);
         return is_int($value) ? $value : $default;
     }
 
@@ -47,9 +65,14 @@ trait RequestGetter
      */
     public function getArrayRequestData(string $key, array $default = []): array
     {
+        $request = $this->getRequest();
+        if (!$request instanceof Request) {
+            return [];
+        }
+
         /** @var string $oxidDefault */
         $oxidDefault = $default;
-        $value = $this->getRequest() ? $this->getRequest()->getRequestParameter($key, $oxidDefault) : $default;
+        $value = $request->getRequestParameter($key, $oxidDefault);
         return is_array($value) ? $value : $default;
     }
 
@@ -61,8 +84,12 @@ trait RequestGetter
      */
     public function getBoolRequestData(string $key): bool
     {
-        $value = $this->getRequest() ? $this->getRequest()->getRequestParameter($key) : false;
-        return (bool)$value;
+        $request = $this->getRequest();
+        if (!$request instanceof Request) {
+            return false;
+        }
+
+        return (bool)$request->getRequestParameter($key);
     }
 
     /**
@@ -74,7 +101,12 @@ trait RequestGetter
      */
     public function getStringRequestEscapedData(string $key, string $default = ''): string
     {
-        $value = $this->getRequest() ? $this->getRequest()->getRequestEscapedParameter($key, $default) : $default;
+        $request = $this->getRequest();
+        if (!$request instanceof Request) {
+            return $default;
+        }
+
+        $value = $request->getRequestEscapedParameter($key, $default);
         return is_string($value) ? $value : $default;
     }
 
@@ -91,21 +123,5 @@ trait RequestGetter
         $oxidDefault = $default;
         $value = $this->getRequest() ? $this->getRequest()->getRequestParameter($key, $oxidDefault) : $default;
         return is_array($value) ? $value : $default;
-    }
-
-    /**
-     * Helper Method to get the Request-Object
-     * @return null|Request
-     */
-    private function getRequest(): ?Request
-    {
-        if (is_null($this->request)) {
-            try {
-                $this->request = $this->getServiceFromContainer(RegistryService::class)->getRequest();
-            } catch (NotFoundExceptionInterface | ContainerExceptionInterface) {
-                // do noting
-            }
-        }
-        return $this->request;
     }
 }
