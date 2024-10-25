@@ -9,14 +9,10 @@ use OxidEsales\Eshop\Core\Request;
 use OxidEsales\Eshop\Core\UtilsView;
 use OxidSolutionCatalysts\TeleCash\Core\Service\RegistryService;
 use PHPUnit\Framework\TestCase;
-use Prophecy\PhpUnit\ProphecyTrait;
-use Prophecy\Prophecy\ObjectProphecy;
 
 #[CoversClass(RegistryService::class)]
 class RegistryServiceTest extends TestCase
 {
-    use ProphecyTrait;
-
     private RegistryService $registryService;
 
     protected function setUp(): void
@@ -27,45 +23,45 @@ class RegistryServiceTest extends TestCase
 
     public function testGetConfig(): void
     {
-        $mockConfig = $this->prophesize(Config::class);
-        Registry::set(Config::class, $mockConfig->reveal());
+        $mockConfig = $this->createMock(Config::class);
+        Registry::set(Config::class, $mockConfig);
 
         $result = $this->registryService->getConfig();
 
         $this->assertInstanceOf(Config::class, $result);
-        $this->assertSame($mockConfig->reveal(), $result);
+        $this->assertSame($mockConfig, $result);
     }
 
     public function testGetLang(): void
     {
-        $mockLang = $this->prophesize(Language::class);
-        Registry::set(Language::class, $mockLang->reveal());
+        $mockLang = $this->createMock(Language::class);
+        Registry::set(Language::class, $mockLang);
 
         $result = $this->registryService->getLang();
 
         $this->assertInstanceOf(Language::class, $result);
-        $this->assertSame($mockLang->reveal(), $result);
+        $this->assertSame($mockLang, $result);
     }
 
     public function testGetRequest(): void
     {
-        $mockRequest = $this->prophesize(Request::class);
-        Registry::set(Request::class, $mockRequest->reveal());
+        $mockRequest = $this->createMock(Request::class);
+        Registry::set(Request::class, $mockRequest);
 
         $result = $this->registryService->getRequest();
 
         $this->assertInstanceOf(Request::class, $result);
-        $this->assertSame($mockRequest->reveal(), $result);
+        $this->assertSame($mockRequest, $result);
     }
 
     public function testGetUtilsView(): void
     {
-        $mockUtilsView = $this->prophesize(UtilsView::class);
-        Registry::set(UtilsView::class, $mockUtilsView->reveal());
+        $mockUtilsView = $this->createMock(UtilsView::class);
+        Registry::set(UtilsView::class, $mockUtilsView);
 
         $result = $this->registryService->getUtilsView();
 
         $this->assertInstanceOf(UtilsView::class, $result);
-        $this->assertSame($mockUtilsView->reveal(), $result);
+        $this->assertSame($mockUtilsView, $result);
     }
 }
