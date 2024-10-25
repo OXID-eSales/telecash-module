@@ -10,9 +10,44 @@ declare(strict_types=1);
 namespace OxidSolutionCatalysts\TeleCash\Extension\Application\Model;
 
 use OxidEsales\Eshop\Application\Model\User;
+use OxidSolutionCatalysts\TeleCash\Application\Model\TeleCashPayment;
+use OxidSolutionCatalysts\TeleCash\Settings\Service\ModuleSettingsServiceInterface;
+use OxidSolutionCatalysts\TeleCash\Traits\ModelGetter;
+use OxidSolutionCatalysts\TeleCash\Traits\ServiceContainer;
 
 class Payment extends Payment_parent
 {
+    use ModelGetter;
+    use ServiceContainer;
+
+    protected ModuleSettingsServiceInterface $moduleSettings;
+
+    /**
+     * Constructor for Payment.
+     *
+     * Initializes a new instance of the Payment class. This constructor can be used
+     * in both production and test environments due to its flexible parameter configuration.
+     *
+     * @param bool $initParent  Whether to initialize the parent BaseModel.
+     *                          Set to false in test environment to avoid
+     *                          OXID framework dependencies. Default is true.
+     */
+    public function __construct(
+        bool $initParent = true
+    ) {
+        if ($initParent) {
+            parent::__construct();
+        }
+
+        $this->setContainer($this->getContainer());
+        $this->moduleSettings = $this->getRequiredService(
+            ModuleSettingsServiceInterface::class,
+            'ModuleSettingsServiceInterface'
+        );
+    }
+
+    protected ?TeleCashPayment $teleCashPayment = null;
+
     /**
      * Core-Extension - var-types and return value only in doc-block
      * {@inheritDoc}
@@ -40,10 +75,10 @@ class Payment extends Payment_parent
      * @return bool True if it's a valid TeleCash payment or not a TeleCash payment at all,
      *              false if it's an invalid TeleCash payment.
      */
-    private function isTeleCashPaymentValid(): bool
+    public function isTeleCashPaymentValid(): bool
     {
         if ($this->isTeleCashPayment()) {
-            return $this->isValidTeleCashPayment();
+            return $this->isValidTeleCashConfiguration();
         }
         return true;
     }
@@ -55,18 +90,19 @@ class Payment extends Payment_parent
      */
     private function isTeleCashPayment(): bool
     {
-        return false;
+        $this->teleCashPayment = $this->getTeleCashPaymentModel();
+        return $this->teleCashPayment && $this->teleCashPayment->loadByPaymentId($this->getId());
     }
 
     /**
-     * Checks if the current TeleCash payment is valid.
+     * Checks if the current TeleCash paymentconfiguration is valid.
      * This method should only be called after confirming that
      * the payment method is indeed a TeleCash payment.
      *
      * @return bool True if the TeleCash payment is valid, false otherwise.
      */
-    private function isValidTeleCashPayment(): bool
+    private function isValidTeleCashConfiguration(): bool
     {
-        return false;
+        return $this->moduleSettings->isValid();
     }
 }
