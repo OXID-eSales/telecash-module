@@ -5,7 +5,7 @@
  * See LICENSE file for license details.
  */
 
-namespace OxidSolutionCatalysts\TeleCash\Tests\Unit\Application\Model;
+namespace OxidSolutionCatalysts\TeleCash\Tests\Integration\Application\Model;
 
 use Doctrine\DBAL\Connection;
 use OxidSolutionCatalysts\TeleCash\Application\Model\TeleCashPayment;

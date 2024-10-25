@@ -43,6 +43,8 @@ class AdminTeleCashJsonEndpoint extends BaseController
     use RequestGetter;
     use ServiceContainer;
 
+    protected ?RegistryService $registryService = null;
+
     /**
      * Constructor for the AdminTeleCashJsonEndpoint controller
      *
@@ -51,9 +53,8 @@ class AdminTeleCashJsonEndpoint extends BaseController
      *
      * @param bool $initParent Whether to initialize the parent controller (default: true)
      */
-    public function __construct(
-        bool $initParent = true
-    ) {
+    public function __construct(bool $initParent = true)
+    {
         if ($initParent) {
             parent::__construct();
         }
