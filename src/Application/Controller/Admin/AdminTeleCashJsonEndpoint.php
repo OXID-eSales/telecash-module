@@ -12,7 +12,7 @@ namespace OxidSolutionCatalysts\TeleCash\Application\Controller\Admin;
 use OxidEsales\Eshop\Core\Controller\BaseController;
 use OxidSolutionCatalysts\TeleCash\Core\Module;
 use OxidSolutionCatalysts\TeleCash\Core\Service\RegistryService;
-use OxidSolutionCatalysts\TeleCash\Traits\ControllerGetter;
+use OxidSolutionCatalysts\TeleCash\Traits\ModelGetter;
 use OxidSolutionCatalysts\TeleCash\Traits\Json;
 use OxidSolutionCatalysts\TeleCash\Traits\RequestGetter;
 use OxidSolutionCatalysts\TeleCash\Traits\ServiceContainer;
@@ -30,7 +30,7 @@ use OxidSolutionCatalysts\TeleCash\Traits\ServiceContainer;
  * - Request parameter processing
  *
  * Used traits:
- * - ControllerGetter: Provides access to TeleCash payment models
+ * - ModelGetter: Provides access to TeleCash payment models
  * - Json: Handles JSON encoding/decoding and response output
  * - RequestGetter: Processes and validates request parameters
  *
@@ -38,7 +38,7 @@ use OxidSolutionCatalysts\TeleCash\Traits\ServiceContainer;
  */
 class AdminTeleCashJsonEndpoint extends BaseController
 {
-    use ControllerGetter;
+    use ModelGetter;
     use Json;
     use RequestGetter;
     use ServiceContainer;

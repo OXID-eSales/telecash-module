@@ -9,6 +9,7 @@ declare(strict_types=1);
 
 namespace OxidSolutionCatalysts\TeleCash\Traits;
 
+use OxidEsales\Eshop\Application\Model\Payment;
 use OxidSolutionCatalysts\TeleCash\Application\Model\TeleCashPayment;
 use OxidSolutionCatalysts\TeleCash\Core\Service\OxNewService;
 use OxidSolutionCatalysts\TeleCash\Core\Service\TeleCashPaymentValidatorServiceInterface;
@@ -16,12 +17,12 @@ use OxidSolutionCatalysts\TeleCash\Core\Service\TeleCashPaymentValidatorServiceI
 /**
  * Convenience trait to work with Controller-Models.
  */
-trait ControllerGetter
+trait ModelGetter
 {
     private function getTeleCashPaymentModel(): ?TeleCashPayment
     {
-        $oxNewService = $this->getServiceFromContainer(OxNewService::class);
-        if (!$oxNewService instanceof OxNewService) {
+        $oxNewService = $this->getOxNewService();
+        if (!$oxNewService) {
             return null;
         }
 
@@ -30,5 +31,15 @@ trait ControllerGetter
             'TeleCashPaymentValidatorService'
         );
         return $oxNewService->oxNew(TeleCashPayment::class, [$validator]);
+    }
+
+    private function getOxidPaymentModel(): ?Payment
+    {
+        return $this->getOxNewService()?->oxNew(Payment::class);
+    }
+
+    private function getOxNewService(): ?OxNewService
+    {
+        return $this->getServiceFromContainer(OxNewService::class);
     }
 }

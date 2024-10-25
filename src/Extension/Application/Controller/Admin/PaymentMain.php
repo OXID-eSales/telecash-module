@@ -15,14 +15,14 @@ use OxidSolutionCatalysts\TeleCash\Exception\TeleCashException;
 use OxidSolutionCatalysts\TeleCash\Application\Model\TeleCashPayment;
 use OxidSolutionCatalysts\TeleCash\Core\Module;
 use OxidSolutionCatalysts\TeleCash\Core\Service\TranslateServiceInterface;
-use OxidSolutionCatalysts\TeleCash\Traits\ControllerGetter;
+use OxidSolutionCatalysts\TeleCash\Traits\ModelGetter;
 use OxidSolutionCatalysts\TeleCash\Traits\RequestGetter;
 use OxidSolutionCatalysts\TeleCash\Traits\ServiceContainer;
 
 class PaymentMain extends PaymentMain_parent
 {
     use RequestGetter;
-    use ControllerGetter;
+    use ModelGetter;
     use ServiceContainer;
 
     protected TranslateServiceInterface $translateService;
