@@ -22,7 +22,7 @@ class DisplayHostedDataTest extends \PHPUnit\Framework\TestCase
      * 3. The DataStorageItem is correctly included in the request
      *
      * @param DataStorageItem $storageItem The storage item to be included in the request
-     * @dataProvider dataProvider Tests various storage item configurations
+     * @dataProvider         dataProvider
      */
     public function testXMLGeneration(DataStorageItem $storageItem): void
     {
@@ -64,10 +64,7 @@ class DisplayHostedDataTest extends \PHPUnit\Framework\TestCase
     /**
      * Provides test data for XML generation tests
      *
-     * Currently provides:
-     * - A basic DataStorageItem with identifier 'abc-def'
-     *
-     * @return array Array of test cases, each containing a DataStorageItem
+     * @return array<array<DataStorageItem>> Array of test cases, each containing a DataStorageItem
      */
     public static function dataProvider(): array
     {
