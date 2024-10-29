@@ -73,6 +73,7 @@ trait Json
      * This method encodes an array to JSON format with the following options:
      * - Pretty printing enabled for readability
      * - Numeric strings are converted to numbers
+     * - Empty arrays are converted to empty objects ({})
      * - Throws exceptions on encoding errors
      *
      * @param array<string|int, mixed> $data Array to encode. Keys can be strings
@@ -82,9 +83,14 @@ trait Json
     protected function arrayToJson(array $data): string
     {
         try {
+            // Convert empty array to empty object
+            if (empty($data)) {
+                return '{}';
+            }
+
             $result = json_encode(
                 $data,
-                JSON_THROW_ON_ERROR | JSON_PRETTY_PRINT | JSON_NUMERIC_CHECK
+                JSON_THROW_ON_ERROR | JSON_PRETTY_PRINT | JSON_NUMERIC_CHECK | JSON_FORCE_OBJECT
             );
         } catch (JsonException) {
             $result = '';
