@@ -27,7 +27,6 @@ class AbstractResponseTest extends TestCase
      */
     protected function setUp(): void
     {
-        // Create a mock of the abstract class to test protected methods
         $this->abstractResponse = $this->createMock(AbstractResponse::class);
     }
 
@@ -49,18 +48,14 @@ class AbstractResponseTest extends TestCase
         $reflection = new ReflectionClass(AbstractResponse::class);
         $method = $reflection->getMethod('firstElementByTagNSString');
 
-        // Execute the protected method
+        $result = $method->invokeArgs($this->abstractResponse, [$doc, 'http://example.com', 'element']);
+        $this->assertEquals('Test', $result);
+
         $result = $method->invokeArgs(
             $this->abstractResponse,
-            [
-                $doc,                   // XML document
-                'http://example.com',   // Namespace URI
-                'element'               // Element to find
-            ]
+            [$doc, 'http://example.com', 'nonexistentelement', true, 'default']
         );
-
-        // Verify the result matches expected content
-        $this->assertEquals('Test', $result, 'Should extract the text content of the specified element');
+        $this->assertEquals('default', $result);
     }
 
     /**

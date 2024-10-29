@@ -27,16 +27,13 @@ class InstallTest extends \PHPUnit\Framework\TestCase
      * @param RecurringPaymentInformation $paymentInformation Recurring payment configuration
      * @dataProvider dataProvider
      */
-    public function testXMLGeneration(
-        Payment $payment,
-        RecurringPaymentInformation $paymentInformation
-    ): void {
-        // Create mock for the order service
-        $orderService = $this->createMock(OrderService::class);
+    public function testXMLGeneration(Payment $payment, RecurringPaymentInformation $paymentInformation): void
+    {
+        $orderService  = $this->createMock(OrderService::class);
 
-        // Create and build the install request
         $recurring = new Install($orderService, $payment, $paymentInformation);
-        $document = $recurring->getDocument();
+        $document  = $recurring->getDocument();
+
         $document->appendChild($recurring->getElement());
 
         // Verify RecurringPayment element exists

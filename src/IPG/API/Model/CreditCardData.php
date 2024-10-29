@@ -7,6 +7,8 @@ namespace OxidSolutionCatalysts\TeleCash\IPG\API\Model;
  */
 class CreditCardData implements ElementInterface
 {
+    private string $namespaceShort = 'ns2';
+
     /** @var string|null $CardNumber */
     private string|null $cardNumber;
 
@@ -28,6 +30,11 @@ class CreditCardData implements ElementInterface
         $this->expYear    = $expYear;
     }
 
+    public function setNamespaceShort(string $namespaceShort): void
+    {
+        $this->namespaceShort = $namespaceShort;
+    }
+
     /**
      * @param \DOMDocument $document
      *
@@ -35,7 +42,7 @@ class CreditCardData implements ElementInterface
      */
     public function getXML(\DOMDocument $document): mixed
     {
-        $xml = $document->createElement('ns2:CreditCardData');
+        $xml = $document->createElement($this->namespaceShort . ':CreditCardData');
         if (!empty($this->cardNumber)) {
             $cardNumber              = $document->createElement('ns1:CardNumber');
             $cardNumber->textContent = $this->cardNumber;

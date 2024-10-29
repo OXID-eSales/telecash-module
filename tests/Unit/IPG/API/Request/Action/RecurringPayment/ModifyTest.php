@@ -34,12 +34,11 @@ class ModifyTest extends \PHPUnit\Framework\TestCase
         Payment $payment,
         RecurringPaymentInformation $paymentInformation
     ): void {
-        // Create mock for the order service
-        $orderService = $this->createMock(OrderService::class);
+        $orderService  = $this->createMock(OrderService::class);
 
-        // Create and build the modify request
         $recurring = new Modify($orderService, $orderId, $payment, $paymentInformation);
-        $document = $recurring->getDocument();
+        $document  = $recurring->getDocument();
+
         $document->appendChild($recurring->getElement());
 
         // Verify RecurringPayment element exists

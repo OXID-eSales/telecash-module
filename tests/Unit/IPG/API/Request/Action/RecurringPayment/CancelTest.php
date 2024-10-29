@@ -26,12 +26,11 @@ class CancelTest extends \PHPUnit\Framework\TestCase
      */
     public function testXMLGeneration(string $orderId): void
     {
-        // Create mock for the order service
-        $orderService = $this->createMock(OrderService::class);
+        $orderService  = $this->createMock(OrderService::class);
 
-        // Create and build the cancel request
         $recurring = new Cancel($orderService, $orderId);
-        $document = $recurring->getDocument();
+        $document  = $recurring->getDocument();
+
         $document->appendChild($recurring->getElement());
 
         // Verify RecurringPayment element exists

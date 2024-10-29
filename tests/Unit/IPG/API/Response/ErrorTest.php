@@ -147,4 +147,33 @@ class ErrorTest extends TestCase
             (string)$error
         );
     }
+
+    public function testDefaultCase()
+    {
+        $xml = '<SOAP-ENV:Envelope 
+            xmlns:SOAP-ENV="' . OrderService::NAMESPACE_SOAP . '"
+            xmlns:ns1="' . OrderService::NAMESPACE_N1 . '"
+            xmlns:ns2="' . OrderService::NAMESPACE_N2 . '"
+            xmlns:ns3="' . OrderService::NAMESPACE_N3 . '">
+            <SOAP-ENV:Body>
+                <SOAP-ENV:Fault>
+                    <faultcode>SOAP-ENV:Client</faultcode>
+                    <faultstring>DefaultException: Some weird Error</faultstring>
+                    <detail>
+                        <ns3:IPGApiActionResponse>
+                            <ns3:ErrorMessage>Dummy Error: Transaction declined</ns3:ErrorMessage>
+                        </ns3:IPGApiActionResponse>
+                    </detail>
+                </SOAP-ENV:Fault>
+            </SOAP-ENV:Body>
+        </SOAP-ENV:Envelope>';
+
+        $doc = new \DOMDocument();
+        $doc->loadXML($xml);
+
+        $this->expectException(\Exception::class);
+        $error = Error::createFromSoapFault($doc);
+
+        $this->assertTrue(true);
+    }
 }

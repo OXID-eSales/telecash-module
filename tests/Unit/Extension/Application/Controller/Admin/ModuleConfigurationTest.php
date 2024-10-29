@@ -18,10 +18,6 @@ class ModuleConfigurationTest extends TestCase
         $this->moduleConfiguration = $this->createPartialMock(ModuleConfiguration::class, []);
         $this->registryService = $this->createMock(RegistryService::class);
         $this->fileSettingsService = $this->createMock(ModuleFileSettingsServiceInterface::class);
-
-        // If you need to set the properties, you can do so like this:
-        // $this->moduleConfiguration->registryService = $this->registryService;
-        // $this->moduleConfiguration->fileSettingsService = $this->fileSettingsService;
     }
 
     public function testRender()
