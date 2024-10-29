@@ -201,6 +201,7 @@ final class ModuleSettingsTest extends TestCase
      *
      * @param string $storedValue The value stored in the settings
      * @param string $expectedMode The expected API mode
+     * @throws Exception
      */
     public function testGetApiMode(string $storedValue, string $expectedMode): void
     {
@@ -669,5 +670,102 @@ final class ModuleSettingsTest extends TestCase
             'cert_install_password' => ['getClientCertificateInstallationPassword'],
             'private_key_password' => ['getClientCertificatePrivateKeyPassword']
         ];
+    }
+
+    /**
+     * Tests the retrieval of log level settings
+     *
+     * Verifies that getLogLevel:
+     * 1. Returns the correct stored log level
+     * 2. Defaults to LOG_LEVEL_ERROR when no valid value is stored
+     * 3. Properly handles different input values
+     *
+     * @dataProvider getLogLevelDataProvider
+     *
+     * @param string $storedValue The value stored in the settings
+     * @param string $expectedLevel The expected log level
+     * @throws Exception
+     */
+    public function testGetLogLevel(string $storedValue, string $expectedLevel): void
+    {
+        // Create and configure mocks
+        $moduleSettingService = $this->createPartialMock(ModuleSettingService::class, ['getString']);
+        $fileSettingsService = $this->createMock(ModuleFileSettingsServiceInterface::class);
+
+        $moduleSettingService->method('getString')->willReturnMap([
+            [ModuleSettingsServiceInterface::LOG_LEVEL, Module::MODULE_ID, new UnicodeString($storedValue)]
+        ]);
+
+        $sut = new ModuleSettingsService($moduleSettingService, $fileSettingsService);
+
+        $this->assertSame(
+            $expectedLevel,
+            $sut->getLogLevel(),
+            sprintf('Log level should be "%s" when stored value is "%s"', $expectedLevel, $storedValue)
+        );
+    }
+
+    /**
+     * Provides test cases for log level retrieval
+     *
+     * Test cases cover:
+     * - Empty value (should default to error level)
+     * - Invalid value (should default to error level)
+     * - All valid log levels
+     *
+     * @return array<string, array<string, string>> Test cases for log level testing
+     */
+    public static function getLogLevelDataProvider(): array
+    {
+        return [
+            'empty_value' => [
+                'stored_value' => '',
+                'expected' => ModuleSettingsServiceInterface::LOG_LEVEL_ERROR
+            ],
+            'invalid_value' => [
+                'stored_value' => 'invalid_level',
+                'expected' => ModuleSettingsServiceInterface::LOG_LEVEL_ERROR
+            ],
+            'error_level' => [
+                'stored_value' => ModuleSettingsServiceInterface::LOG_LEVEL_ERROR,
+                'expected' => ModuleSettingsServiceInterface::LOG_LEVEL_ERROR
+            ],
+            'info_level' => [
+                'stored_value' => ModuleSettingsServiceInterface::LOG_LEVEL_INFO,
+                'expected' => ModuleSettingsServiceInterface::LOG_LEVEL_INFO
+            ],
+            'debug_level' => [
+                'stored_value' => ModuleSettingsServiceInterface::LOG_LEVEL_DEBUG,
+                'expected' => ModuleSettingsServiceInterface::LOG_LEVEL_DEBUG
+            ]
+        ];
+    }
+
+    /**
+     * Tests the saving of log level settings
+     *
+     * Verifies that saveLogLevel:
+     * 1. Correctly passes the level to the storage service
+     * 2. Uses the correct module identifier
+     * 3. Maintains data integrity
+     */
+    public function testSaveLogLevel(): void
+    {
+        $testLevel = ModuleSettingsServiceInterface::LOG_LEVEL_INFO;
+
+        // Create mocks with expectations
+        $moduleSettingService = $this->createPartialMock(ModuleSettingService::class, ['saveString']);
+        $fileSettingsService = $this->createMock(ModuleFileSettingsServiceInterface::class);
+
+        $moduleSettingService->expects($this->once())
+            ->method('saveString')
+            ->with(
+                ModuleSettingsServiceInterface::LOG_LEVEL,
+                $testLevel,
+                Module::MODULE_ID
+            );
+
+        $sut = new ModuleSettingsService($moduleSettingService, $fileSettingsService);
+        $sut->saveLogLevel($testLevel);
     }
 }
