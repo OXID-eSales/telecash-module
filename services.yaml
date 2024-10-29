@@ -1,6 +1,3 @@
-parameters:
-  app.log_file_path: '/var/www/source/log/oe_moduletemplate.log'
-
 imports:
   - { resource: src/Settings/services.yaml }
   - { resource: src/Core/services.yaml }
