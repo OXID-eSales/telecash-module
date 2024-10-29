@@ -17,8 +17,6 @@ interface ModuleFileSettingsServiceInterface
 
     public const CLIENT_CERT_PRIVATEKEY_FILE = 'osctelecash_clientcertificateprivatekeyfile';
 
-    public const CLIENT_CERT_PEM_FILE = 'osctelecash_clientcertificatepemfile';
-
     public const TRUST_ANCHOR_PEM_FILE = 'osctelecash_trustanchorpemfile';
 
 
@@ -42,16 +40,6 @@ interface ModuleFileSettingsServiceInterface
     public function getClientCertificatePrivateKeyFilePath(): string;
 
     public function deleteClientCertificatePrivateKeyFile(): bool;
-
-    public function storeClientCertificatePEMFile(UploadedFile $file): void;
-
-    public function checkClientCertificatePEMFileExists(): bool;
-
-    public function getClientCertificatePEMFileName(): string;
-
-    public function getClientCertificatePEMFilePath(): string;
-
-    public function deleteClientCertificatePEMFile(): bool;
 
     public function storeTrustAnchorPEMFile(UploadedFile $file): void;
 

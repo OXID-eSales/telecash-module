@@ -26,6 +26,8 @@ interface ModuleSettingsServiceInterface
 
     public const CLIENT_CERT_PRIVATEKEY_PASSWORD = 'osctelecash_clientcertificateprivatekeypassword';
 
+    public function isValid(): bool;
+
     public function isLiveApiMode(): bool;
 
     public function getApiMode(): string;

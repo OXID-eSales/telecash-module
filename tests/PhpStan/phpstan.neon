@@ -3,7 +3,8 @@ parameters:
     bootstrapFiles:
         - phpstan-bootstrap.php
     stubFiles:
-        - stubs/ModuleConfiguration.stub
+        - stubs/Application/Controller/Admin/ModuleConfiguration.stub
+        - stubs/Application/Model/Payment.stub
     level: 8
     scanFiles:
 

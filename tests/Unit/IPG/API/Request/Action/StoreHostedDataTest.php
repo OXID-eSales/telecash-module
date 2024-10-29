@@ -3,49 +3,70 @@
 namespace OxidSolutionCatalysts\TeleCash\IPG\API\Request\Action;
 
 use OxidSolutionCatalysts\TeleCash\IPG\API\Model\DataStorageItem;
-use Prophecy\Prophet;
+use OxidSolutionCatalysts\TeleCash\IPG\API\Service\OrderService;
 
 /**
- * Test case for Request/Action/StoreHostedData
+ * Test class for StoreHostedData request action
+ *
+ * Validates the XML generation for storing payment data in the TeleCash system.
+ * This test ensures proper formatting of the storage request XML structure.
  */
 class StoreHostedDataTest extends \PHPUnit\Framework\TestCase
 {
     /**
-     * @param DataStorageItem $storageItem
+     * Tests the XML generation for the StoreHostedData request
      *
+     * Verifies that:
+     * 1. The StoreHostedData element is present
+     * 2. The DataStorageItem is properly included
+     * 3. The XML structure follows the required format
+     *
+     * @param DataStorageItem $storageItem The storage item to be stored
      * @dataProvider dataProvider
      */
-    public function testXMLGeneration(DataStorageItem $storageItem)
+    public function testXMLGeneration(DataStorageItem $storageItem): void
     {
-        $prophet = new Prophet();
-        $orderService  = $prophet->prophesize('OxidSolutionCatalysts\TeleCash\IPG\API\Service\OrderService');
+        // Create mock for order service
+        $orderService = $this->createMock(OrderService::class);
 
-        $store    = new StoreHostedData($orderService->reveal(), $storageItem);
+        // Create and build the store request
+        $store = new StoreHostedData($orderService, $storageItem);
         $document = $store->getDocument();
         $document->appendChild($store->getElement());
 
+        // Verify StoreHostedData element exists
         $elementStore = $document->getElementsByTagName('ns2:StoreHostedData');
-        $this->assertEquals(1, $elementStore->length, 'Expected element StoreHostedData not found');
+        $this->assertEquals(
+            1,
+            $elementStore->length,
+            'XML must contain exactly one StoreHostedData element'
+        );
 
+        // Extract child elements for verification
         $children = [];
         /** @var \DOMNode $child */
         foreach ($elementStore->item(0)->childNodes as $child) {
             $children[$child->nodeName] = $child->nodeValue;
         }
 
-        $this->assertArrayHasKey('ns2:DataStorageItem', $children, 'Expected element DataStorageItem not found');
-        //no need to further test DataStorageItem, as this is already covered in DataStorageItemTest
+        // Verify DataStorageItem presence
+        $this->assertArrayHasKey(
+            'ns2:DataStorageItem',
+            $children,
+            'StoreHostedData must contain DataStorageItem element'
+        );
+        // Detailed DataStorageItem testing is covered in DataStorageItemTest
     }
 
     /**
-     * Provides some test values
+     * Provides test data for store request testing
      *
-     * @return array
+     * @return array Array of test cases with DataStorageItem objects
      */
     public static function dataProvider(): array
     {
         return [
-            [new DataStorageItem('abc-def')]
+            [new DataStorageItem('abc-def')] // Basic storage item test case
         ];
     }
 }

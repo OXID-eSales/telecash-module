@@ -2,63 +2,94 @@
 
 namespace OxidSolutionCatalysts\TeleCash\IPG\API\Request\Action\RecurringPayment;
 
-use Prophecy\Prophet;
+use OxidSolutionCatalysts\TeleCash\IPG\API\Service\OrderService;
 
 /**
- * Test case for Request/Action/RecurringPayment/Cancel
+ * Test class for RecurringPayment Cancel request action
+ *
+ * Verifies the XML generation for canceling recurring payments in the TeleCash system.
+ * This test ensures proper formatting of the cancellation request XML structure.
  */
 class CancelTest extends \PHPUnit\Framework\TestCase
 {
     /**
-     * @param string $orderId
+     * Tests the XML generation for the Cancel request
      *
+     * Verifies that:
+     * 1. The RecurringPayment element is present
+     * 2. Required elements exist with correct values
+     * 3. Optional elements are not present
+     * 4. The function type is set to 'cancel'
+     *
+     * @param string $orderId The order ID to be canceled
      * @dataProvider dataProvider
      */
     public function testXMLGeneration(string $orderId): void
     {
-        $prophet = new Prophet();
-        $orderService  = $prophet->prophesize('OxidSolutionCatalysts\TeleCash\IPG\API\Service\OrderService');
+        // Create mock for the order service
+        $orderService = $this->createMock(OrderService::class);
 
-        $recurring = new Cancel($orderService->reveal(), $orderId);
-        $document  = $recurring->getDocument();
+        // Create and build the cancel request
+        $recurring = new Cancel($orderService, $orderId);
+        $document = $recurring->getDocument();
         $document->appendChild($recurring->getElement());
 
+        // Verify RecurringPayment element exists
         $elementRecurringPayment = $document->getElementsByTagName('ns2:RecurringPayment');
-        $this->assertEquals(1, $elementRecurringPayment->length, 'Expected element RecurringPayment not found');
+        $this->assertEquals(
+            1,
+            $elementRecurringPayment->length,
+            'XML must contain exactly one RecurringPayment element'
+        );
 
+        // Extract all child elements for verification
         $children = [];
         /** @var \DOMNode $child */
         foreach ($elementRecurringPayment->item(0)->childNodes as $child) {
             $children[$child->nodeName] = $child->nodeValue;
         }
 
+        // Verify required and optional elements
         $this->assertArrayNotHasKey(
             'ns2:RecurringPaymentInformation',
             $children,
-            'Unexpected element RecurringPaymentInformation was found'
+            'Cancel request should not contain RecurringPaymentInformation'
         );
-        // no need to further test RecurringPaymentInformation,
-        // as this is already covered in RecurringPaymentInformationTest
+
         $this->assertArrayNotHasKey(
             'ns1:Payment',
             $children,
-            'Unexpected element Payment was found'
+            'Cancel request should not contain Payment information'
         );
-        //no need to further test Payment, as this is already covered in PaymentTest
-        $this->assertArrayHasKey('ns2:Function', $children, 'Expected element Function not found');
-        $this->assertEquals('cancel', $children['ns2:Function'], 'Function did not match');
-        $this->assertArrayHasKey('ns2:OrderId', $children, 'Expected element OrderId not found');
+
+        $this->assertArrayHasKey(
+            'ns2:Function',
+            $children,
+            'Cancel request must contain Function element'
+        );
+
+        $this->assertEquals(
+            'cancel',
+            $children['ns2:Function'],
+            'Function must be set to "cancel"'
+        );
+
+        $this->assertArrayHasKey(
+            'ns2:OrderId',
+            $children,
+            'Cancel request must contain OrderId'
+        );
     }
 
     /**
-     * Provides some test values
+     * Provides test data for cancel request testing
      *
-     * @return array
+     * @return array Array of test cases with order IDs
      */
     public static function dataProvider(): array
     {
         return [
-            ['8934htgien g34hgigh30gj50o'],
+            ['8934htgien g34hgigh30gj50o'], // Sample order ID
         ];
     }
 }

@@ -6,8 +6,15 @@
  */
 
 use OxidEsales\Eshop\Application\Controller\Admin\ModuleConfiguration as oxModuleConfiguration;
+use OxidEsales\Eshop\Application\Controller\Admin\PaymentMain as oxPaymentMain;
+use OxidEsales\Eshop\Application\Model\Payment as oxPayment;
+use OxidEsales\Eshop\Application\Model\PaymentList as oxPaymentList;
+use OxidSolutionCatalysts\TeleCash\Application\Controller\Admin\AdminTeleCashJsonEndpoint;
 use OxidSolutionCatalysts\TeleCash\Core\Module;
 use OxidSolutionCatalysts\TeleCash\Extension\Application\Controller\Admin\ModuleConfiguration;
+use OxidSolutionCatalysts\TeleCash\Extension\Application\Controller\Admin\PaymentMain;
+use OxidSolutionCatalysts\TeleCash\Extension\Application\Model\Payment;
+use OxidSolutionCatalysts\TeleCash\Extension\Application\Model\PaymentList;
 use OxidSolutionCatalysts\TeleCash\Settings\Service\ModuleFileSettingsServiceInterface;
 use OxidSolutionCatalysts\TeleCash\Settings\Service\ModuleSettingsServiceInterface;
 
@@ -35,13 +42,20 @@ $aModule = [
     'url'         => '',
     'email'       => '',
     'controllers' => [
+        // Admin
+        'AdminTeleCashJsonEndpoint' => AdminTeleCashJsonEndpoint::class,
     ],
     'events' => [
         'onActivate' => '\OxidSolutionCatalysts\TeleCash\Core\ModuleEvents::onActivate',
         'onDeactivate' => '\OxidSolutionCatalysts\TeleCash\Core\ModuleEvents::onDeactivate'
     ],
     'extend' => [
+        // Controller
         oxModuleConfiguration::class => ModuleConfiguration::class,
+        oxPaymentMain::class         => PaymentMain::class,
+        // Models
+        oxPayment::class     => Payment::class,
+        oxPaymentList::class => PaymentList::class,
     ],
     'settings' => [
         [
@@ -91,12 +105,6 @@ $aModule = [
         [
             'group' => null,
             'name'  => ModuleFileSettingsServiceInterface::CLIENT_CERT_PRIVATEKEY_FILE,
-            'type'  => 'str',
-            'value' => '',
-        ],
-        [
-            'group' => null,
-            'name'  => ModuleFileSettingsServiceInterface::CLIENT_CERT_PEM_FILE,
             'type'  => 'str',
             'value' => '',
         ],

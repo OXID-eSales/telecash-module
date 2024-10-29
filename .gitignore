@@ -7,3 +7,4 @@ composer.lock
 .php_cs.cache
 tests/.phpunit.result.cache
 tests/.phpunit.cache
+tests/reports/
