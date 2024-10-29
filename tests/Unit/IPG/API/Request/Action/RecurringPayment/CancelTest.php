@@ -2,7 +2,7 @@
 
 namespace OxidSolutionCatalysts\TeleCash\IPG\API\Request\Action\RecurringPayment;
 
-use Prophecy\Prophet;
+use OxidSolutionCatalysts\TeleCash\IPG\API\Service\OrderService;
 
 /**
  * Test case for Request/Action/RecurringPayment/Cancel
@@ -16,10 +16,9 @@ class CancelTest extends \PHPUnit\Framework\TestCase
      */
     public function testXMLGeneration(string $orderId): void
     {
-        $prophet = new Prophet();
-        $orderService  = $prophet->prophesize('OxidSolutionCatalysts\TeleCash\IPG\API\Service\OrderService');
+        $orderService  = $this->createMock(OrderService::class);
 
-        $recurring = new Cancel($orderService->reveal(), $orderId);
+        $recurring = new Cancel($orderService, $orderId);
         $document  = $recurring->getDocument();
         $document->appendChild($recurring->getElement());
 

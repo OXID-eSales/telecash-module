@@ -4,7 +4,7 @@ namespace OxidSolutionCatalysts\TeleCash\IPG\API\Request\Action\RecurringPayment
 
 use OxidSolutionCatalysts\TeleCash\IPG\API\Model\Payment;
 use OxidSolutionCatalysts\TeleCash\IPG\API\Model\RecurringPaymentInformation;
-use Prophecy\Prophet;
+use OxidSolutionCatalysts\TeleCash\IPG\API\Service\OrderService;
 
 /**
  * Test case for Request/Action/RecurringPayment/Modify
@@ -23,10 +23,9 @@ class ModifyTest extends \PHPUnit\Framework\TestCase
         Payment $payment,
         RecurringPaymentInformation $paymentInformation
     ): void {
-        $prophet = new Prophet();
-        $orderService  = $prophet->prophesize('OxidSolutionCatalysts\TeleCash\IPG\API\Service\OrderService');
+        $orderService  = $this->createMock(OrderService::class);
 
-        $recurring = new Modify($orderService->reveal(), $orderId, $payment, $paymentInformation);
+        $recurring = new Modify($orderService, $orderId, $payment, $paymentInformation);
         $document  = $recurring->getDocument();
         $document->appendChild($recurring->getElement());
 

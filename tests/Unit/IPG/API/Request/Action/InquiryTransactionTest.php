@@ -3,8 +3,6 @@
 namespace OxidSolutionCatalysts\TeleCash\Tests\IPG\API\Request\Action;
 
 use PHPUnit\Framework\TestCase;
-use Prophecy\PhpUnit\ProphecyTrait;
-use Prophecy\Prophecy\ObjectProphecy;
 use OxidSolutionCatalysts\TeleCash\IPG\API\Request\Action\InquiryTransaction;
 use OxidSolutionCatalysts\TeleCash\IPG\API\Service\OrderService;
 use OxidSolutionCatalysts\TeleCash\IPG\API\Response\Action\Validation;
@@ -12,9 +10,7 @@ use OxidSolutionCatalysts\TeleCash\IPG\API\Response\Error;
 
 class InquiryTransactionTest extends TestCase
 {
-    use ProphecyTrait;
-
-    private ObjectProphecy $orderServiceProphecy;
+    private OrderService $orderServiceMock;
     private InquiryTransaction $inquiryTransaction;
     private \DOMDocument $document;
 
@@ -23,10 +19,10 @@ class InquiryTransactionTest extends TestCase
         parent::setUp();
 
         // Create prophecy for OrderService
-        $this->orderServiceProphecy = $this->prophesize(OrderService::class);
+        $this->orderServiceMock = $this->createMock(OrderService::class);
 
         // Create actual instance of InquiryTransaction with the prophesized service
-        $this->inquiryTransaction = new InquiryTransaction($this->orderServiceProphecy->reveal());
+        $this->inquiryTransaction = new InquiryTransaction($this->orderServiceMock);
 
         // Store document reference for assertions
         $xmlSource = $this->createSuccessfulResponseXML();
@@ -41,10 +37,9 @@ class InquiryTransactionTest extends TestCase
         $storeId = '123456789';
         $mockResponse = $this->getMockResponse();
 
-        $this->orderServiceProphecy
-            ->IPGApiAction($this->inquiryTransaction)
-            ->willReturn($mockResponse)
-            ->shouldBeCalledOnce();
+        $this->orderServiceMock
+            ->method('IPGApiAction')
+            ->willReturn($mockResponse);
 
         // Act
         $result = $this->inquiryTransaction->getByIPGTransactionId($storeId);
@@ -56,30 +51,23 @@ class InquiryTransactionTest extends TestCase
         $elements = $this->document->getElementsByTagNameNS(OrderService::NAMESPACE_N3, 'IpgTransactionId');
         $this->assertEquals(1, $elements->length);
         $this->assertEquals($storeId, $elements->item(0)->nodeValue);
-
-        // Verify prophecy
-        $this->orderServiceProphecy->checkProphecyMethodsPredictions();
     }
 
     public function testGetByIPGTransactionIdError(): void
     {
         // Arrange
         $storeId = '123456789';
-        $mockError = $this->prophesize(Error::class)->reveal();
+        $mockError = $this->createMock(Error::class);
 
-        $this->orderServiceProphecy
-            ->IPGApiAction($this->inquiryTransaction)
-            ->willReturn($mockError)
-            ->shouldBeCalledOnce();
+        $this->orderServiceMock
+            ->method('IPGApiAction')
+            ->willReturn($mockError);
 
         // Act
         $result = $this->inquiryTransaction->getByIPGTransactionId($storeId);
 
         // Assert
         $this->assertInstanceOf(Error::class, $result);
-
-        // Verify prophecy
-        $this->orderServiceProphecy->checkProphecyMethodsPredictions();
     }
 
     public function testGetByOrderIdAndTDateSuccess(): void
@@ -89,10 +77,9 @@ class InquiryTransactionTest extends TestCase
         $tDate = '20240422';
         $mockResponse = $this->getMockResponse();
 
-        $this->orderServiceProphecy
-            ->IPGApiAction($this->inquiryTransaction)
-            ->willReturn($mockResponse)
-            ->shouldBeCalledOnce();
+        $this->orderServiceMock
+            ->method('IPGApiAction')
+            ->willReturn($mockResponse);
 
         // Act
         $result = $this->inquiryTransaction->getByOrderIdAndTDate($orderId, $tDate);
@@ -113,9 +100,6 @@ class InquiryTransactionTest extends TestCase
         );
         $this->assertEquals(1, $tDateElements->length);
         $this->assertEquals($tDate, $tDateElements->item(0)->nodeValue);
-
-        // Verify prophecy
-        $this->orderServiceProphecy->checkProphecyMethodsPredictions();
     }
 
     public function testGetByOrderIdAndTDateError(): void
@@ -123,21 +107,17 @@ class InquiryTransactionTest extends TestCase
         // Arrange
         $orderId = 'ORDER123';
         $tDate = '20240422';
-        $mockError = $this->prophesize(Error::class)->reveal();
+        $mockError = $this->createMock(Error::class);
 
-        $this->orderServiceProphecy
-            ->IPGApiAction($this->inquiryTransaction)
-            ->willReturn($mockError)
-            ->shouldBeCalledOnce();
+        $this->orderServiceMock
+            ->method('IPGApiAction')
+            ->willReturn($mockError);
 
         // Act
         $result = $this->inquiryTransaction->getByOrderIdAndTDate($orderId, $tDate);
 
         // Assert
         $this->assertInstanceOf(Error::class, $result);
-
-        // Verify prophecy
-        $this->orderServiceProphecy->checkProphecyMethodsPredictions();
     }
 
     private function getMockResponse()

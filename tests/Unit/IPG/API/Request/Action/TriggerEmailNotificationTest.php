@@ -2,7 +2,7 @@
 
 namespace OxidSolutionCatalysts\TeleCash\IPG\API\Request\Action;
 
-use Prophecy\Prophet;
+use OxidSolutionCatalysts\TeleCash\IPG\API\Service\OrderService;
 
 class TriggerEmailNotificationTest extends \PHPUnit\Framework\TestCase
 {
@@ -15,11 +15,11 @@ class TriggerEmailNotificationTest extends \PHPUnit\Framework\TestCase
      */
     public function testXMLDataCreation(string $orderId, string $tDate, string|null $email = null)
     {
-        $prophet = new Prophet();
-        $orderService  = $prophet->prophesize('OxidSolutionCatalysts\TeleCash\IPG\API\Service\OrderService');
+
+        $orderService = $this->createMock(OrderService::class);
 
         $triggerEmailNotification = new TriggerEmailNotification(
-            $orderService->reveal(),
+            $orderService,
             $orderId,
             $tDate,
             $email

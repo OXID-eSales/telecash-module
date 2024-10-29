@@ -20,9 +20,16 @@ class CreditCardDataTest extends \PHPUnit\Framework\TestCase
     {
         $ccData   = new CreditCardData($ccNumber, $validMonth, $validYear);
         $document = new \DOMDocument('1.0', 'UTF-8');
+
+        $ccData->setNamespaceShort('test');
         $xml      = $ccData->getXML($document);
         $document->appendChild($xml);
+        $elementCCData = $document->getElementsByTagName('test:CreditCardData');
+        $this->assertEquals(1, $elementCCData->length, 'Expected "test" element CreditCardData not found');
 
+        $ccData->setNamespaceShort('ns2');
+        $xml      = $ccData->getXML($document);
+        $document->appendChild($xml);
         $elementCCData = $document->getElementsByTagName('ns2:CreditCardData');
         $this->assertEquals(1, $elementCCData->length, 'Expected element CreditCardData not found');
 
@@ -42,6 +49,11 @@ class CreditCardDataTest extends \PHPUnit\Framework\TestCase
         $this->assertEquals($validMonth, $children['ns1:ExpMonth'], 'Valid month did not match');
         $this->assertArrayHasKey('ns1:ExpYear', $children, 'Expected element ExpYear not found');
         $this->assertEquals($validYear, $children['ns1:ExpYear'], 'Valid year did not match');
+    }
+
+    public function testSetNamespaceShort()
+    {
+        $ccData   = new CreditCardData('12345678', '12', '30');
     }
 
     /**

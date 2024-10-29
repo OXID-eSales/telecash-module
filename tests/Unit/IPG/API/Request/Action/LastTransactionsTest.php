@@ -7,20 +7,17 @@ use OxidSolutionCatalysts\TeleCash\IPG\API\Response\Action\Validation;
 use OxidSolutionCatalysts\TeleCash\IPG\API\Service\OrderService;
 use PHPUnit\Framework\TestCase;
 use Prophecy\PhpUnit\ProphecyTrait;
-use Prophecy\Prophecy\ObjectProphecy;
 
 class LastTransactionsTest extends TestCase
 {
-    use ProphecyTrait;
-
-    private ObjectProphecy $orderServiceProphecy;
+    private OrderService $orderServiceMock;
 
     protected function setUp(): void
     {
         parent::setUp();
 
         // Create prophecy for OrderService
-        $this->orderServiceProphecy = $this->prophesize(OrderService::class);
+        $this->orderServiceMock = $this->createMock(OrderService::class);
     }
 
     public function testWithOrderId(): void
@@ -28,12 +25,11 @@ class LastTransactionsTest extends TestCase
         $orderId = '123';
 
         $mockResponse = $this->getMockResponse();
-        $lastTransactions = new LastTransactions($this->orderServiceProphecy->reveal(), 10, $orderId);
+        $lastTransactions = new LastTransactions($this->orderServiceMock, 10, $orderId);
 
-        $this->orderServiceProphecy
-            ->IPGApiAction($lastTransactions)
-            ->willReturn($mockResponse)
-            ->shouldBeCalledOnce();
+        $this->orderServiceMock
+            ->method('IPGApiAction')
+            ->willReturn($mockResponse);
 
         $result = $lastTransactions->get();
 
@@ -47,12 +43,11 @@ class LastTransactionsTest extends TestCase
         $dtTo = '2021-01-31';
 
         $mockResponse = $this->getMockResponse();
-        $lastTransactions = new LastTransactions($this->orderServiceProphecy->reveal(), 10, null, $dtFrom, $dtTo);
+        $lastTransactions = new LastTransactions($this->orderServiceMock, 10, null, $dtFrom, $dtTo);
 
-        $this->orderServiceProphecy
-            ->IPGApiAction($lastTransactions)
-            ->willReturn($mockResponse)
-            ->shouldBeCalledOnce();
+        $this->orderServiceMock
+            ->method('IPGApiAction')
+            ->willReturn($mockResponse);
 
         $result = $lastTransactions->get();
 

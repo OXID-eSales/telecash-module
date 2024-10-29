@@ -292,7 +292,9 @@ class Sell extends AbstractResponse
         $this->brand                    = $this->firstElementByTagNSString(
             $responseDoc,
             OrderService::NAMESPACE_N3,
-            'Brand'
+            'Brand',
+            true,
+            ''
         );
         $this->orderId                  = $this->firstElementByTagNSString(
             $responseDoc,

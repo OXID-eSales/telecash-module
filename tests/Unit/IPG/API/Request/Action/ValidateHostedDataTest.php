@@ -3,49 +3,70 @@
 namespace OxidSolutionCatalysts\TeleCash\IPG\API\Request\Action;
 
 use OxidSolutionCatalysts\TeleCash\IPG\API\Model\Payment;
-use Prophecy\Prophet;
+use OxidSolutionCatalysts\TeleCash\IPG\API\Service\OrderService;
 
 /**
- * Test case for Request/Action/ValidateHostedData
+ * Test class for ValidateHostedData request action
+ *
+ * Validates the XML generation for validating stored payment data
+ * in the TeleCash system.
  */
 class ValidateHostedDataTest extends \PHPUnit\Framework\TestCase
 {
     /**
-     * @param Payment $payment
+     * Tests the XML generation for the ValidateHostedData request
      *
+     * Verifies that:
+     * 1. The Validate element exists
+     * 2. The Payment information is properly included
+     * 3. The XML structure meets the required format
+     *
+     * @param Payment $payment The payment information to validate
      * @dataProvider dataProvider
      */
-    public function testXMLGeneration($payment)
+    public function testXMLGeneration(Payment $payment): void
     {
-        $prophet = new Prophet();
-        $orderService  = $prophet->prophesize('OxidSolutionCatalysts\TeleCash\IPG\API\Service\OrderService');
+        // Create mock for order service
+        $orderService = $this->createMock(OrderService::class);
 
-        $validate = new ValidateHostedData($orderService->reveal(), $payment);
+        // Create and build the validate request
+        $validate = new ValidateHostedData($orderService, $payment);
         $document = $validate->getDocument();
         $document->appendChild($validate->getElement());
 
+        // Verify Validate element exists
         $elementValidate = $document->getElementsByTagName('ns2:Validate');
-        $this->assertEquals(1, $elementValidate->length, 'Expected element Validate not found');
+        $this->assertEquals(
+            1,
+            $elementValidate->length,
+            'XML must contain exactly one Validate element'
+        );
 
+        // Extract child elements for verification
         $children = [];
         /** @var \DOMNode $child */
         foreach ($elementValidate->item(0)->childNodes as $child) {
             $children[$child->nodeName] = $child->nodeValue;
         }
 
-        $this->assertArrayHasKey('ns1:Payment', $children, 'Expected element Payment not found');
-        //no need to further test Payment, as this is already covered in PaymentTest
+        // Verify Payment element presence
+        $this->assertArrayHasKey(
+            'ns1:Payment',
+            $children,
+            'Validate request must contain Payment element'
+        );
+        // Detailed Payment testing is covered in PaymentTest
     }
 
     /**
-     * Provides some test values
+     * Provides test data for validation request testing
      *
-     * @return array
+     * @return array Array of test cases with Payment objects
      */
-    public static function dataProvider()
+    public static function dataProvider(): array
     {
         return [
-            [new Payment('abc-def')]
+            [new Payment('abc-def')] // Basic payment test case
         ];
     }
 }

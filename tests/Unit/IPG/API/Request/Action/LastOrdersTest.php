@@ -6,21 +6,16 @@ use OxidSolutionCatalysts\TeleCash\IPG\API\Request\Action\LastOrders;
 use OxidSolutionCatalysts\TeleCash\IPG\API\Response\Action\Validation;
 use OxidSolutionCatalysts\TeleCash\IPG\API\Service\OrderService;
 use PHPUnit\Framework\TestCase;
-use Prophecy\PhpUnit\ProphecyTrait;
-use Prophecy\Prophecy\ObjectProphecy;
 
 class LastOrdersTest extends TestCase
 {
-    use ProphecyTrait;
-
-    private ObjectProphecy $orderServiceProphecy;
+    private OrderService $orderServiceMock;
 
     protected function setUp(): void
     {
         parent::setUp();
 
-        // Create prophecy for OrderService
-        $this->orderServiceProphecy = $this->prophesize(OrderService::class);
+        $this->orderServiceMock = $this->createMock(OrderService::class);
     }
 
     public function testWithOrderId(): void
@@ -28,12 +23,11 @@ class LastOrdersTest extends TestCase
         $orderId = '123';
 
         $mockResponse = $this->getMockResponse();
-        $lastOrders = new LastOrders($this->orderServiceProphecy->reveal(), 10, $orderId);
+        $lastOrders = new LastOrders($this->orderServiceMock, 10, $orderId);
 
-        $this->orderServiceProphecy
-            ->IPGApiAction($lastOrders)
-            ->willReturn($mockResponse)
-            ->shouldBeCalledOnce();
+        $this->orderServiceMock
+            ->method('IPGApiAction')
+            ->willReturn($mockResponse);
 
         $result = $lastOrders->get();
 
@@ -48,17 +42,16 @@ class LastOrdersTest extends TestCase
 
         $mockResponse = $this->getMockResponse();
         $lastOrders = new LastOrders(
-            $this->orderServiceProphecy->reveal(),
+            $this->orderServiceMock,
             10,
             null,
             $dtFrom,
             $dtTo
         );
 
-        $this->orderServiceProphecy
-            ->IPGApiAction($lastOrders)
-            ->willReturn($mockResponse)
-            ->shouldBeCalledOnce();
+        $this->orderServiceMock
+            ->method('IPGApiAction')
+            ->willReturn($mockResponse);
 
         $result = $lastOrders->get();
 

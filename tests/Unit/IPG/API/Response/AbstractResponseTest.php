@@ -5,16 +5,17 @@ namespace OxidSolutionCatalysts\TeleCash\Tests\Unit\IPG\API\Response;
 use OxidSolutionCatalysts\TeleCash\IPG\API\AbstractResponse;
 use PHPUnit\Framework\TestCase;
 use ReflectionClass;
-use Prophecy\Prophet;
 
+/**
+ * Class AbstractResponseTest
+ */
 class AbstractResponseTest extends TestCase
 {
     private $abstractResponse;
 
     protected function setUp(): void
     {
-        $prophet = new Prophet();
-        $this->abstractResponse = $prophet->prophesize(AbstractResponse::class)->reveal();
+        $this->abstractResponse = $this->createMock(AbstractResponse::class);
     }
 
     public function testFirstElementByTagNSString()
@@ -27,8 +28,13 @@ class AbstractResponseTest extends TestCase
         $method->setAccessible(true);
 
         $result = $method->invokeArgs($this->abstractResponse, [$doc, 'http://example.com', 'element']);
-
         $this->assertEquals('Test', $result);
+
+        $result = $method->invokeArgs(
+            $this->abstractResponse,
+            [$doc, 'http://example.com', 'nonexistentelement', true, 'default']
+        );
+        $this->assertEquals('default', $result);
     }
 
     public function testFirstElementByTagNSStringThrowsException()
