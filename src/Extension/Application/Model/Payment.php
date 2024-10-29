@@ -88,7 +88,7 @@ class Payment extends Payment_parent
      *
      * @return bool True if it's a TeleCash payment, false otherwise.
      */
-    private function isTeleCashPayment(): bool
+    protected function isTeleCashPayment(): bool
     {
         $this->teleCashPayment = $this->getTeleCashPaymentModel();
         return $this->teleCashPayment && $this->teleCashPayment->loadByPaymentId($this->getId());
@@ -101,7 +101,7 @@ class Payment extends Payment_parent
      *
      * @return bool True if the TeleCash payment is valid, false otherwise.
      */
-    private function isValidTeleCashConfiguration(): bool
+    protected function isValidTeleCashConfiguration(): bool
     {
         return $this->moduleSettings->isValid();
     }
