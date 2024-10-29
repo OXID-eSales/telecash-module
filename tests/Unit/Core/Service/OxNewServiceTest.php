@@ -1,5 +1,12 @@
 <?php
 
+/**
+ * Copyright © OXID eSales AG. All rights reserved.
+ * See LICENSE file for license details.
+ */
+
+declare(strict_types=1);
+
 namespace OxidSolutionCatalysts\TeleCash\Tests\Unit\Core\Service;
 
 use OxidSolutionCatalysts\TeleCash\Core\Service\OxNewService;
