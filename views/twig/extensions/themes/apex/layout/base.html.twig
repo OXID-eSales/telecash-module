@@ -1,0 +1,11 @@
+{% extends 'layout/base.html.twig' %}
+
+{% block base_js %}
+    {{ parent() }}
+    {% if oViewConf.getTopActiveClassName()|lower=="order" %}
+        {{ script({ include: oViewConf.getModuleUrl(teleCashModuleId, 'src/js/telecash_order.js'), priority: 10, dynamic: __oxid_include_dynamic }) }}
+{% endblock %}
+
+{% block base_css %}
+    {{ parent() }}
+{% endblock %}

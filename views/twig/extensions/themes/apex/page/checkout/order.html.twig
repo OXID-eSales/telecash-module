@@ -1,0 +1,75 @@
+{% extends 'page/checkout/order.html.twig' %}
+
+{% block checkout_order_payment_method_desc %}
+    {{ parent() }}
+    <form class="needs-validation" novalidate>
+        <div class="row">
+            <!-- Card Number -->
+            <div class="col-12 mb-3">
+                <label for="ccNumber" class="form-label">{{ translate({ ident: "TELECASH_CC_NUMBER" suffix: "TELECASH_ASTERISK" }) }}</label>
+                <input type="text"
+                       class="form-control"
+                       id="ccNumber"
+                       name="ccNumber"
+                       pattern="[0-9]{13,19}"
+                       maxlength="19"
+                       placeholder="{{ translate({ ident: "TELECASH_CC_NUMBER_PLACEHOLDER" }) }}"
+                       required
+                       autocomplete="cc-number">
+                <div class="invalid-feedback">
+                    {{ translate({ ident: "TELECASH_CC_NUMBER_VALIDATE" }) }}
+                </div>
+            </div>
+
+            <!-- Expiry Date -->
+            <div class="col-md-6 mb-3">
+                <label for="ccExpiry" class="form-label">{{ translate({ ident: "TELECASH_CC_EXPIRYDATE" suffix: "TELECASH_ASTERISK" }) }}</label>
+                <input type="text"
+                       class="form-control"
+                       id="ccExpiry"
+                       name="ccExpiry"
+                       pattern="(0[1-9]|1[0-2])\/([0-9]{2})"
+                       placeholder="{{ translate({ ident: "TELECASH_CC_EXPIRYDATE_PLACEHOLDER" }) }}"
+                       maxlength="5"
+                       required
+                       autocomplete="cc-exp">
+                <div class="invalid-feedback">
+                    {{ translate({ ident: "TELECASH_CC_EXPIRYDATE_VALIDATE" }) }}
+                </div>
+            </div>
+
+            <!-- CVC/CVV -->
+            <div class="col-md-6 mb-3">
+                <label for="ccCVC" class="form-label">{{ translate({ ident: "TELECASH_CC_CVC" suffix: "TELECASH_ASTERISK" }) }}</label>
+                <input type="text"
+                       class="form-control"
+                       id="ccCVC"
+                       name="ccCVC"
+                       pattern="[0-9]{3,4}"
+                       placeholder="{{ translate({ ident: "TELECASH_CC_CVC_PLACEHOLDER" }) }}"
+                       maxlength="4"
+                       required
+                       autocomplete="cc-csc">
+                <div class="invalid-feedback">
+                    {{ translate({ ident: "TELECASH_CC_CVC_VALIDATE" }) }}
+                </div>
+            </div>
+
+            <!-- Cardholder Name -->
+            <div class="col-12 mb-3">
+                <label for="ccName" class="form-label">{{ translate({ ident: "TELECASH_CC_HOLDERNAME" suffix: "TELECASH_ASTERISK" }) }}Cardholder Name *</label>
+                <input type="text"
+                       class="form-control"
+                       id="ccName"
+                       name="ccName"
+                       required
+                       autocomplete="cc-name"
+                       placeholder="{{ translate({ ident: "TELECASH_CC_HOLDERNAME_PLACEHOLDER" }) }}">
+                <div class="invalid-feedback">
+                    {{ translate({ ident: "TELECASH_CC_HOLDERNAME_VALIDATE" }) }}
+                    Please enter the cardholder name.
+                </div>
+            </div>
+        </div>
+    </form>
+{% endblock %}

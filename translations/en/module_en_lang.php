@@ -8,7 +8,22 @@
 declare(strict_types=1);
 
 $aLang = [
-    'charset'                   => 'UTF-8',
+    'charset' => 'UTF-8',
 
-    'TELECASHPAYMENT_EXISTS_FAIL' => 'The Telecash payment method could not be saved with the Telecash Ident and the Capture type. It already exists.'
+    'TELECASHPAYMENT_EXISTS_FAIL' => 'The Telecash payment method could not be saved with the Telecash Ident and the Capture type. It already exists.',
+
+    'TELECASH_ASTERISK'                  => '*',
+    'TELECASH_CC_NUMBER'                 => 'Card Number',
+    'TELECASH_CC_NUMBER_VALIDATE'        => 'Please enter a valid credit card number.',
+    'TELECASH_CC_NUMBER_PLACEHOLDER'     => 'xxxx xxxx xxxx xxxx',
+    'TELECASH_CC_EXPIRYDATE'             => 'Expiry Date',
+    'TELECASH_CC_EXPIRYDATE_VALIDATE'    => 'Please enter a valid expiry date.',
+    'TELECASH_CC_EXPIRYDATE_PLACEHOLDER' => 'MM/YY',
+    'TELECASH_CC_CVC'                    => 'CVC/CVV',
+    'TELECASH_CC_CVC_VALIDATE'           => 'Please enter a valid security code.',
+    'TELECASH_CC_CVC_PLACEHOLDER'        => 'xxx',
+    'TELECASH_CC_HOLDERNAME'             => 'Cardholder Name',
+    'TELECASH_CC_HOLDERNAME_VALIDATE'    => 'Please enter the cardholder name.',
+    'TELECASH_CC_HOLDERNAME_PLACEHOLDER' => 'Name as shown on card',
+
 ];
