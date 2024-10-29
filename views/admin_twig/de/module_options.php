@@ -9,16 +9,24 @@ declare(strict_types=1);
 
 use OxidSolutionCatalysts\TeleCash\Settings\Service\ModuleFileSettingsServiceInterface;
 use OxidSolutionCatalysts\TeleCash\Settings\Service\ModuleSettingsServiceInterface;
+use OxidSolutionCatalysts\TeleCash\Core\Module;
 
 $aLang = [
     'charset' => 'UTF-8',
 
     # Module settings
-    'SHOP_MODULE_GROUP_osctelecash_api' => 'API',
+    'SHOP_MODULE_GROUP_' . ModuleSettingsServiceInterface::MODULE_CONFIG_API_VARGROUP   => 'API',
+    'SHOP_MODULE_GROUP_' . ModuleSettingsServiceInterface::MODULE_CONFIG_DEBUG_VARGROUP => 'Fehleranalyse',
 
     'SHOP_MODULE_' . ModuleSettingsServiceInterface::API_MODE                                                          => 'API-Modus',
     'SHOP_MODULE_' . ModuleSettingsServiceInterface::API_MODE . '_' . ModuleSettingsServiceInterface::API_MODE_LIVE    => 'Live',
     'SHOP_MODULE_' . ModuleSettingsServiceInterface::API_MODE . '_' . ModuleSettingsServiceInterface::API_MODE_SANDBOX => 'Sandbox',
+
+    'SHOP_MODULE_' . ModuleSettingsServiceInterface::LOG_LEVEL                                                         => 'Logging',
+    'SHOP_MODULE_' . ModuleSettingsServiceInterface::LOG_LEVEL . '_' . ModuleSettingsServiceInterface::LOG_LEVEL_ERROR => 'Error',
+    'SHOP_MODULE_' . ModuleSettingsServiceInterface::LOG_LEVEL . '_' . ModuleSettingsServiceInterface::LOG_LEVEL_INFO  => 'Info',
+    'SHOP_MODULE_' . ModuleSettingsServiceInterface::LOG_LEVEL . '_' . ModuleSettingsServiceInterface::LOG_LEVEL_DEBUG => 'Debug',
+    'HELP_SHOP_MODULE_' . ModuleSettingsServiceInterface::LOG_LEVEL                                                    => 'Im TeleCash-Modul werden an verschiedenen Stellen Daten gesammelt. Je nach Logger-Level werden nur Fehler (Error) oder Fehler und Informationen (Info) oder Fehler, Informationen und ausführliche Informationen (Debug) in eine Log-Datei geschrieben. Die Log-Datei befindet sich auf dem Server unter source/logs/' . Module::MODULE_ID,
 
     'SHOP_MODULE_' . ModuleSettingsServiceInterface::STORE_ID                             => 'Shop-ID',
     'HELP_SHOP_MODULE_' . ModuleSettingsServiceInterface::STORE_ID                        => 'Ihre Shop-ID (z.B. 10012345678), die für die Basis-Authentifizierung erforderlich ist.',

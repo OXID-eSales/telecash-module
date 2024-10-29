@@ -70,7 +70,7 @@ $aModule = [
             'name'  => ModuleSettingsServiceInterface::STORE_ID,
             'type'  => 'str',
             'value' => '',
-    ],
+        ],
         [
             'group' => ModuleSettingsServiceInterface::MODULE_CONFIG_API_VARGROUP,
             'name'  => ModuleSettingsServiceInterface::USER_ID,
@@ -94,6 +94,16 @@ $aModule = [
             'name'  => ModuleSettingsServiceInterface::CLIENT_CERT_PRIVATEKEY_PASSWORD,
             'type'  => 'str',
             'value' => '',
+        ],
+        [
+            'group'       => ModuleSettingsServiceInterface::MODULE_CONFIG_DEBUG_VARGROUP,
+            'name'        => ModuleSettingsServiceInterface::LOG_LEVEL,
+            'type'        => 'select',
+            'constraints' => ModuleSettingsServiceInterface::LOG_LEVEL_ERROR . '|' .
+                ModuleSettingsServiceInterface::LOG_LEVEL_INFO. '|' .
+                ModuleSettingsServiceInterface::LOG_LEVEL_DEBUG,
+            'value'       => ModuleSettingsServiceInterface::LOG_LEVEL_ERROR
+
         ],
         // these options are hidden, so the group is null
         [

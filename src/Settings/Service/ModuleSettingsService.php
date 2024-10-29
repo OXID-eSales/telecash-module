@@ -17,14 +17,6 @@ use OxidSolutionCatalysts\TeleCash\Core\Module;
  */
 class ModuleSettingsService implements ModuleSettingsServiceInterface
 {
-    /**
-     * possible API-Modes
-     */
-    public const API_MODE_VALUES = [
-        self::API_MODE_LIVE,
-        self::API_MODE_SANDBOX,
-    ];
-
     public function __construct(
         private readonly ModuleSettingServiceInterface $moduleSettingService,
         private readonly ModuleFileSettingsServiceInterface $moduleFileSettingsService
@@ -161,5 +153,23 @@ class ModuleSettingsService implements ModuleSettingsServiceInterface
     public function saveClientCertificatePrivateKeyPassword(string $value): void
     {
         $this->moduleSettingService->saveString(self::CLIENT_CERT_PRIVATEKEY_PASSWORD, $value, Module::MODULE_ID);
+    }
+
+    /**
+     * get the actual saved TeleCash LogLevel
+     */
+    public function getLogLevel(): string
+    {
+        $value = (string)$this->moduleSettingService->getString(self::LOG_LEVEL, Module::MODULE_ID);
+
+        return (!empty($value) && array_key_exists($value, self::TELECASH_LOG_LEVELS)) ? $value : self::LOG_LEVEL_ERROR;
+    }
+
+    /**
+     * save the TeleCash LogLevel
+     */
+    public function saveLogLevel(string $value): void
+    {
+        $this->moduleSettingService->saveString(self::LOG_LEVEL, $value, Module::MODULE_ID);
     }
 }
