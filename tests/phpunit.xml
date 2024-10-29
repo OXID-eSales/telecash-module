@@ -21,7 +21,7 @@
     </testsuites>
     <coverage>
         <report>
-            <clover outputFile="tests/Reports/coverage_unit_osc_telecash.xml"/>
+            <clover outputFile="Reports/coverage_unit_osc_telecash.xml"/>
         </report>
         <include>
             <directory suffix=".php">../src</directory>
