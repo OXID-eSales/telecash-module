@@ -7,7 +7,7 @@
 
 declare(strict_types=1);
 
-namespace OxidSolutionCatalysts\TeleCash\Tests\Settings\Service;
+namespace OxidSolutionCatalysts\TeleCash\Tests\Unit\Settings\Service;
 
 use OxidEsales\EshopCommunity\Internal\Framework\Module\Facade\ModuleSettingService;
 use OxidSolutionCatalysts\TeleCash\Core\Module;
