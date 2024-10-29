@@ -26,8 +26,23 @@ class ModuleSettingsService implements ModuleSettingsServiceInterface
     ];
 
     public function __construct(
-        private readonly ModuleSettingServiceInterface $moduleSettingService
+        private readonly ModuleSettingServiceInterface $moduleSettingService,
+        private readonly ModuleFileSettingsServiceInterface $moduleFileSettingsService
     ) {
+    }
+
+    /**
+     * if true is it a complete configuration
+     */
+    public function isValid(): bool
+    {
+        return $this->getStoreId()
+            && $this->getBasicAuthPassword()
+            && $this->getClientCertificateInstallationPassword()
+            && $this->getClientCertificatePrivateKeyPassword()
+            && $this->moduleFileSettingsService->checkClientCertificateP12FileExists()
+            && $this->moduleFileSettingsService->checkClientCertificatePrivateKeyFileExists()
+            && $this->moduleFileSettingsService->checkTrustAnchorPEMFileExists();
     }
 
     /**

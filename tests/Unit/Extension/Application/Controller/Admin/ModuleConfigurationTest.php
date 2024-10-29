@@ -4,10 +4,8 @@ namespace OxidSolutionCatalysts\TeleCash\Tests\Unit\Extension\Application\Contro
 
 use OxidSolutionCatalysts\TeleCash\Extension\Application\Controller\Admin\ModuleConfiguration;
 use OxidSolutionCatalysts\TeleCash\Core\Service\RegistryService;
-use OxidSolutionCatalysts\TeleCash\Settings\Service\ModuleFileSettingsService;
 use OxidSolutionCatalysts\TeleCash\Settings\Service\ModuleFileSettingsServiceInterface;
 use PHPUnit\Framework\TestCase;
-use Symfony\Component\HttpFoundation\File\UploadedFile;
 
 class ModuleConfigurationTest extends TestCase
 {
@@ -17,7 +15,7 @@ class ModuleConfigurationTest extends TestCase
 
     protected function setUp(): void
     {
-        $this->moduleConfiguration = $this->createMock(ModuleConfiguration::class);
+        $this->moduleConfiguration = $this->createPartialMock(ModuleConfiguration::class, []);
         $this->registryService = $this->createMock(RegistryService::class);
         $this->fileSettingsService = $this->createMock(ModuleFileSettingsServiceInterface::class);
     }

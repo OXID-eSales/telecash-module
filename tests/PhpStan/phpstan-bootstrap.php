@@ -8,9 +8,30 @@
 declare(strict_types=1);
 
 use OxidEsales\Eshop\Application\Controller\Admin\ModuleConfiguration;
+use OxidEsales\Eshop\Application\Controller\Admin\PaymentMain;
+use OxidEsales\Eshop\Application\Model\Payment;
+use OxidEsales\Eshop\Application\Model\PaymentList;
 use OxidSolutionCatalysts\TeleCash\Extension\Application\Controller\Admin\ModuleConfiguration_parent;
+use OxidSolutionCatalysts\TeleCash\Extension\Application\Controller\Admin\PaymentMain_parent;
+use OxidSolutionCatalysts\TeleCash\Extension\Application\Model\Payment_parent;
+use OxidSolutionCatalysts\TeleCash\Extension\Application\Model\PaymentList_parent;
 
 class_alias(
     ModuleConfiguration::class,
     ModuleConfiguration_parent::class
+);
+
+class_alias(
+    Payment::class,
+    Payment_parent::class
+);
+
+class_alias(
+    PaymentList::class,
+    PaymentList_parent::class
+);
+
+class_alias(
+    PaymentMain::class,
+    PaymentMain_parent::class
 );

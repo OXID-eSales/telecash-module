@@ -90,15 +90,6 @@ class ModuleFileSettingsTest extends TestCase
                 'settingName'       => ModuleFileSettingsServiceInterface::CLIENT_CERT_PRIVATEKEY_FILE,
                 'filename'          => 'test.key',
             ],
-            'PEM' => [
-                'storeMethod'       => 'storeClientCertificatePEMFile',
-                'deleteMethod'      => 'deleteClientCertificatePEMFile',
-                'checkExistsMethod' => 'checkClientCertificatePEMFileExists',
-                'getNameMethod'     => 'getClientCertificatePEMFileName',
-                'getPathMethod'     => 'getClientCertificatePEMFilePath',
-                'settingName'       => ModuleFileSettingsServiceInterface::CLIENT_CERT_PEM_FILE,
-                'filename'          => 'test.pem',
-            ],
             'TrustAnchor' => [
                 'storeMethod'       => 'storeTrustAnchorPEMFile',
                 'deleteMethod'      => 'deleteTrustAnchorPEMFile',

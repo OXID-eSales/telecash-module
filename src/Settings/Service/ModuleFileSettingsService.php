@@ -39,21 +39,18 @@ class ModuleFileSettingsService implements ModuleFileSettingsServiceInterface
     public const TELECASH_STORE_METHODS = [
         self::CLIENT_CERT_P12_FILE        => 'storeClientCertificateP12File',
         self::CLIENT_CERT_PRIVATEKEY_FILE => 'storeClientCertificatePrivateKeyFile',
-        self::CLIENT_CERT_PEM_FILE        => 'storeClientCertificatePEMFile',
         self::TRUST_ANCHOR_PEM_FILE       => 'storeTrustAnchorPEMFile',
     ];
 
     public const TELECASH_GET_FILENAME_METHODS = [
         self::CLIENT_CERT_P12_FILE        => 'getClientCertificateP12FileName',
         self::CLIENT_CERT_PRIVATEKEY_FILE => 'getClientCertificatePrivateKeyFileName',
-        self::CLIENT_CERT_PEM_FILE        => 'getClientCertificatePEMFileName',
         self::TRUST_ANCHOR_PEM_FILE       => 'getTrustAnchorPEMFileName',
     ];
 
     public const TELECASH_DELETE_METHODS = [
         self::CLIENT_CERT_P12_FILE        => 'deleteClientCertificateP12File',
         self::CLIENT_CERT_PRIVATEKEY_FILE => 'deleteClientCertificatePrivateKeyFile',
-        self::CLIENT_CERT_PEM_FILE        => 'deleteClientCertificatePEMFile',
         self::TRUST_ANCHOR_PEM_FILE       => 'deleteTrustAnchorPEMFile',
     ];
 
@@ -304,58 +301,6 @@ class ModuleFileSettingsService implements ModuleFileSettingsServiceInterface
     public function deleteClientCertificatePrivateKeyFile(): bool
     {
         return $this->deleteFile(self::CLIENT_CERT_PRIVATEKEY_FILE);
-    }
-
-    /**
-     * Store the uploaded Client Certificate PEM File.
-     *
-     * @param UploadedFile $file The uploaded PEM file
-     * @throws RuntimeException If there's an error storing the file
-     */
-    public function storeClientCertificatePEMFile(UploadedFile $file): void
-    {
-        $this->storeUploadedFile($file, self::CLIENT_CERT_PEM_FILE);
-    }
-
-    /**
-     * Check if the Client Certificate PEM File exists.
-     *
-     * @return bool True if the file exists, false otherwise
-     */
-    public function checkClientCertificatePEMFileExists(): bool
-    {
-        return $this->checkFileExists(self::CLIENT_CERT_PEM_FILE);
-    }
-
-    /**
-     * Get the name of to the Client Certificate PEM File.
-     *
-     * @return string The name of the PEM file
-     */
-    public function getClientCertificatePEMFileName(): string
-    {
-        return (string)$this->moduleSettingService->getString(self::CLIENT_CERT_PEM_FILE, Module::MODULE_ID);
-    }
-
-    /**
-     * Get the path to the Client Certificate PEM File.
-     *
-     * @return string The full path to the PEM file
-     * @throws RuntimeException If no PEM file has been stored
-     */
-    public function getClientCertificatePEMFilePath(): string
-    {
-        return $this->getFilePath(self::CLIENT_CERT_PEM_FILE);
-    }
-
-    /**
-     * Deletes the Client Certificate PEM file and resets the configuration.
-     *
-     * @return bool True, if deleted successfully, otherwise false
-     */
-    public function deleteClientCertificatePEMFile(): bool
-    {
-        return $this->deleteFile(self::CLIENT_CERT_PEM_FILE);
     }
 
     /**
