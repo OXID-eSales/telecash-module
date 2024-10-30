@@ -2,6 +2,8 @@
 
 namespace OxidSolutionCatalysts\TeleCash\IPG\API\Request\Action;
 
+use OxidSolutionCatalysts\TeleCash\IPG\API\Exception\ActionValidationException;
+use OxidSolutionCatalysts\TeleCash\IPG\API\Exception\ServiceException;
 use OxidSolutionCatalysts\TeleCash\IPG\API\Model\DataStorageItem;
 use OxidSolutionCatalysts\TeleCash\IPG\API\Request\Action;
 use OxidSolutionCatalysts\TeleCash\IPG\API\Response\Action\Confirm;
@@ -33,7 +35,8 @@ class DeleteHostedData extends Action
 
     /**
      * @return Confirm|Error
-     * @throws \Exception
+     * @throws \DOMException
+     * @throws ServiceException|ActionValidationException
      */
     public function delete(): Confirm|Error
     {

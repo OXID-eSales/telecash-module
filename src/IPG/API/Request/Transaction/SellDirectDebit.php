@@ -2,6 +2,8 @@
 
 namespace OxidSolutionCatalysts\TeleCash\IPG\API\Request\Transaction;
 
+use OxidSolutionCatalysts\TeleCash\IPG\API\Exception\ActionValidationException;
+use OxidSolutionCatalysts\TeleCash\IPG\API\Exception\ServiceException;
 use OxidSolutionCatalysts\TeleCash\IPG\API\Model\BillingData;
 use OxidSolutionCatalysts\TeleCash\IPG\API\Model\DirectDebitData;
 use OxidSolutionCatalysts\TeleCash\IPG\API\Model\Payment;
@@ -53,7 +55,8 @@ class SellDirectDebit extends Transaction
 
     /**
      * @return OrderSell|Error
-     * @throws \Exception
+     * @throws \DOMException
+     * @throws ServiceException|ActionValidationException
      */
     public function sell(): OrderSell|Error
     {

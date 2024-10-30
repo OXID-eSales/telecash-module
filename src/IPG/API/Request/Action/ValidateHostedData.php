@@ -2,6 +2,8 @@
 
 namespace OxidSolutionCatalysts\TeleCash\IPG\API\Request\Action;
 
+use OxidSolutionCatalysts\TeleCash\IPG\API\Exception\ActionValidationException;
+use OxidSolutionCatalysts\TeleCash\IPG\API\Exception\ServiceException;
 use OxidSolutionCatalysts\TeleCash\IPG\API\Model\Payment;
 use OxidSolutionCatalysts\TeleCash\IPG\API\Request\Action;
 use OxidSolutionCatalysts\TeleCash\IPG\API\Response\Action\Validation;
@@ -32,7 +34,8 @@ class ValidateHostedData extends Action
 
     /**
      * @return Validation|Error
-     * @throws \Exception
+     * @throws \DOMException
+     * @throws ServiceException|ActionValidationException
      */
     public function validate(): Validation|Error
     {

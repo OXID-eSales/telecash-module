@@ -2,6 +2,8 @@
 
 namespace OxidSolutionCatalysts\TeleCash\IPG\API\Request\Transaction;
 
+use OxidSolutionCatalysts\TeleCash\IPG\API\Exception\ActionValidationException;
+use OxidSolutionCatalysts\TeleCash\IPG\API\Exception\ServiceException;
 use OxidSolutionCatalysts\TeleCash\IPG\API\Model\Payment;
 use OxidSolutionCatalysts\TeleCash\IPG\API\Model\TransactionDetails;
 use OxidSolutionCatalysts\TeleCash\IPG\API\Request\Transaction;
@@ -42,7 +44,8 @@ class SellHostedData extends Transaction
 
     /**
      * @return Sell|Error
-     * @throws \Exception
+     * @throws \DOMException
+     * @throws ServiceException|ActionValidationException
      */
     public function sell(): Sell|Error
     {

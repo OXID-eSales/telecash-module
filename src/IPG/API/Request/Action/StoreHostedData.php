@@ -2,6 +2,8 @@
 
 namespace OxidSolutionCatalysts\TeleCash\IPG\API\Request\Action;
 
+use OxidSolutionCatalysts\TeleCash\IPG\API\Exception\ActionConfirmException;
+use OxidSolutionCatalysts\TeleCash\IPG\API\Exception\ServiceException;
 use OxidSolutionCatalysts\TeleCash\IPG\API\Model\DataStorageItem;
 use OxidSolutionCatalysts\TeleCash\IPG\API\Request\Action;
 use OxidSolutionCatalysts\TeleCash\IPG\API\Response\Action\Confirm;
@@ -32,7 +34,9 @@ class StoreHostedData extends Action
 
     /**
      * @return Confirm|Error
-     * @throws \Exception
+     * @throws \DOMException
+     * @throws ServiceException
+     * @throws ActionConfirmException
      */
     public function store(): Confirm|Error
     {

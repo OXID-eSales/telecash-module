@@ -247,7 +247,6 @@ class Sell extends AbstractResponse
     /**
      * @param \DOMDocument $responseDoc
      *
-     * @throws \Exception
      */
     public function __construct(\DOMDocument $responseDoc)
     {

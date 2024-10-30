@@ -4,6 +4,7 @@ namespace OxidSolutionCatalysts\TeleCash\IPG\API\Response\Action;
 
 use OxidSolutionCatalysts\TeleCash\IPG\API\Response\Action;
 use OxidSolutionCatalysts\TeleCash\IPG\API\Service\OrderService;
+use OxidSolutionCatalysts\TeleCash\IPG\API\Exception\ActionConfirmException;
 
 /**
  * Class Confirm
@@ -13,7 +14,7 @@ class Confirm extends Action
     /**
      * @param \DOMDocument $responseDoc
      *
-     * @throws \Exception
+     * @throws ActionConfirmException
      */
     public function __construct(\DOMDocument $responseDoc)
     {
@@ -32,7 +33,7 @@ class Confirm extends Action
                 );
             }
         } else {
-            throw new \Exception("Call failed " . $responseDoc->saveXML());
+            throw new ActionConfirmException("Call failed " . $responseDoc->saveXML());
         }
     }
 }

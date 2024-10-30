@@ -3,6 +3,9 @@
 namespace OxidSolutionCatalysts\TeleCash\IPG\API\Service;
 
 use OxidSolutionCatalysts\TeleCash\IPG\API\AbstractRequest;
+use OxidSolutionCatalysts\TeleCash\IPG\API\Exception\OrderServiceException;
+use OxidSolutionCatalysts\TeleCash\IPG\API\Exception\SoapResponseException;
+use OxidSolutionCatalysts\TeleCash\IPG\API\Exception\ResponseException;
 use OxidSolutionCatalysts\TeleCash\IPG\API\Request\ActionRequest;
 use OxidSolutionCatalysts\TeleCash\IPG\API\Request\OrderRequest;
 use OxidSolutionCatalysts\TeleCash\IPG\API\Response\Error;
@@ -61,7 +64,7 @@ class OrderService extends SoapClientCurl
      * @param \DOMDocument $responseDoc
      *
      * @return Error|null
-     * @throws \Exception
+     * @throws SoapResponseException|ResponseException
      *
      * @SuppressWarnings(PHPMD.StaticAccess)
      */
@@ -75,7 +78,8 @@ class OrderService extends SoapClientCurl
      *
      * @return \DOMDocument|Error
      *
-     * @throws \Exception
+     * @throws OrderServiceException
+     * @throws \DOMException
      */
     private function soapCall(AbstractRequest $payload): \DOMDocument|Error
     {
@@ -107,17 +111,21 @@ class OrderService extends SoapClientCurl
         }
 
         if ($response === false) {
-            throw new \Exception($this->getErrorMessage());
+            throw new OrderServiceException($this->getErrorMessage());
         }
 
         if (empty($response)) {
-            throw new \Exception('Empty API response received');
+            throw new OrderServiceException('Empty API response received');
         }
 
         $responseDoc = new \DOMDocument('1.0', 'UTF-8');
         $responseDoc->loadXML($response);
 
-        $errorResponse = $this->checkForSoapFault($responseDoc);
+        try {
+            $errorResponse = $this->checkForSoapFault($responseDoc);
+        } catch (SoapResponseException | ResponseException $e) {
+            throw new OrderServiceException($e->getMessage());
+        }
 
         return $errorResponse !== null ? $errorResponse : $responseDoc;
     }
@@ -126,6 +134,7 @@ class OrderService extends SoapClientCurl
      * @param ActionRequest $actionRequest
      *
      * @return \DOMDocument|Error
+     * @throws OrderServiceException|\DOMException
      */
     public function IPGApiAction(ActionRequest $actionRequest): \DOMDocument|Error
     {
@@ -137,6 +146,7 @@ class OrderService extends SoapClientCurl
      * @param OrderRequest $orderRequest
      *
      * @return \DOMDocument|Error
+     * @throws OrderServiceException|\DOMException
      */
     public function IPGApiOrder(OrderRequest $orderRequest): \DOMDocument|Error
     {

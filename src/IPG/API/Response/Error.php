@@ -4,6 +4,8 @@ namespace OxidSolutionCatalysts\TeleCash\IPG\API\Response;
 
 use OxidSolutionCatalysts\TeleCash\IPG\API\AbstractResponse;
 use OxidSolutionCatalysts\TeleCash\IPG\API\Service\OrderService;
+use OxidSolutionCatalysts\TeleCash\IPG\API\Exception\SoapResponseException;
+use OxidSolutionCatalysts\TeleCash\IPG\API\Exception\ResponseException;
 
 /**
  * Class Error
@@ -81,7 +83,7 @@ class Error extends AbstractResponse
      * @param \DOMDocument $document
      *
      * @return Error|null
-     * @throws \Exception
+     * @throws SoapResponseException|ResponseException
      *
      * @SuppressWarnings(PHPMD.CyclomaticComplexity)
      */
@@ -143,7 +145,7 @@ class Error extends AbstractResponse
                             break;
 
                         default:
-                            throw new \Exception(
+                            throw new SoapResponseException(
                                 "Undefined SOAP Client Exception: " .
                                 $response->clientErrorType .
                                 ' (Complete SOAP Fault: ' .
@@ -154,7 +156,7 @@ class Error extends AbstractResponse
                     break;
 
                 default:
-                    throw new \Exception("Undefined SOAP Error: (" . $document->saveXML() . ")");
+                    throw new SoapResponseException("Undefined SOAP Error: (" . $document->saveXML() . ")");
             }
         }
 

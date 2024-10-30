@@ -2,7 +2,9 @@
 
 namespace OxidSolutionCatalysts\TeleCash\IPG\API\Response\Action;
 
+use OxidSolutionCatalysts\TeleCash\IPG\API\Exception\ActionValidationException;
 use OxidSolutionCatalysts\TeleCash\IPG\API\Service\OrderService;
+use OxidSolutionCatalysts\TeleCash\IPG\API\Exception\ResponseException;
 
 /**
  * Class ConfirmRecurring
@@ -23,7 +25,7 @@ class ConfirmRecurring extends Validation
     /**
      * @param \DOMDocument $responseDoc
      *
-     * @throws \Exception
+     * @throws ActionValidationException|ResponseException
      */
     public function __construct(\DOMDocument $responseDoc)
     {

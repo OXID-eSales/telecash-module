@@ -4,6 +4,8 @@ namespace OxidSolutionCatalysts\TeleCash\IPG\API\Response\Action;
 
 use OxidSolutionCatalysts\TeleCash\IPG\API\Response\Action;
 use OxidSolutionCatalysts\TeleCash\IPG\API\Service\OrderService;
+use OxidSolutionCatalysts\TeleCash\IPG\API\Exception\ActionDisplayException;
+use OxidSolutionCatalysts\TeleCash\IPG\API\Exception\ResponseException;
 
 /**
  * Class Display
@@ -52,7 +54,7 @@ class Display extends Action
     /**
      * @param \DOMDocument $responseDoc
      *
-     * @throws \Exception
+     * @throws ActionDisplayException|ResponseException
      */
     public function __construct(\DOMDocument $responseDoc)
     {
@@ -99,7 +101,7 @@ class Display extends Action
                 );
             }
         } else {
-            throw new \Exception("Display Call failed " . $responseDoc->saveXML());
+            throw new ActionDisplayException("Display Call failed " . $responseDoc->saveXML());
         }
     }
 }

@@ -18,9 +18,25 @@ class BillingDataTest extends TestCase
     {
         $document = new \DOMDocument();
         $xml = $this->billingData->getXML($document);
-
         $nameElement = $xml->getElementsByTagName('ns1:Name')->item(0);
         $this->assertEquals('Test Name', $nameElement->textContent);
+    }
+
+    public function testGettersAndSetters(): void
+    {
+        $this->billingData->firstName = 'John';
+        $this->assertEquals('John', $this->billingData->firstName);
+
+        $this->billingData->setMiddleName('Michael');
+        $this->assertEquals('Michael', $this->billingData->getMiddleName());
+
+        $this->assertNull($this->billingData->nonexistingProperty);
+    }
+
+    public function testNonexistentGetterThrowsException()
+    {
+        $this->expectException(\OxidSolutionCatalysts\TeleCash\IPG\API\Exception\PropertyNotExistsException::class);
+        $this->billingData->getNonexistingProperty();
     }
 
     public function testAllSettersAndXMLGeneration(): void

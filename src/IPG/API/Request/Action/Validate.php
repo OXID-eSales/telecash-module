@@ -9,6 +9,8 @@ use OxidSolutionCatalysts\TeleCash\IPG\API\Request\Action;
 use OxidSolutionCatalysts\TeleCash\IPG\API\Response\Error;
 use OxidSolutionCatalysts\TeleCash\IPG\API\Response\Action\Validation;
 use OxidSolutionCatalysts\TeleCash\IPG\API\Service\OrderService;
+use OxidSolutionCatalysts\TeleCash\IPG\API\Exception\ServiceException;
+use OxidSolutionCatalysts\TeleCash\IPG\API\Exception\ActionValidationException;
 
 /**
  * Class Validate
@@ -49,7 +51,8 @@ class Validate extends Action
 
     /**
      * @return Validation|Error
-     * @throws \Exception
+     * @throws \DOMException
+     * @throws ServiceException|ActionValidationException
      */
     public function validate(): Validation|Error
     {

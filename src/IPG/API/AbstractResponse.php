@@ -2,6 +2,8 @@
 
 namespace OxidSolutionCatalysts\TeleCash\IPG\API;
 
+use OxidSolutionCatalysts\TeleCash\IPG\API\Exception\ResponseException;
+
 /**
  * Class AbstractResponse
  */
@@ -14,7 +16,7 @@ abstract class AbstractResponse
      * @param bool $isOptional
      * @param string $default
      * @return string
-     * @throws \Exception
+     * @throws ResponseException
      */
     protected function firstElementByTagNSString(
         \DOMDocument $doc,
@@ -35,6 +37,6 @@ abstract class AbstractResponse
             return $default;
         }
 
-        throw new \Exception("Tag " . $namespace . ':' . $tagName . " not found");
+        throw new ResponseException("Tag " . $namespace . ':' . $tagName . " not found");
     }
 }

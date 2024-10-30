@@ -4,6 +4,8 @@ namespace OxidSolutionCatalysts\TeleCash\IPG\API\Response\Action;
 
 use OxidSolutionCatalysts\TeleCash\IPG\API\Response\Action;
 use OxidSolutionCatalysts\TeleCash\IPG\API\Service\OrderService;
+use OxidSolutionCatalysts\TeleCash\IPG\API\Exception\ActionValidationException;
+use OxidSolutionCatalysts\TeleCash\IPG\API\Exception\ResponseException;
 
 /**
  * Class Validation
@@ -13,7 +15,7 @@ class Validation extends Action
     /**
      * @param \DOMDocument $responseDoc
      *
-     * @throws \Exception
+     * @throws ActionValidationException|ResponseException
      */
     public function __construct(\DOMDocument $responseDoc)
     {
@@ -30,7 +32,7 @@ class Validation extends Action
                 );
             }
         } else {
-            throw new \Exception("Validate Call failed " . $responseDoc->saveXML());
+            throw new ActionValidationException("Validate Call failed " . $responseDoc->saveXML());
         }
     }
 }
