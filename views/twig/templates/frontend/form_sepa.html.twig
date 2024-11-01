@@ -1,0 +1,39 @@
+{% block form_sepa %}
+    <form class="needs-validation" novalidate data-payment-type="sepa">
+        <div class="row">
+            {% block form_sepa_iban %}
+                <!-- IBAN -->
+                <div class="col-12 mb-3">
+                    <label for="sepaIBAN" class="form-label">{{ translate({ ident: "TELECASH_SEPA_IBAN", suffix: "TELECASH_ASTERISK" }) }}</label>
+                    <input type="text"
+                           class="form-control"
+                           id="sepaIBAN"
+                           name="sepaIBAN"
+                           maxlength="34"
+                           placeholder="{{ translate({ ident: "TELECASH_SEPA_IBAN_PLACEHOLDER" }) }}"
+                           required
+                           autocomplete="off">
+                    <div class="invalid-feedback">
+                        {{ translate({ ident: "TELECASH_SEPA_IBAN_VALIDATE" }) }}
+                    </div>
+                </div>
+            {% endblock %}
+            {% block form_sepa_holder %}
+                <!-- Account Holder -->
+                <div class="col-12 mb-3">
+                    <label for="sepaHolder" class="form-label">{{ translate({ ident: "TELECASH_SEPA_HOLDERNAME", suffix: "TELECASH_ASTERISK" }) }}</label>
+                    <input type="text"
+                           class="form-control"
+                           id="sepaHolder"
+                           name="sepaHolder"
+                           required
+                           autocomplete="off"
+                           placeholder="{{ translate({ ident: "TELECASH_SEPA_HOLDERNAME_PLACEHOLDER" }) }}">
+                    <div class="invalid-feedback">
+                        {{ translate({ ident: "TELECASH_SEPA_HOLDERNAME_VALIDATE" }) }}
+                    </div>
+                </div>
+            {% endblock %}
+        </div>
+    </form>
+{% endblock %}
