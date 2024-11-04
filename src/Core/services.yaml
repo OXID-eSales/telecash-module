@@ -3,6 +3,14 @@ services:
     public: false
     autowire: true
 
+  OxidSolutionCatalysts\TeleCash\Core\Service\Logger:
+    class: OxidSolutionCatalysts\TeleCash\Core\Service\Logger
+    public: true
+
+  OxidSolutionCatalysts\TeleCash\Core\Service\Context:
+    class: OxidSolutionCatalysts\TeleCash\Core\Service\Context
+    public: true
+
   OxidSolutionCatalysts\TeleCash\Core\Service\OxNewService:
     class: OxidSolutionCatalysts\TeleCash\Core\Service\OxNewService
     public: true
@@ -18,3 +26,22 @@ services:
   OxidSolutionCatalysts\TeleCash\Core\Service\TeleCashPaymentValidatorServiceInterface:
     class: OxidSolutionCatalysts\TeleCash\Core\Service\TeleCashPaymentValidatorService
     public: true
+
+  OxidSolutionCatalysts\TeleCash\Logger:
+    class: Monolog\Logger
+    factory: ['@OxidSolutionCatalysts\TeleCash\Logger\Factory', 'create']
+    public: true
+
+  OxidSolutionCatalysts\TeleCash\Logger\Factory:
+    class: OxidEsales\EshopCommunity\Internal\Framework\Logger\Factory\MonologLoggerFactory
+    public: true
+    arguments:
+      $configuration: '@OxidSolutionCatalysts\TeleCash\Logger\Configuration'
+
+  OxidSolutionCatalysts\TeleCash\Logger\Configuration:
+    class: OxidEsales\EshopCommunity\Internal\Framework\Logger\Configuration\MonologConfiguration
+    public: true
+    arguments:
+      $loggerName: 'TeleCash Payment Logger'
+      $logFilePath: '@=service("OxidSolutionCatalysts\\TeleCash\\Core\\Service\\Context").getTeleCashLogFilePath()'
+      $logLevel: !php/const Psr\Log\LogLevel::DEBUG

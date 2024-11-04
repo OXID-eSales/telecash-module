@@ -1,0 +1,93 @@
+<?php
+
+/**
+ * Copyright © OXID eSales AG. All rights reserved.
+ * See LICENSE file for license details.
+ */
+
+declare(strict_types=1);
+
+namespace OxidSolutionCatalysts\TeleCash\Core\Service;
+
+use OxidEsales\Eshop\Core\Config;
+use OxidSolutionCatalysts\TeleCash\Core\Module;
+use Symfony\Component\Filesystem\Path;
+
+/**
+ * Context Service for TeleCash Module
+ *
+ * Provides context-specific functionality for the TeleCash module,
+ * particularly focused on file system operations and path management.
+ * Handles the configuration and creation of log file paths.
+ *
+ * Features:
+ * - Dynamic log file path generation
+ * - Integration with shop configuration
+ * - Date-based log file naming
+ * - Symfony Path component usage for cross-platform compatibility
+ */
+class Context
+{
+    /**
+     * Shop configuration instance
+     * Used for accessing shop-specific settings and directories
+     *
+     * @var Config
+     */
+    protected Config $shopConfig;
+
+    /**
+     * Initializes the context service with required dependencies
+     *
+     * @param Config $shopConfig Shop configuration instance providing access to shop settings
+     */
+    public function __construct(Config $shopConfig)
+    {
+        $this->shopConfig = $shopConfig;
+    }
+
+    /**
+     * Generates the full path for the TeleCash log file
+     *
+     * Creates a path by combining:
+     * - Shop's log directory (from configuration)
+     * - TeleCash-specific subdirectory
+     * - Date-based log filename
+     *
+     * Uses Symfony's Path component to ensure cross-platform compatibility
+     * of the generated paths.
+     *
+     * @SuppressWarnings(PHPMD.StaticAccess)
+     * @return string Absolute path to the log file
+     */
+    public function getTeleCashLogFilePath(): string
+    {
+        return Path::join(
+            $this->shopConfig->getLogsDir(),
+            Module::MODULE_ID,
+            $this->getTeleCashLogFileName()
+        );
+    }
+
+    /**
+     * Generates the log filename based on current date
+     *
+     * Creates a log filename in the format:
+     * osc_telecash_YYYY-MM-DD.log
+     *
+     * @return string Generated log filename
+     */
+    private function getTeleCashLogFileName(): string
+    {
+        return Module::MODULE_ID . "_" . $this->getCurrentDate() . ".log";
+    }
+
+    /**
+     * Gets current date in Y-m-d format
+     * Protected to allow overriding in tests
+     */
+    protected function getCurrentDate(): string
+    {
+        return date('Y-m-d');
+    }
+}
