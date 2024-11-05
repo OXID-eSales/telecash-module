@@ -121,7 +121,7 @@ class TeleCashPaymentTest extends TestCase
      */
     public function testSetAndGetTeleCashIdent(): void
     {
-        $validIdent = Module::TELECASH_PAYMENT_IDENTS[0];
+        $validIdent = Module::TELECASH_PAYMENT_IDENTS[Module::TELECASH_PAYMENT_IDENT_DEFAULT];
 
         // Expect setTeleCashIdent to be called once with the valid ident
         $this->teleCashPayment->expects($this->once())
@@ -138,20 +138,22 @@ class TeleCashPaymentTest extends TestCase
         $this->assertEquals($validIdent, $this->teleCashPayment->getTeleCashIdent());
     }
 
-    /**
-     * Test setting and getting the TeleCash capture type
-     */
     public function testSetAndGetTeleCashCaptureType(): void
     {
-        $validIdent = Module::TELECASH_PAYMENT_IDENTS[0];
+        // We'll use the default ident and its valid capture type
+        $validIdent = Module::TELECASH_PAYMENT_IDENT_DEFAULT;
         $validCaptureType = Module::TELECASH_CAPTURE_TYPES[$validIdent][0];
 
-        // Expect setTeleCashCaptureType to be called once with the valid capture type
+        // First expect setTeleCashIdent to be called with the valid ident
+        $this->teleCashPayment->method('getTeleCashIdent')
+            ->willReturn($validIdent);
+
+        // Expect setTeleCashCaptureType to be called with the valid capture type
         $this->teleCashPayment->expects($this->once())
             ->method('setTeleCashCaptureType')
             ->with($validCaptureType);
 
-        // Expect getTeleCashCaptureType to be called once and return the valid capture type
+        // Expect getTeleCashCaptureType to return the valid capture type
         $this->teleCashPayment->expects($this->once())
             ->method('getTeleCashCaptureType')
             ->willReturn($validCaptureType);
@@ -169,7 +171,7 @@ class TeleCashPaymentTest extends TestCase
         $teleCashPaymentReal = $this->createRealTeleCashPayment();
         $possibleIdents = $teleCashPaymentReal->getPossibleTeleCashIdents();
 
-        $this->assertEquals(Module::TELECASH_PAYMENT_IDENTS, $possibleIdents);
+        $this->assertEquals(array_keys(Module::TELECASH_PAYMENT_IDENTS), $possibleIdents);
         $this->assertIsArray($possibleIdents);
         $this->assertNotEmpty($possibleIdents);
     }
@@ -180,10 +182,11 @@ class TeleCashPaymentTest extends TestCase
     public function testValidTeleCashIdentWithValidInput(): void
     {
         $teleCashPaymentReal = $this->createRealTeleCashPayment();
-        $validIdent = Module::TELECASH_PAYMENT_IDENTS[0];
+        $validIdent = Module::TELECASH_PAYMENT_IDENT_DEFAULT;
 
         $result = $teleCashPaymentReal->validTeleCashIdent($validIdent);
 
+        // Since the default ident now has an empty string value
         $this->assertEquals($validIdent, $result);
     }
 
@@ -206,7 +209,7 @@ class TeleCashPaymentTest extends TestCase
     public function testGetPossibleTeleCashCaptureTypes(): void
     {
         $teleCashPaymentReal = $this->createRealTeleCashPayment();
-        $validIdent = Module::TELECASH_PAYMENT_IDENTS[0];
+        $validIdent = Module::TELECASH_PAYMENT_IDENT_DEFAULT;
 
         $captureTypes = $teleCashPaymentReal->getPossibleTeleCashCaptureTypes($validIdent);
 
@@ -221,7 +224,7 @@ class TeleCashPaymentTest extends TestCase
     public function testValidTeleCashCaptureTypeWithValidInput(): void
     {
         $teleCashPaymentReal = $this->createRealTeleCashPayment();
-        $validIdent = Module::TELECASH_PAYMENT_IDENTS[0];
+        $validIdent = Module::TELECASH_PAYMENT_IDENT_DEFAULT;
         $validCaptureType = Module::TELECASH_CAPTURE_TYPES[$validIdent][0];
 
         $result = $teleCashPaymentReal->validTeleCashCaptureType($validCaptureType, $validIdent);
@@ -235,12 +238,30 @@ class TeleCashPaymentTest extends TestCase
     public function testValidTeleCashCaptureTypeWithInvalidInput(): void
     {
         $teleCashPaymentReal = $this->createRealTeleCashPayment();
-        $validIdent = Module::TELECASH_PAYMENT_IDENTS[0];
+        $validIdent = Module::TELECASH_PAYMENT_IDENTS[Module::TELECASH_PAYMENT_IDENT_DEFAULT];
         $invalidCaptureType = 'invalid_capture_type';
 
         $result = $teleCashPaymentReal->validTeleCashCaptureType($invalidCaptureType, $validIdent);
 
         $this->assertEquals(Module::TELECASH_CAPTURE_TYPE_DIRECT, $result);
+    }
+
+    /**
+     * Test getting the TeleCash payment method code.
+     * This test verifies that the correct payment method code is returned
+     * from the TELECASH_PAYMENT_IDENTS mapping when retrieving the
+     * payment method for a specific TeleCash identifier.
+     */
+    public function testGetTeleCashPaymentMethod(): void
+    {
+        $teleCashPaymentReal = $this->createRealTeleCashPayment();
+        $ident = Module::TELECASH_PAYMENT_IDENT_CC_VISA;
+
+        $teleCashPaymentReal->setTeleCashIdent($ident);
+        $result = $teleCashPaymentReal->getTeleCashPaymentMethod();
+
+        $this->assertEquals(Module::TELECASH_PAYMENT_IDENTS[$ident], $result);
+        $this->assertEquals('V', $result);
     }
 
     /**

@@ -53,12 +53,12 @@ class OrderController extends OrderController_parent
 
         if ($teleCashPayment) {
             $this->addTplParam(
-                'isTeleCashCreditCard',
-                $teleCashPayment->getTeleCashIdent() === Module::TELECASH_PAYMENT_IDENT_CREDITCARD
+                'teleCashPaymentMethod',
+                $teleCashPayment->getTeleCashPaymentMethod()
             );
             $this->addTplParam(
-                'isTeleCashSepa',
-                $teleCashPayment->getTeleCashIdent() === Module::TELECASH_PAYMENT_IDENT_SEPA
+                'teleCashTransactionType',
+                'sale'
             );
         }
     }
