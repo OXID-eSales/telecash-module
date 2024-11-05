@@ -79,7 +79,7 @@ class PaymentMain extends PaymentMain_parent
     {
         $teleCashPayment = $this->getTeleCashPayment();
 
-        // this variables are needed in any case
+        // these variables are needed in any case
         $this->addTplParam('teleCashModuleId', Module::MODULE_ID);
         $this->addTplParam('teleCashCaptureTypeDirect', Module::TELECASH_CAPTURE_TYPE_DIRECT);
         $this->addTplParam('teleCashCaptureTypeOnDelivery', Module::TELECASH_CAPTURE_TYPE_ONDELIVERY);

@@ -1,0 +1,13 @@
+{% extends 'page/checkout/order.html.twig' %}
+
+{% block checkout_order_payment_method_desc %}
+    {{ parent() }}
+    {% if isTeleCashPayment %}
+        {% if isTeleCashCreditCard %}
+            {% include "@" ~ teleCashModuleId ~ "/templates/frontend/form_creditcard.html.twig" %}
+        {% endif %}
+        {% if isTeleCashSepa %}
+            {% include "@" ~ teleCashModuleId ~ "/templates/frontend/form_sepa.html.twig" %}
+        {% endif %}
+    {% endif %}
+{% endblock %}
