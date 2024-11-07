@@ -10,6 +10,7 @@ declare(strict_types=1);
 namespace OxidSolutionCatalysts\TeleCash\Core\Service;
 
 use OxidEsales\Eshop\Core\Config;
+use OxidEsales\EshopCommunity\Application\Model\Basket;
 use OxidSolutionCatalysts\TeleCash\Core\Module;
 use Symfony\Component\Filesystem\Path;
 
@@ -89,5 +90,68 @@ class Context
     protected function getCurrentDate(): string
     {
         return date('Y-m-d');
+    }
+
+    /**
+     * Get Success-URL for TeleCash-Connect
+     */
+    public function getSuccessUrl(Basket $basket): string
+    {
+        $parameter = [
+            "cl"  => "order",
+            "fnc" => "execute",
+        ];
+
+        if ($this->shopConfig->getConfigParam('blConfirmAGB')) {
+            $parameter["ord_agb"] = 1;
+        }
+
+        if ($this->shopConfig->getConfigParam('blEnableIntangibleProdAgreement')) {
+            if ($basket->hasArticlesWithDownloadableAgreement()) {
+                $parameter["oxdownloadableproductsagreement"] = "1";
+            }
+            if ($basket->hasArticlesWithIntangibleAgreement()) {
+                $parameter["oxserviceproductsagreement"] = "1";
+            }
+        }
+
+        return $this->prepareUrl($parameter);
+    }
+
+    /**
+     * Get Fail-URL for TeleCash-Connect
+     */
+    public function getFailUrl(): string
+    {
+        $parameter = [
+            "cl"           => "payment",
+            "payerror"     => "XXX",
+            "payerrortext" => "YYY",
+        ];
+
+        return $this->prepareUrl($parameter);
+    }
+
+    /**
+     * Get Notification-URL for TeleCash-Connect
+     */
+    public function getNotificationUrl(): string
+    {
+        $parameter = [
+            "cl"  => "teleCashNotification",
+            "fnc" => "update",
+        ];
+
+        return $this->prepareUrl($parameter);
+    }
+
+    /**
+     * Helper for Url-Methods
+     * @param array<string, int|string> $parameter
+     * @return string
+     */
+    private function prepareUrl(array $parameter): string
+    {
+        return $this->shopConfig->getShopHomeUrl() . '?' . http_build_query($parameter);
     }
 }
