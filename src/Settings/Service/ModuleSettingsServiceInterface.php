@@ -25,6 +25,14 @@ interface ModuleSettingsServiceInterface
         self::API_MODE_SANDBOX,
     ];
 
+    /**
+     * possible API-Modes
+     */
+    public const CONNECT_URLS = [
+        self::API_MODE_LIVE    => 'https://www.ipg-online.com/connect/gateway/processing',
+        self::API_MODE_SANDBOX => 'https://test.ipg-online.com/connect/gateway/processing',
+    ];
+
     public const STORE_ID = 'osctelecash_storeid';
 
     public const USER_ID = 'osctelecash_userid';
@@ -59,6 +67,8 @@ interface ModuleSettingsServiceInterface
     public function getApiMode(): string;
 
     public function saveApiMode(string $value): void;
+
+    public function getConnectUrl(): string;
 
     public function getStoreId(): string;
 

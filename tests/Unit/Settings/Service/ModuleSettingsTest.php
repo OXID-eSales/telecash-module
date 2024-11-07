@@ -742,6 +742,73 @@ final class ModuleSettingsTest extends TestCase
     }
 
     /**
+     * Tests the retrieval of Connect URL based on API mode
+     *
+     * Verifies that getConnectUrl:
+     * 1. Returns the correct URL for live mode
+     * 2. Returns the correct URL for sandbox mode
+     * 3. Returns the correct default URL when mode is invalid
+     *
+     * @dataProvider getConnectUrlDataProvider
+     *
+     * @param string $apiMode The API mode to test
+     * @param string $expectedUrl The expected Connect URL
+     */
+    public function testGetConnectUrl(string $apiMode, string $expectedUrl): void
+    {
+        // Create and configure mocks
+        $moduleSettingService = $this->createPartialMock(ModuleSettingService::class, ['getString']);
+        $fileSettingsService = $this->createMock(ModuleFileSettingsServiceInterface::class);
+
+        // Configure the mock to return our test API mode
+        $moduleSettingService->method('getString')->willReturnMap([
+            [ModuleSettingsServiceInterface::API_MODE, Module::MODULE_ID, new UnicodeString($apiMode)]
+        ]);
+
+        $sut = new ModuleSettingsService($moduleSettingService, $fileSettingsService);
+
+        $this->assertSame(
+            $expectedUrl,
+            $sut->getConnectUrl(),
+            sprintf('Connect URL should be "%s" when API mode is "%s"', $expectedUrl, $apiMode)
+        );
+    }
+
+    /**
+     * Provides test cases for Connect URL retrieval
+     *
+     * Test cases cover:
+     * - Live mode URL
+     * - Sandbox mode URL
+     * - Default URL for invalid mode
+     *
+     * @return array<string, array<string, string>> Test cases for Connect URL testing
+     */
+    public static function getConnectUrlDataProvider(): array
+    {
+        return [
+            'live_mode' => [
+                'api_mode' => ModuleSettingsServiceInterface::API_MODE_LIVE,
+                'expected_url' => ModuleSettingsServiceInterface::CONNECT_URLS[
+                    ModuleSettingsServiceInterface::API_MODE_LIVE
+                ]
+            ],
+            'sandbox_mode' => [
+                'api_mode' => ModuleSettingsServiceInterface::API_MODE_SANDBOX,
+                'expected_url' => ModuleSettingsServiceInterface::CONNECT_URLS[
+                    ModuleSettingsServiceInterface::API_MODE_SANDBOX
+                ]
+            ],
+            'invalid_mode' => [
+                'api_mode' => 'invalid_mode',
+                'expected_url' => ModuleSettingsServiceInterface::CONNECT_URLS[
+                    ModuleSettingsServiceInterface::API_MODE_LIVE
+                ]
+            ]
+        ];
+    }
+
+    /**
      * Tests the saving of log level settings
      *
      * Verifies that saveLogLevel:

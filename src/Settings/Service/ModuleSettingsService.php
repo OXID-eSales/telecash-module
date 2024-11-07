@@ -64,6 +64,14 @@ class ModuleSettingsService implements ModuleSettingsServiceInterface
     }
 
     /**
+     * get the Connect URL by API-Mode
+     */
+    public function getConnectUrl(): string
+    {
+        return self::CONNECT_URLS[$this->getApiMode()];
+    }
+
+    /**
      * get the Store ID from Config
      * @return string
      */
