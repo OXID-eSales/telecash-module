@@ -7,7 +7,7 @@
 
 declare(strict_types=1);
 
-namespace OxidSolutionCatalysts\TeleCash\IPG\Connect;
+namespace OxidSolutionCatalysts\TeleCash\IPG;
 
 use DateTime;
 use InvalidArgumentException;
