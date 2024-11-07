@@ -11,6 +11,7 @@ namespace OxidSolutionCatalysts\TeleCash\Extension\Application\Model;
 
 use OxidEsales\Eshop\Application\Model\User;
 use OxidSolutionCatalysts\TeleCash\Application\Model\TeleCashPayment;
+use OxidSolutionCatalysts\TeleCash\Exception\TeleCashException;
 use OxidSolutionCatalysts\TeleCash\Settings\Service\ModuleSettingsServiceInterface;
 use OxidSolutionCatalysts\TeleCash\Traits\ModelGetter;
 use OxidSolutionCatalysts\TeleCash\Traits\ServiceContainer;
@@ -87,11 +88,12 @@ class Payment extends Payment_parent
      * Checks if the current payment method is a TeleCash payment.
      *
      * @return bool True if it's a TeleCash payment, false otherwise.
+     * @throws TeleCashException
      */
     protected function isTeleCashPayment(): bool
     {
         $this->teleCashPayment = $this->getTeleCashPaymentModel();
-        return $this->teleCashPayment && $this->teleCashPayment->loadByPaymentId($this->getId());
+        return $this->teleCashPayment->loadByPaymentId($this->getId());
     }
 
     /**
