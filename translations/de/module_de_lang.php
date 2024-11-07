@@ -11,6 +11,7 @@ $aLang = [
     'charset' => 'UTF-8',
 
     'TELECASHPAYMENT_EXISTS_FAIL' => 'Die Telecash-Zahlart konnte nicht mit dem Telecash-Ident und dem Capture-Typ gespeichert werden. Sie existiert bereits.',
+    'TELECASH_SERVICE_MISSING'    => 'Ein benötigter Service wurde nicht gefunden.',
 
     'TELECASH_ASTERISK' => '*',
 
