@@ -201,6 +201,13 @@ class TeleCashPayment extends BaseModel implements TeleCashPaymentInterface
         return $this->captureType;
     }
 
+    /** getter for TeleCash Payment-Method */
+    public function getTeleCashTransactionType(): string
+    {
+        $captureType = $this->getTeleCashCaptureType();
+        return Module::TELECASH_TRANSACTION_TYPES[$captureType];
+    }
+
     /** setter for Capture Type */
     public function setTeleCashCaptureType(string $captureType = ''): void
     {

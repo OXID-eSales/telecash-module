@@ -265,6 +265,40 @@ class TeleCashPaymentTest extends TestCase
     }
 
     /**
+     * Test getting the TeleCash transaction type based on capture type.
+     * This test verifies that the correct transaction type ('sale'/'postauth')
+     * is returned for each capture type according to the TELECASH_TRANSACTION_TYPES mapping.
+     */
+    public function testGetTeleCashTransactionType(): void
+    {
+        $teleCashPaymentReal = $this->createRealTeleCashPayment();
+
+        // Test direct capture type
+        $teleCashPaymentReal->setTestValues(
+            'test_payment',
+            Module::TELECASH_PAYMENT_IDENT_DEFAULT,
+            Module::TELECASH_CAPTURE_TYPE_DIRECT
+        );
+        $this->assertEquals('sale', $teleCashPaymentReal->getTeleCashTransactionType());
+
+        // Test on delivery capture type
+        $teleCashPaymentReal->setTestValues(
+            'test_payment',
+            Module::TELECASH_PAYMENT_IDENT_CC_VISA,
+            Module::TELECASH_CAPTURE_TYPE_ONDELIVERY
+        );
+        $this->assertEquals('postauth', $teleCashPaymentReal->getTeleCashTransactionType());
+
+        // Test manually capture type
+        $teleCashPaymentReal->setTestValues(
+            'test_payment',
+            Module::TELECASH_PAYMENT_IDENT_CC_VISA,
+            Module::TELECASH_CAPTURE_TYPE_MANUALLY
+        );
+        $this->assertEquals('postauth', $teleCashPaymentReal->getTeleCashTransactionType());
+    }
+
+    /**
      * Test loading TeleCash Payment by PaymentId
      */
     public function testLoadByPaymentId(): void
