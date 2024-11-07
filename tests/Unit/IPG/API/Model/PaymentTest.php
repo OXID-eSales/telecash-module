@@ -1,13 +1,16 @@
 <?php
 
-namespace OxidSolutionCatalysts\TeleCash\IPG\API\Model;
+namespace OxidSolutionCatalysts\TeleCash\Tests\Unit\IPG\API\Model;
+
+use OxidSolutionCatalysts\TeleCash\IPG\API\Model\Payment;
+use PHPUnit\Framework\TestCase;
 
 /**
  * Test case for Payment
  *
  * @package Checkdomain\TeleCash\IPG\API\Model
  */
-class PaymentTest extends \PHPUnit\Framework\TestCase
+class PaymentTest extends TestCase
 {
     /**
      * @param string|null $hostedDataId

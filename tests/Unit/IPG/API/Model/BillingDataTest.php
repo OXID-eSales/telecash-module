@@ -1,6 +1,6 @@
 <?php
 
-namespace OxidSolutionCatalysts\TeleCash\IPG\API\Model\Tests;
+namespace OxidSolutionCatalysts\TeleCash\Tests\Unit\IPG\API\Model;
 
 use OxidSolutionCatalysts\TeleCash\IPG\API\Model\BillingData;
 use PHPUnit\Framework\TestCase;

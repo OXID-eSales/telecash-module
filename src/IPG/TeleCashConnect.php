@@ -11,6 +11,12 @@ namespace OxidSolutionCatalysts\TeleCash\IPG\Connect;
 
 use DateTime;
 use InvalidArgumentException;
+use OxidSolutionCatalysts\TeleCash\IPG\Model\BillingAddress;
+use OxidSolutionCatalysts\TeleCash\IPG\Model\CreditCardData;
+use OxidSolutionCatalysts\TeleCash\IPG\Model\CustomData;
+use OxidSolutionCatalysts\TeleCash\IPG\Model\DirectDebitData;
+use OxidSolutionCatalysts\TeleCash\IPG\Model\ShippingAddress;
+use OxidSolutionCatalysts\TeleCash\IPG\Model\TransactionResult;
 
 /**
  * Base class for handling TeleCash Connect integration
@@ -354,7 +360,7 @@ class TeleCashConnect
      */
     public function getBillingAddress(): array
     {
-        return (new Model\BillingAddress($this->responseData))->toArray();
+        return (new BillingAddress($this->responseData))->toArray();
     }
 
     /**
@@ -364,7 +370,7 @@ class TeleCashConnect
      */
     public function getShippingAddress(): array
     {
-        return (new Model\ShippingAddress($this->responseData))->toArray();
+        return (new ShippingAddress($this->responseData))->toArray();
     }
 
     /**
@@ -374,7 +380,7 @@ class TeleCashConnect
      */
     public function getTransactionResult(): array
     {
-        return (new Model\TransactionResult($this->responseData))->toArray();
+        return (new TransactionResult($this->responseData))->toArray();
     }
 
     /**
@@ -384,7 +390,7 @@ class TeleCashConnect
      */
     public function getCreditCardData(): array
     {
-        return (new Model\CreditCardData($this->responseData))->toArray();
+        return (new CreditCardData($this->responseData))->toArray();
     }
 
     /**
@@ -394,7 +400,7 @@ class TeleCashConnect
      */
     public function getDirectDebitData(): array
     {
-        return (new Model\DirectDebitData($this->responseData))->toArray();
+        return (new DirectDebitData($this->responseData))->toArray();
     }
 
     /**
@@ -404,7 +410,7 @@ class TeleCashConnect
      */
     public function getCustomData(): array
     {
-        return (new Model\CustomData($this->responseData))->toArray();
+        return (new CustomData($this->responseData))->toArray();
     }
 
     /**

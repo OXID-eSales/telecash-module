@@ -7,7 +7,7 @@
 
 declare(strict_types=1);
 
-namespace OxidSolutionCatalysts\TeleCash\IPG\Connect\Model;
+namespace OxidSolutionCatalysts\TeleCash\IPG\Model;
 
 /**
  * DirectDebitData class for handling field-value mappings

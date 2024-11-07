@@ -1,6 +1,6 @@
 <?php
 
-namespace OxidSolutionCatalysts\TeleCash\Tests\Unit\IPG\API;
+namespace OxidSolutionCatalysts\TeleCash\Tests\Unit\IPG;
 
 use OxidSolutionCatalysts\TeleCash\IPG\API\Model\BillingData;
 use OxidSolutionCatalysts\TeleCash\IPG\API\Service\OrderService;

@@ -1,13 +1,16 @@
 <?php
 
-namespace OxidSolutionCatalysts\TeleCash\IPG\API\Model;
+namespace OxidSolutionCatalysts\TeleCash\Tests\Unit\IPG\API\Model;
+
+use OxidSolutionCatalysts\TeleCash\IPG\API\Model\DataStorageItem;
+use PHPUnit\Framework\TestCase;
 
 /**
  * Test case for DataStorageItem
  *
  * @package Checkdomain\TeleCash\IPG\API\Model
  */
-class DataStorageItemTest extends \PHPUnit\Framework\TestCase
+class DataStorageItemTest extends TestCase
 {
     /**
      * @param string|null $hostedDataId

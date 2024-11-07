@@ -1,13 +1,17 @@
 <?php
 
-namespace OxidSolutionCatalysts\TeleCash\IPG\API\Model;
+namespace OxidSolutionCatalysts\TeleCash\Tests\Unit\IPG\API\Model;
+
+use OxidSolutionCatalysts\TeleCash\IPG\API\Model\CreditCardData;
+use OxidSolutionCatalysts\TeleCash\IPG\API\Model\CreditCardItem;
+use PHPUnit\Framework\TestCase;
 
 /**
  * Test case for CreditCardItem
  *
  * @package Checkdomain\TeleCash\IPG\API\Model
  */
-class CreditCardItemTest extends \PHPUnit\Framework\TestCase
+class CreditCardItemTest extends TestCase
 {
     /**
      * @param CreditCardData $creditCardData

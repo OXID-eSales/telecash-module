@@ -1,13 +1,17 @@
 <?php
 
-namespace OxidSolutionCatalysts\TeleCash\IPG\API\Model;
+namespace OxidSolutionCatalysts\TeleCash\Tests\Unit\IPG\API\Model;
+
+use DOMNode;
+use OxidSolutionCatalysts\TeleCash\IPG\API\Model\CreditCardData;
+use PHPUnit\Framework\TestCase;
 
 /**
  * Test case for CreditCardData
  *
  * @package Checkdomain\TeleCash\IPG\API\Model
  */
-class CreditCardDataTest extends \PHPUnit\Framework\TestCase
+class CreditCardDataTest extends TestCase
 {
     /**
      * @param string|null $ccNumber
@@ -34,7 +38,7 @@ class CreditCardDataTest extends \PHPUnit\Framework\TestCase
         $this->assertEquals(1, $elementCCData->length, 'Expected element CreditCardData not found');
 
         $children = [];
-        /** @var \DOMNode $child */
+        /** @var DOMNode $child */
         foreach ($elementCCData->item(0)->childNodes as $child) {
             $children[$child->nodeName] = $child->nodeValue;
         }
