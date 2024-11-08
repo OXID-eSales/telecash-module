@@ -115,6 +115,16 @@ class TeleCashConnect
     }
 
     /**
+     * Returns the storename
+     *
+     * @return string
+     */
+    public function getStoreName(): string
+    {
+        return $this->storeName;
+    }
+
+    /**
      * Returns the hash Algorithm from a TeleCashResponse
      *
      * @param array<string, string> $data The response data
@@ -298,11 +308,12 @@ class TeleCashConnect
      * Generates a list of hidden form fields from the internal POST data.
      * The hashExtended field will be calculated added to the list automatically.
      *
+     * @param array<string, string> $formFields
      * @return string
      */
-    public function getHiddenFormFields(): string
+    public function getHiddenFormFields(array $formFields): string
     {
-        return $this->createHiddenFormFields($this->getPostData());
+        return $this->createHiddenFormFields($formFields);
     }
 
     /**
