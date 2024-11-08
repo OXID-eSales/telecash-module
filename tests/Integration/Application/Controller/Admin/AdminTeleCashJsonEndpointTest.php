@@ -234,12 +234,14 @@ class AdminTeleCashJsonEndpointTest extends TestCase
         $container->method('has')
             ->willReturnMap([
                 [OxNewService::class, false],
-                [RegistryService::class, true]
+                [RegistryService::class, true],
+                [TeleCashPaymentValidatorServiceInterface::class, true]
             ]);
 
         $container->method('get')
             ->willReturnMap([
-                [RegistryService::class, $this->registryService]
+                [RegistryService::class, $this->registryService],
+                [TeleCashPaymentValidatorServiceInterface::class, $this->validatorService]
             ]);
 
         // Inject new container

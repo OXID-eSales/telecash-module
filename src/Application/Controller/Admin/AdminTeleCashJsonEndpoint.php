@@ -83,14 +83,18 @@ class AdminTeleCashJsonEndpoint extends BaseController
      * ["direct", "manually", "ondelivery"]
      *
      * @return void Response is output directly as JSON
-     * @throws TeleCashException
      */
     public function getPossibleTeleCashCaptureTypes(): void
     {
-        $teleCashPayment = $this->getTeleCashPaymentModel();
-        $valueKey = Module::TELECASH_DB_FIELD_IDENT;
-        $teleCashIdentValue = $this->getStringRequestEscapedData($valueKey);
-        $resultArr = $teleCashPayment->getPossibleTeleCashCaptureTypes($teleCashIdentValue);
+        try {
+            $teleCashPayment = $this->getTeleCashPaymentModel();
+            $valueKey = Module::TELECASH_DB_FIELD_IDENT;
+            $teleCashIdentValue = $this->getStringRequestEscapedData($valueKey);
+            $resultArr = $teleCashPayment->getPossibleTeleCashCaptureTypes($teleCashIdentValue);
+        } catch (TeleCashException $e) {
+            // Log error if needed
+            $resultArr = [];
+        }
 
         $result = $this->arrayToJson($resultArr);
         $this->outputJson($result);
