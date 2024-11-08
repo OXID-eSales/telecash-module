@@ -16,7 +16,7 @@ use OxidSolutionCatalysts\TeleCash\Core\Service\TeleCashPaymentValidatorServiceI
 use OxidSolutionCatalysts\TeleCash\Exception\TeleCashException;
 use OxidSolutionCatalysts\TeleCash\IPG\TeleCashConnect;
 use OxidSolutionCatalysts\TeleCash\Application\Model\TeleCashConnectData;
-use OxidSolutionCatalysts\TeleCash\Settings\Service\ModuleSettingsService;
+use OxidSolutionCatalysts\TeleCash\Settings\Service\ModuleSettingsServiceInterface;
 
 /**
  * Convenience trait to work with Controller-Models.
@@ -60,7 +60,7 @@ trait ModelGetter
      */
     private function getTeleCashConnect(): TeleCashConnect
     {
-        $moduleSettings = $this->getServiceFromContainer(ModuleSettingsService::class);
+        $moduleSettings = $this->getServiceFromContainer(ModuleSettingsServiceInterface::class);
         $storeId = $moduleSettings ? $moduleSettings->getStoreId() : '';
         $password = $moduleSettings ? $moduleSettings->getClientCertificatePrivateKeyPassword() : '';
         return $this->getOxNewService()->oxNew(
