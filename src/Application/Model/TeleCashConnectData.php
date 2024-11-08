@@ -11,6 +11,7 @@ namespace OxidSolutionCatalysts\TeleCash\Application\Model;
 
 use DateTime;
 use Doctrine\DBAL\Exception;
+use OxidEsales\Eshop\Core\Price as oxPrice;
 use OxidEsales\Eshop\Application\Model\Address;
 use OxidEsales\Eshop\Application\Model\Basket;
 use OxidEsales\Eshop\Application\Model\Country;
@@ -20,8 +21,14 @@ use OxidEsales\Eshop\Core\Exception\DatabaseConnectionException;
 use OxidEsales\Eshop\Core\Exception\StandardException;
 use OxidSolutionCatalysts\TeleCash\Application\Model\Interface\TeleCashConnectDataInterface;
 use OxidSolutionCatalysts\TeleCash\Core\Service\OxNewService;
+use OxidSolutionCatalysts\TeleCash\Core\Service\Price;
 use OxidSolutionCatalysts\TeleCash\IPG\TeleCashConnect;
 
+/**
+ * Class TeleCashConnectData - Provider for TeleCashData
+ *
+ * @SuppressWarnings(PHPMD.CouplingBetweenObjects)
+ */
 class TeleCashConnectData implements TeleCashConnectDataInterface
 {
     protected ?User $user = null;
@@ -49,10 +56,11 @@ class TeleCashConnectData implements TeleCashConnectDataInterface
      * in both production and test environments due to its flexible parameter configuration.
      *
      * @param TeleCashConnect $teleCashConnect  The TeleCash Connector
+     * @param OxNewService $oxNewService The oxNewService
      */
     public function __construct(
         private readonly TeleCashConnect $teleCashConnect,
-        private readonly OxNewService $oxNewService,
+        private readonly OxNewService $oxNewService
     ) {
     }
 
@@ -143,7 +151,7 @@ class TeleCashConnectData implements TeleCashConnectDataInterface
      */
     public function getTeleCashConnectDataAsHiddenFields(): string
     {
-        return $this->teleCashConnect->getHiddenFormFields();
+        return $this->teleCashConnect->getHiddenFormFields($this->getTeleCashConnectData());
     }
 
     /**
@@ -153,8 +161,21 @@ class TeleCashConnectData implements TeleCashConnectDataInterface
      */
     private function getBasicFields(): array
     {
-        $oxidCurrency = $this->basket?->getBasketCurrency();
+        $oxidCurrency = '';
+        $oxidBasketTotal = '';
+        $basket = $this->basket;
 
+        // Basket-Total
+        if ($basket) {
+            $oxidCurrency = $basket->getBasketCurrency();
+            $basketPrice = $basket->getPrice();
+            if ($basketPrice) {
+                $priceService = $this->createPriceService($basketPrice, $oxidCurrency);
+                $oxidBasketTotal = $priceService->getFormattedBruttoPrice();
+            }
+        }
+
+        // TeleCash mapped Currency
         $teleCashCurrency = $oxidCurrency ?
             $this->teleCashConnect->getCurrencyCodeByShortname($oxidCurrency->name) :
             '';
@@ -162,12 +183,15 @@ class TeleCashConnectData implements TeleCashConnectDataInterface
         return [
             'timezone'                   => date_default_timezone_get(),
             'txntype'                    => $this->transactionType,
-            'chargetotal'                => '14,00',
+            'chargetotal'                => $oxidBasketTotal,
             'currency'                   => $teleCashCurrency,
             'txndatetime'                => $this->teleCashConnect->formatDateTime(new DateTime()),
             'responseFailURL'            => $this->responseFailURL,
             'responseSuccessURL'         => $this->responseSuccessURL,
             'transactionNotificationURL' => $this->transactionNotificationURL,
+            'checkoutoption'             => 'combinedpage',
+            'storename'                  => $this->teleCashConnect->getStoreName(),
+            'hash_algorithm'             => $this->teleCashConnect->getHashMethod()
         ];
     }
 
@@ -298,5 +322,17 @@ class TeleCashConnectData implements TeleCashConnectDataInterface
         $country = $this->oxNewService->oxNew(Country::class);
         $country->load($countryId);
         return $country->isLoaded() ? $country->getFieldStringData('oxtitle') : '';
+    }
+
+    /**
+     * create Price-Service
+     *
+     * @param oxPrice $price
+     * @param object $currency
+     * @return Price
+     */
+    private function createPriceService(oxPrice $price, object $currency): Price
+    {
+        return new Price($price, $currency);
     }
 }
