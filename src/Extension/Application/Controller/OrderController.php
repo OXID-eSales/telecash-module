@@ -17,7 +17,7 @@ use OxidSolutionCatalysts\TeleCash\Core\Module;
 use OxidSolutionCatalysts\TeleCash\Core\Service\Context;
 use OxidSolutionCatalysts\TeleCash\Core\Service\RegistryService;
 use OxidSolutionCatalysts\TeleCash\Exception\TeleCashException;
-use OxidSolutionCatalysts\TeleCash\Settings\Service\ModuleSettingsService;
+use OxidSolutionCatalysts\TeleCash\Settings\Service\ModuleSettingsServiceInterface;
 use OxidSolutionCatalysts\TeleCash\Traits\ModelGetter;
 use OxidSolutionCatalysts\TeleCash\Traits\RequestGetter;
 use OxidSolutionCatalysts\TeleCash\Traits\ServiceContainer;
@@ -63,7 +63,7 @@ class OrderController extends OrderController_parent
         $teleCashPayment = $this->getTeleCashPayment();
         $registryService = $this->getServiceFromContainer(RegistryService::class);
         $context = $this->getServiceFromContainer(Context::class);
-        $moduleSettings = $this->getServiceFromContainer(ModuleSettingsService::class);
+        $moduleSettings = $this->getServiceFromContainer(ModuleSettingsServiceInterface::class);
 
         // these variables are needed in any case
         $this->addTplParam('teleCashModuleId', Module::MODULE_ID);
@@ -82,8 +82,9 @@ class OrderController extends OrderController_parent
             $deliveryId = $this->getStringRequestEscapedData("deladrid");
             if ($deliveryId) {
                 $address = $this->getOxNewService()->oxNew(Address::class);
-                $address->load($deliveryId);
-                $teleCashConnectData->setOxidAddress($address);
+                if ($address->load($deliveryId)) {
+                    $teleCashConnectData->setOxidAddress($address);
+                }
             }
 
             //Urls
@@ -100,9 +101,10 @@ class OrderController extends OrderController_parent
             $teleCashConnectData->setTransactionType($teleCashPayment->getTeleCashTransactionType());
             $teleCashConnectData->setPaymentMethod($teleCashPayment->getTeleCashPaymentMethod());
 
+            $hiddenFields = $teleCashConnectData->getTeleCashConnectDataAsHiddenFields();
             $this->addTplParam(
                 'teleCashHiddenData',
-                $teleCashConnectData->getTeleCashConnectDataAsHiddenFields()
+                $hiddenFields
             );
             $this->addTplParam(
                 'teleCashConnectUrl',
