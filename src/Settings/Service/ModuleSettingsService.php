@@ -42,7 +42,7 @@ class ModuleSettingsService implements ModuleSettingsServiceInterface
      */
     public function isLiveApiMode(): bool
     {
-        return self::API_MODE_SANDBOX === $this->getApiMode();
+        return self::API_MODE_LIVE === $this->getApiMode();
     }
 
     /**

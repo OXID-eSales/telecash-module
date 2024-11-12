@@ -304,11 +304,11 @@ final class ModuleSettingsTest extends TestCase
         return [
             'live_mode' => [
                 'stored_mode' => ModuleSettingsServiceInterface::API_MODE_LIVE,
-                'expected_result' => false
+                'expected_result' => true
             ],
             'sandbox_mode' => [
                 'stored_mode' => ModuleSettingsServiceInterface::API_MODE_SANDBOX,
-                'expected_result' => true
+                'expected_result' => false
             ]
         ];
     }

@@ -138,7 +138,8 @@ class Context
         ];
 
         // add xdebug in sandbox for better testing
-        if (!$this->moduleSettings->isLiveApiMode()) {
+        $sandboxMode = !$this->moduleSettings->isLiveApiMode();
+        if ($sandboxMode) {
             $parameter['XDEBUG_SESSION_START'] = "1";
         }
 
