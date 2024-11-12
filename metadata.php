@@ -8,6 +8,7 @@
 use OxidEsales\Eshop\Application\Controller\Admin\ModuleConfiguration as oxModuleConfiguration;
 use OxidEsales\Eshop\Application\Controller\Admin\PaymentMain as oxPaymentMain;
 use OxidEsales\Eshop\Application\Controller\OrderController as oxOrderController;
+use OxidEsales\Eshop\Application\Controller\PaymentController as oxPaymentController;
 use OxidEsales\Eshop\Application\Model\Address as oxAddress;
 use OxidEsales\Eshop\Application\Model\Country as oxCountry;
 use OxidEsales\Eshop\Application\Model\Payment as oxPayment;
@@ -15,10 +16,12 @@ use OxidEsales\Eshop\Application\Model\PaymentList as oxPaymentList;
 use OxidEsales\Eshop\Application\Model\State as oxState;
 use OxidEsales\Eshop\Application\Model\User as oxUser;
 use OxidSolutionCatalysts\TeleCash\Application\Controller\Admin\AdminTeleCashJsonEndpoint;
+use OxidSolutionCatalysts\TeleCash\Application\Controller\FrontendTeleCashNotificationEndpoint;
 use OxidSolutionCatalysts\TeleCash\Core\Module;
 use OxidSolutionCatalysts\TeleCash\Extension\Application\Controller\Admin\ModuleConfiguration;
 use OxidSolutionCatalysts\TeleCash\Extension\Application\Controller\Admin\PaymentMain;
 use OxidSolutionCatalysts\TeleCash\Extension\Application\Controller\OrderController;
+use OxidSolutionCatalysts\TeleCash\Extension\Application\Controller\PaymentController;
 use OxidSolutionCatalysts\TeleCash\Extension\Application\Model\Address;
 use OxidSolutionCatalysts\TeleCash\Extension\Application\Model\Country;
 use OxidSolutionCatalysts\TeleCash\Extension\Application\Model\Payment;
@@ -53,7 +56,8 @@ $aModule = [
     'email'       => '',
     'controllers' => [
         // Admin
-        'AdminTeleCashJsonEndpoint' => AdminTeleCashJsonEndpoint::class,
+        'AdminTeleCashJsonEndpoint'            => AdminTeleCashJsonEndpoint::class,
+        'FrontendTeleCashNotificationEndpoint' => FrontendTeleCashNotificationEndpoint::class,
     ],
     'events' => [
         'onActivate' => '\OxidSolutionCatalysts\TeleCash\Core\ModuleEvents::onActivate',
@@ -65,6 +69,7 @@ $aModule = [
         oxPaymentMain::class         => PaymentMain::class,
         // Controller Frontend
         oxOrderController::class     => OrderController::class,
+        oxPaymentController::class   => PaymentController::class,
         // Models
         oxAddress::class             => Address::class,
         oxCountry::class             => Country::class,
@@ -88,25 +93,31 @@ $aModule = [
             'value' => '',
         ],
         [
-            'group' => ModuleSettingsServiceInterface::MODULE_CONFIG_API_VARGROUP,
+            'group' => ModuleSettingsServiceInterface::MODULE_CONFIG_API_FRONTEND_VARGROUP,
+            'name'  => ModuleSettingsServiceInterface::SHARED_SECRET,
+            'type'  => 'str',
+            'value' => '',
+        ],
+        [
+            'group' => ModuleSettingsServiceInterface::MODULE_CONFIG_API_BACKEND_VARGROUP,
             'name'  => ModuleSettingsServiceInterface::USER_ID,
             'type'  => 'str',
             'value' => '',
         ],
         [
-            'group' => ModuleSettingsServiceInterface::MODULE_CONFIG_API_VARGROUP,
+            'group' => ModuleSettingsServiceInterface::MODULE_CONFIG_API_BACKEND_VARGROUP,
             'name'  => ModuleSettingsServiceInterface::BASIC_AUTH_PASSWORD,
             'type'  => 'str',
             'value' => '',
         ],
         [
-            'group' => ModuleSettingsServiceInterface::MODULE_CONFIG_API_VARGROUP,
+            'group' => ModuleSettingsServiceInterface::MODULE_CONFIG_API_BACKEND_VARGROUP,
             'name'  => ModuleSettingsServiceInterface::CLIENT_CERT_INSTALL_PASSWORD,
             'type'  => 'str',
             'value' => '',
         ],
         [
-            'group' => ModuleSettingsServiceInterface::MODULE_CONFIG_API_VARGROUP,
+            'group' => ModuleSettingsServiceInterface::MODULE_CONFIG_API_BACKEND_VARGROUP,
             'name'  => ModuleSettingsServiceInterface::CLIENT_CERT_PRIVATEKEY_PASSWORD,
             'type'  => 'str',
             'value' => '',
