@@ -12,6 +12,8 @@ namespace OxidSolutionCatalysts\TeleCash\Core\Service;
 use OxidEsales\Eshop\Core\Config;
 use OxidEsales\EshopCommunity\Application\Model\Basket;
 use OxidSolutionCatalysts\TeleCash\Core\Module;
+use OxidSolutionCatalysts\TeleCash\Settings\Service\ModuleSettingsService;
+use OxidSolutionCatalysts\TeleCash\Settings\Service\ModuleSettingsServiceInterface;
 use Symfony\Component\Filesystem\Path;
 
 /**
@@ -30,21 +32,15 @@ use Symfony\Component\Filesystem\Path;
 class Context
 {
     /**
-     * Shop configuration instance
-     * Used for accessing shop-specific settings and directories
-     *
-     * @var Config
-     */
-    protected Config $shopConfig;
-
-    /**
      * Initializes the context service with required dependencies
      *
      * @param Config $shopConfig Shop configuration instance providing access to shop settings
+     * @param ModuleSettingsServiceInterface $moduleSettings
      */
-    public function __construct(Config $shopConfig)
-    {
-        $this->shopConfig = $shopConfig;
+    public function __construct(
+        private readonly Config $shopConfig,
+        private readonly ModuleSettingsServiceInterface $moduleSettings
+    ) {
     }
 
     /**
@@ -125,8 +121,7 @@ class Context
     {
         $parameter = [
             "cl"           => "payment",
-            "payerror"     => "XXX",
-            "payerrortext" => "YYY",
+            "fnc"          => "showTeleCashError",
         ];
 
         return $this->prepareUrl($parameter);
@@ -138,9 +133,14 @@ class Context
     public function getNotificationUrl(): string
     {
         $parameter = [
-            "cl"  => "teleCashNotification",
-            "fnc" => "update",
+            "cl"  => "FrontendTeleCashNotificationEndpoint",
+            "fnc" => "receiveNotifications",
         ];
+
+        // add xdebug in sandbox for better testing
+        if (!$this->moduleSettings->isLiveApiMode()) {
+            $parameter['XDEBUG_SESSION_START'] = "1";
+        }
 
         return $this->prepareUrl($parameter);
     }
@@ -152,6 +152,8 @@ class Context
      */
     private function prepareUrl(array $parameter): string
     {
-        return $this->shopConfig->getShopHomeUrl() . '?' . http_build_query($parameter);
+        return html_entity_decode(
+            $this->shopConfig->getCurrentShopUrl(false) . 'index.php?' . http_build_query($parameter)
+        );
     }
 }
