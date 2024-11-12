@@ -182,7 +182,7 @@ class TeleCashPayment extends BaseModel implements TeleCashPaymentInterface
     {
         return $ident && in_array($ident, $this->getPossibleTeleCashIdents(), true) ?
             $ident :
-            Module::TELECASH_PAYMENT_IDENT_DEFAULT;
+            Module::TELECASH_PAYMENT_IDENT_TELECASH;
     }
 
     /** getter for possible TeleCash Capture-Types */

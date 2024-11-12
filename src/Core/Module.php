@@ -22,7 +22,8 @@ final class Module
     public const TELECASH_DB_FIELD_CAPTURETYPE = self::TELECASH_PAYMENT_EXTENSION_TABLE .
         '__' . self::TELECASH_PAYMENT_EXTENSION_TABLE_CAPTURETYPE;
 
-    public const TELECASH_PAYMENT_IDENT_DEFAULT = 'telecash';
+    public const TELECASH_PAYMENT_IDENT_DEFAULT = 'none';
+    public const TELECASH_PAYMENT_IDENT_TELECASH = 'telecash';
     public const TELECASH_PAYMENT_IDENT_CC_AMERICAN = 'cc_american';
     public const TELECASH_PAYMENT_IDENT_CC_VISA = 'cc_visa';
     public const TELECASH_PAYMENT_IDENT_CC_MASTERCARD = 'cc_mastercard';
@@ -32,6 +33,7 @@ final class Module
 
     public const TELECASH_PAYMENT_IDENTS = [
         self::TELECASH_PAYMENT_IDENT_DEFAULT       => '',
+        self::TELECASH_PAYMENT_IDENT_TELECASH      => '',
         self::TELECASH_PAYMENT_IDENT_CC_AMERICAN   => 'A',
         self::TELECASH_PAYMENT_IDENT_CC_MASTERCARD => 'M',
         self::TELECASH_PAYMENT_IDENT_CC_VISA       => 'V',
@@ -45,6 +47,9 @@ final class Module
 
     public const TELECASH_CAPTURE_TYPES = [
         self::TELECASH_PAYMENT_IDENT_DEFAULT => [
+            self::TELECASH_CAPTURE_TYPE_DIRECT
+        ],
+        self::TELECASH_PAYMENT_IDENT_TELECASH => [
             self::TELECASH_CAPTURE_TYPE_DIRECT
         ],
         self::TELECASH_PAYMENT_IDENT_CC_AMERICAN => [
