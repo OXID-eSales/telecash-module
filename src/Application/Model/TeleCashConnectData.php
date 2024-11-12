@@ -267,8 +267,13 @@ class TeleCashConnectData implements TeleCashConnectDataInterface
             }
         }
 
+        // Normally, OXID also recognizes a company in the delivery address. Syntactically, it would be the
+        // TeleCash field "scompany". However, TeleCash does not recognize "scompany". Providing fields unknown
+        // to Telecash leads to transaction maintenance. That's why we're leaving it out here and just providing
+        // information at this point.
+        // 'scompany' => $addressObj->getFieldStringData('oxcompany'),
+
         return [
-            'scompany' => $addressObj->getFieldStringData('oxcompany'),
             'sname'    => trim(
                 $addressObj->getFieldStringData('oxfname') . ' ' . $addressObj->getFieldStringData('oxlname')
             ),
