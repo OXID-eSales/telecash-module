@@ -62,7 +62,7 @@ trait ModelGetter
     {
         $moduleSettings = $this->getServiceFromContainer(ModuleSettingsServiceInterface::class);
         $storeId = $moduleSettings ? $moduleSettings->getStoreId() : '';
-        $password = $moduleSettings ? $moduleSettings->getClientCertificatePrivateKeyPassword() : '';
+        $password = $moduleSettings ? $moduleSettings->getSharedSecret() : '';
         return $this->getOxNewService()->oxNew(
             TeleCashConnect::class,
             [
