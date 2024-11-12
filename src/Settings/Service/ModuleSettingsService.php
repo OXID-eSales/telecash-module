@@ -91,6 +91,25 @@ class ModuleSettingsService implements ModuleSettingsServiceInterface
     }
 
     /**
+     * get the Shared Secret from Config
+     * @return string
+     */
+    public function getSharedSecret(): string
+    {
+        return (string)$this->moduleSettingService->getString(self::SHARED_SECRET, Module::MODULE_ID);
+    }
+
+    /**
+     * save the Shared Secret to Config
+     * @param string $value
+     * @return void
+     */
+    public function saveSharedSecret(string $value): void
+    {
+        $this->moduleSettingService->saveString(self::SHARED_SECRET, $value, Module::MODULE_ID);
+    }
+
+    /**
      * get the User ID from Config
      * @return string
      */

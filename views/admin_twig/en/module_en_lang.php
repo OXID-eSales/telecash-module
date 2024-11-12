@@ -14,6 +14,7 @@ $aLang = [
     'OSC_TELECASH_PAYMENT_DATA_INITIAL_ERROR'                                      => 'An error occurred during the initial setup of the payment method:',
     'OSC_TELECASH_PAYMENT_IDENT'                                                   => 'Telecash Payment Method',
     'OSC_TELECASH_PAYMENT_IDENT_' . Module::TELECASH_PAYMENT_IDENT_DEFAULT         => 'no TeleCash Payment',
+    'OSC_TELECASH_PAYMENT_IDENT_' . Module::TELECASH_PAYMENT_IDENT_TELECASH        => 'TeleCash Connect',
     'OSC_TELECASH_PAYMENT_IDENT_' . Module::TELECASH_PAYMENT_IDENT_CC_AMERICAN     => 'Credit Card American Express',
     'OSC_TELECASH_PAYMENT_IDENT_' . Module::TELECASH_PAYMENT_IDENT_CC_MASTERCARD   => 'Credit Card Mastercard',
     'OSC_TELECASH_PAYMENT_IDENT_' . Module::TELECASH_PAYMENT_IDENT_CC_VISA         => 'Credit Card Visa',

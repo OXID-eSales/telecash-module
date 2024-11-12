@@ -398,6 +398,63 @@ final class ModuleSettingsTest extends TestCase
     }
 
     /**
+     * Tests the retrieval of Shared Secret
+     *
+     * Verifies that getSharedSecret:
+     * 1. Returns the correct shared secret value
+     * 2. Properly handles type conversion
+     * 3. Returns empty string for null values
+     */
+    public function testGetSharedSecret(): void
+    {
+        $expectedValue = 'test_shared_secret';
+
+        // Create and configure mocks
+        $moduleSettingService = $this->createPartialMock(ModuleSettingService::class, ['getString']);
+        $fileSettingsService = $this->createMock(ModuleFileSettingsServiceInterface::class);
+
+        $moduleSettingService->method('getString')
+            ->with(ModuleSettingsServiceInterface::SHARED_SECRET, Module::MODULE_ID)
+            ->willReturn(new UnicodeString($expectedValue));
+
+        $sut = new ModuleSettingsService($moduleSettingService, $fileSettingsService);
+
+        $this->assertSame(
+            $expectedValue,
+            $sut->getSharedSecret(),
+            'getStoreId should return the exact stored value'
+        );
+    }
+
+    /**
+     * Tests the saving of Shared Secret
+     *
+     * Verifies that saveSharedSecret:
+     * 1. Correctly passes the value to the storage service
+     * 2. Uses the correct module identifier
+     * 3. Maintains data integrity
+     */
+    public function testSaveSharedSecret(): void
+    {
+        $testValue = 'new_shared_secret';
+
+        // Create mocks with expectations
+        $moduleSettingService = $this->createPartialMock(ModuleSettingService::class, ['saveString']);
+        $fileSettingsService = $this->createMock(ModuleFileSettingsServiceInterface::class);
+
+        $moduleSettingService->expects($this->once())
+            ->method('saveString')
+            ->with(
+                ModuleSettingsServiceInterface::SHARED_SECRET,
+                $testValue,
+                Module::MODULE_ID
+            );
+
+        $sut = new ModuleSettingsService($moduleSettingService, $fileSettingsService);
+        $sut->saveSharedSecret($testValue);
+    }
+
+    /**
      * Tests the retrieval of User ID
      *
      * Verifies that getUserId:

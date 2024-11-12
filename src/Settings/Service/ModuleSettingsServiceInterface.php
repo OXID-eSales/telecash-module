@@ -12,6 +12,9 @@ namespace OxidSolutionCatalysts\TeleCash\Settings\Service;
 interface ModuleSettingsServiceInterface
 {
     public const MODULE_CONFIG_API_VARGROUP = 'osctelecash_api';
+    public const MODULE_CONFIG_API_FRONTEND_VARGROUP = 'osctelecash_api_frontend';
+    public const MODULE_CONFIG_API_BACKEND_VARGROUP = 'osctelecash_api_backend';
+
     public const MODULE_CONFIG_DEBUG_VARGROUP = 'osctelecash_debug';
     public const API_MODE = 'osctelecash_apimode';
     public const API_MODE_LIVE = 'live';
@@ -34,6 +37,8 @@ interface ModuleSettingsServiceInterface
     ];
 
     public const STORE_ID = 'osctelecash_storeid';
+
+    public const SHARED_SECRET = 'osctelecash_shared_secret';
 
     public const USER_ID = 'osctelecash_userid';
 
@@ -73,6 +78,10 @@ interface ModuleSettingsServiceInterface
     public function getStoreId(): string;
 
     public function saveStoreId(string $value): void;
+
+    public function getSharedSecret(): string;
+
+    public function saveSharedSecret(string $value): void;
 
     public function getUserId(): string;
 

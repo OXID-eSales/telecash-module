@@ -15,8 +15,10 @@ $aLang = [
     'charset' => 'UTF-8',
 
     # Module settings
-    'SHOP_MODULE_GROUP_' . ModuleSettingsServiceInterface::MODULE_CONFIG_API_VARGROUP   => 'API',
-    'SHOP_MODULE_GROUP_' . ModuleSettingsServiceInterface::MODULE_CONFIG_DEBUG_VARGROUP => 'Debugging',
+    'SHOP_MODULE_GROUP_' . ModuleSettingsServiceInterface::MODULE_CONFIG_API_VARGROUP          => 'API',
+    'SHOP_MODULE_GROUP_' . ModuleSettingsServiceInterface::MODULE_CONFIG_API_FRONTEND_VARGROUP => 'API for OXID Frontend',
+    'SHOP_MODULE_GROUP_' . ModuleSettingsServiceInterface::MODULE_CONFIG_API_BACKEND_VARGROUP  => 'API für OXID Backend',
+    'SHOP_MODULE_GROUP_' . ModuleSettingsServiceInterface::MODULE_CONFIG_DEBUG_VARGROUP        => 'Debugging',
 
     'SHOP_MODULE_' . ModuleSettingsServiceInterface::API_MODE                                                          => 'API-Modus',
     'SHOP_MODULE_' . ModuleSettingsServiceInterface::API_MODE . '_' . ModuleSettingsServiceInterface::API_MODE_LIVE    => 'Live',
@@ -30,6 +32,8 @@ $aLang = [
 
     'SHOP_MODULE_' . ModuleSettingsServiceInterface::STORE_ID                             => 'Store ID',
     'HELP_SHOP_MODULE_' . ModuleSettingsServiceInterface::STORE_ID                        => 'Your store ID (e.g. 10012345678) which is required for the basic authentication.',
+    'SHOP_MODULE_' . ModuleSettingsServiceInterface::SHARED_SECRET                        => 'Shared Secret',
+    'HELP_SHOP_MODULE_' . ModuleSettingsServiceInterface::SHARED_SECRET                   => 'Your shared secret for accessing TeleCash via TeleCash Connect. If you do not need access to Telecash orders from the OXID admin, it is sufficient to simply enter the shared secret.',
     'SHOP_MODULE_' . ModuleSettingsServiceInterface::USER_ID                              => 'User ID',
     'HELP_SHOP_MODULE_' . ModuleSettingsServiceInterface::USER_ID                         => 'The user ID denoting the user who is allowed to access the Web Service API, e.g. 1. Again, this is required for the basic authentication.',
     'SHOP_MODULE_' . ModuleSettingsServiceInterface::BASIC_AUTH_PASSWORD                  => 'Basic Authentication Password',
