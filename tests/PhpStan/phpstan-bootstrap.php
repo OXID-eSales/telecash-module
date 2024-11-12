@@ -10,6 +10,7 @@ declare(strict_types=1);
 use OxidEsales\Eshop\Application\Controller\Admin\ModuleConfiguration;
 use OxidEsales\Eshop\Application\Controller\Admin\PaymentMain;
 use OxidEsales\Eshop\Application\Controller\OrderController;
+use OxidEsales\Eshop\Application\Controller\PaymentController;
 use OxidEsales\Eshop\Application\Model\Address;
 use OxidEsales\Eshop\Application\Model\Country;
 use OxidEsales\Eshop\Application\Model\Payment;
@@ -19,6 +20,7 @@ use OxidEsales\Eshop\Application\Model\User;
 use OxidSolutionCatalysts\TeleCash\Extension\Application\Controller\Admin\ModuleConfiguration_parent;
 use OxidSolutionCatalysts\TeleCash\Extension\Application\Controller\Admin\PaymentMain_parent;
 use OxidSolutionCatalysts\TeleCash\Extension\Application\Controller\OrderController_parent;
+use OxidSolutionCatalysts\TeleCash\Extension\Application\Controller\PaymentController_parent;
 use OxidSolutionCatalysts\TeleCash\Extension\Application\Model\Address_parent;
 use OxidSolutionCatalysts\TeleCash\Extension\Application\Model\Country_parent;
 use OxidSolutionCatalysts\TeleCash\Extension\Application\Model\Payment_parent;
@@ -43,6 +45,11 @@ class_alias(
 class_alias(
     OrderController::class,
     OrderController_parent::class
+);
+
+class_alias(
+    PaymentController::class,
+    PaymentController_parent::class
 );
 
 // Models
