@@ -200,7 +200,7 @@ class TeleCashPaymentTest extends TestCase
 
         $result = $teleCashPaymentReal->validTeleCashIdent($invalidIdent);
 
-        $this->assertEquals(Module::TELECASH_PAYMENT_IDENT_DEFAULT, $result);
+        $this->assertEquals(Module::TELECASH_PAYMENT_IDENT_TELECASH, $result);
     }
 
     /**
