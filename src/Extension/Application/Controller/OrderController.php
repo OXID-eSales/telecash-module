@@ -11,12 +11,11 @@ namespace OxidSolutionCatalysts\TeleCash\Extension\Application\Controller;
 
 use OxidEsales\Eshop\Application\Model\Address;
 use OxidEsales\Eshop\Application\Model\Payment;
-use OxidEsales\Eshop\Core\Exception\LanguageNotFoundException;
 use OxidSolutionCatalysts\TeleCash\Application\Model\TeleCashPayment;
 use OxidSolutionCatalysts\TeleCash\Core\Module;
 use OxidSolutionCatalysts\TeleCash\Core\Service\Context;
-use OxidSolutionCatalysts\TeleCash\Core\Service\RegistryService;
 use OxidSolutionCatalysts\TeleCash\Exception\TeleCashException;
+use OxidSolutionCatalysts\TeleCash\Settings\Service\ModuleLanguageSettingsServiceInterface;
 use OxidSolutionCatalysts\TeleCash\Settings\Service\ModuleSettingsServiceInterface;
 use OxidSolutionCatalysts\TeleCash\Traits\ModelGetter;
 use OxidSolutionCatalysts\TeleCash\Traits\RequestGetter;
@@ -43,7 +42,6 @@ class OrderController extends OrderController_parent
      *
      * @return string
      * @throws TeleCashException
-     * @throws LanguageNotFoundException
      */
     public function render()
     {
@@ -56,14 +54,13 @@ class OrderController extends OrderController_parent
 
     /**
      * @throws TeleCashException
-     * @throws LanguageNotFoundException
      */
     private function addTeleCashToTemplate(): void
     {
         $teleCashPayment = $this->getTeleCashPayment();
-        $registryService = $this->getServiceFromContainer(RegistryService::class);
         $context = $this->getServiceFromContainer(Context::class);
         $moduleSettings = $this->getServiceFromContainer(ModuleSettingsServiceInterface::class);
+        $languageSettings = $this->getServiceFromContainer(ModuleLanguageSettingsServiceInterface::class);
 
         // these variables are needed in any case
         $this->addTplParam('teleCashModuleId', Module::MODULE_ID);
@@ -75,8 +72,9 @@ class OrderController extends OrderController_parent
             $teleCashConnectData = $this->getTeleCashConnectData();
 
             // Language
-            $oxidLanguage = $registryService ? $registryService->getLang()->getLanguageAbbr() : '';
-            $language = strtoupper($oxidLanguage);
+            $language = $languageSettings ?
+                $languageSettings->getLocaleForCountryIso() :
+                ModuleLanguageSettingsServiceInterface::DEFAULT_LOCALE;
 
             // possible DeliveryAddress
             $deliveryId = $this->getStringRequestEscapedData("deladrid");

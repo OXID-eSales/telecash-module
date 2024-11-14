@@ -8,6 +8,7 @@
 declare(strict_types=1);
 
 use OxidSolutionCatalysts\TeleCash\Settings\Service\ModuleFileSettingsServiceInterface;
+use OxidSolutionCatalysts\TeleCash\Settings\Service\ModuleLanguageSettingsServiceInterface;
 use OxidSolutionCatalysts\TeleCash\Settings\Service\ModuleSettingsServiceInterface;
 use OxidSolutionCatalysts\TeleCash\Core\Module;
 
@@ -18,6 +19,7 @@ $aLang = [
     'SHOP_MODULE_GROUP_' . ModuleSettingsServiceInterface::MODULE_CONFIG_API_VARGROUP          => 'API',
     'SHOP_MODULE_GROUP_' . ModuleSettingsServiceInterface::MODULE_CONFIG_API_FRONTEND_VARGROUP => 'API for OXID Frontend',
     'SHOP_MODULE_GROUP_' . ModuleSettingsServiceInterface::MODULE_CONFIG_API_BACKEND_VARGROUP  => 'API für OXID Backend',
+    'SHOP_MODULE_GROUP_' . ModuleSettingsServiceInterface::MODULE_CONFIG_LANGUAGE              => 'Languages',
     'SHOP_MODULE_GROUP_' . ModuleSettingsServiceInterface::MODULE_CONFIG_DEBUG_VARGROUP        => 'Debugging',
 
     'SHOP_MODULE_' . ModuleSettingsServiceInterface::API_MODE                                                          => 'API-Modus',
@@ -29,6 +31,9 @@ $aLang = [
     'SHOP_MODULE_' . ModuleSettingsServiceInterface::LOG_LEVEL . '_' . ModuleSettingsServiceInterface::LOG_LEVEL_INFO  => 'Info',
     'SHOP_MODULE_' . ModuleSettingsServiceInterface::LOG_LEVEL . '_' . ModuleSettingsServiceInterface::LOG_LEVEL_DEBUG => 'Debug',
     'HELP_SHOP_MODULE_' . ModuleSettingsServiceInterface::LOG_LEVEL                                                    => 'Data is collected at various points in the TeleCash module. Depending on the logger level, only errors (Error) or errors and information (Info) or errors, information and detailed information (Debug) are written to a log file. The log file is located on the server under source/logs/' . Module::MODULE_ID,
+
+    'SHOP_MODULE_' . ModuleLanguageSettingsServiceInterface::LANGUAGES      => 'Languages',
+    'HELP_SHOP_MODULE_' . ModuleLanguageSettingsServiceInterface::LANGUAGES => 'For each language used in the shop, we need a suitable locale. e.g. de => de_DE. Please add any missing locales. The default for locales not found is en_US.',
 
     'SHOP_MODULE_' . ModuleSettingsServiceInterface::STORE_ID                             => 'Store ID',
     'HELP_SHOP_MODULE_' . ModuleSettingsServiceInterface::STORE_ID                        => 'Your store ID (e.g. 10012345678) which is required for the basic authentication.',

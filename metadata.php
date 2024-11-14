@@ -29,6 +29,7 @@ use OxidSolutionCatalysts\TeleCash\Extension\Application\Model\PaymentList;
 use OxidSolutionCatalysts\TeleCash\Extension\Application\Model\User;
 use OxidSolutionCatalysts\TeleCash\Extension\Application\Model\State;
 use OxidSolutionCatalysts\TeleCash\Settings\Service\ModuleFileSettingsServiceInterface;
+use OxidSolutionCatalysts\TeleCash\Settings\Service\ModuleLanguageSettingsServiceInterface;
 use OxidSolutionCatalysts\TeleCash\Settings\Service\ModuleSettingsServiceInterface;
 
 /**
@@ -123,6 +124,15 @@ $aModule = [
             'value' => '',
         ],
         [
+            'group' => ModuleSettingsServiceInterface::MODULE_CONFIG_LANGUAGE,
+            'name'  => ModuleLanguageSettingsServiceInterface::LANGUAGES,
+            'type'  => 'aarr',
+            'value' => [
+                'de' => 'de_DE',
+                'en' => 'en_US',
+            ]
+        ],
+        [
             'group'       => ModuleSettingsServiceInterface::MODULE_CONFIG_DEBUG_VARGROUP,
             'name'        => ModuleSettingsServiceInterface::LOG_LEVEL,
             'type'        => 'select',
@@ -130,7 +140,6 @@ $aModule = [
                 ModuleSettingsServiceInterface::LOG_LEVEL_INFO. '|' .
                 ModuleSettingsServiceInterface::LOG_LEVEL_DEBUG,
             'value'       => ModuleSettingsServiceInterface::LOG_LEVEL_ERROR
-
         ],
         // these options are hidden, so the group is null
         [
