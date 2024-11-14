@@ -76,6 +76,7 @@ class Payment extends Payment_parent
      *
      * @return bool True if it's a valid TeleCash payment or not a TeleCash payment at all,
      *              false if it's an invalid TeleCash payment.
+     * @throws TeleCashException
      */
     public function isTeleCashPaymentValid(): bool
     {
@@ -107,6 +108,8 @@ class Payment extends Payment_parent
      */
     protected function isValidTeleCashConfiguration(): bool
     {
-        return $this->moduleSettings->isValid();
+        return $this->isAdmin() ?
+            $this->moduleSettings->isValidBackendConfiguration() :
+            $this->moduleSettings->isValidFrontendConfiguration();
     }
 }

@@ -24,9 +24,9 @@ class ModuleSettingsService implements ModuleSettingsServiceInterface
     }
 
     /**
-     * if true is it a complete configuration
+     * if true is it a complete backend configuration
      */
-    public function isValid(): bool
+    public function isValidBackendConfiguration(): bool
     {
         return $this->getStoreId()
             && $this->getBasicAuthPassword()
@@ -35,6 +35,15 @@ class ModuleSettingsService implements ModuleSettingsServiceInterface
             && $this->moduleFileSettingsService->checkClientCertificateP12FileExists()
             && $this->moduleFileSettingsService->checkClientCertificatePrivateKeyFileExists()
             && $this->moduleFileSettingsService->checkTrustAnchorPEMFileExists();
+    }
+
+    /**
+     * if true is it a complete frontend configuration
+     */
+    public function isValidFrontendConfiguration(): bool
+    {
+        return $this->getStoreId()
+            && $this->getSharedSecret();
     }
 
     /**
