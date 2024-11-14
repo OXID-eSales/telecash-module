@@ -66,7 +66,9 @@ interface ModuleSettingsServiceInterface
         self::LOG_LEVEL_DEBUG => 100
     ];
 
-    public function isValid(): bool;
+    public function isValidBackendConfiguration(): bool;
+
+    public function isValidFrontendConfiguration(): bool;
 
     public function isLiveApiMode(): bool;
 

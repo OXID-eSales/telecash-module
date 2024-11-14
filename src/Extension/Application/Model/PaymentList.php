@@ -10,6 +10,7 @@ declare(strict_types=1);
 namespace OxidSolutionCatalysts\TeleCash\Extension\Application\Model;
 
 use OxidEsales\Eshop\Application\Model\User;
+use OxidSolutionCatalysts\TeleCash\Exception\TeleCashException;
 use OxidSolutionCatalysts\TeleCash\Traits\ModelGetter;
 use OxidSolutionCatalysts\TeleCash\Traits\ServiceContainer;
 
@@ -43,11 +44,12 @@ class PaymentList extends PaymentList_parent
      * {@inheritDoc}
      *
      * @param string $sShipSetId user chosen delivery set
-     * @param double $dPrice     basket product price excl. discount
-     * @param User   $oUser      session user object
+     * @param double $dPrice basket product price excl. discount
+     * @param User $oUser session user object
      *
      * @return array<string, \OxidEsales\EshopCommunity\Application\Model\Payment>
      *     Array of payment models indexed by payment id
+     * @throws TeleCashException
      */
     public function getPaymentList($sShipSetId, $dPrice, $oUser = null)
     {

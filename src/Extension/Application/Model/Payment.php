@@ -108,6 +108,8 @@ class Payment extends Payment_parent
      */
     protected function isValidTeleCashConfiguration(): bool
     {
-        return $this->moduleSettings->isValid();
+        return $this->isAdmin() ?
+            $this->moduleSettings->isValidBackendConfiguration() :
+            $this->moduleSettings->isValidFrontendConfiguration();
     }
 }

@@ -35,7 +35,7 @@ use Symfony\Component\String\UnicodeString;
 final class ModuleSettingsTest extends TestCase
 {
     /**
-     * Tests the validation of complete TeleCash configuration
+     * Tests the validation of complete TeleCash backend configuration
      *
      * Verifies that the isValid method correctly evaluates:
      * - Presence of all required credentials
@@ -44,7 +44,7 @@ final class ModuleSettingsTest extends TestCase
      *
      * @return void
      */
-    public function testIsValid(): void
+    public function testIsValidBackendConfiguration(): void
     {
         // Create mocks for dependencies
         $moduleSettingService = $this->createPartialMock(ModuleSettingService::class, ['getString']);
@@ -82,7 +82,7 @@ final class ModuleSettingsTest extends TestCase
 
         // Test valid configuration
         $this->assertTrue(
-            $sut->isValid(),
+            $sut->isValidBackendConfiguration(),
             'Configuration should be valid when all required settings are present'
         );
 
@@ -183,7 +183,112 @@ final class ModuleSettingsTest extends TestCase
             $sut = new ModuleSettingsService($invalidSettingService, $invalidFileService);
 
             $this->assertFalse(
-                $sut->isValid(),
+                $sut->isValidBackendConfiguration(),
+                sprintf('[%s] %s', $caseName, $testCase['message'])
+            );
+        }
+    }
+
+    /**
+     * Tests the validation of frontend TeleCash configuration
+     *
+     * Verifies that the isValidFrontendConfiguration method correctly evaluates:
+     * - Presence of required store ID
+     * - Presence of shared secret
+     * - Various combinations of valid and invalid configurations
+     *
+     * @return void
+     * @throws Exception
+     */
+    public function testIsValidFrontendConfiguration(): void
+    {
+        // Create mocks for dependencies
+        $moduleSettingService = $this->createPartialMock(ModuleSettingService::class, ['getString']);
+        $fileSettingsService = $this->createMock(ModuleFileSettingsServiceInterface::class);
+
+        // Setup valid configuration case
+        $moduleSettingService->method('getString')->willReturnMap([
+            [
+                ModuleSettingsServiceInterface::STORE_ID,
+                Module::MODULE_ID,
+                new UnicodeString('valid-store')
+            ],
+            [
+                ModuleSettingsServiceInterface::SHARED_SECRET,
+                Module::MODULE_ID,
+                new UnicodeString('valid-secret')
+            ]
+        ]);
+
+        $sut = new ModuleSettingsService($moduleSettingService, $fileSettingsService);
+
+        // Test valid configuration
+        $this->assertTrue(
+            $sut->isValidFrontendConfiguration(),
+            'Configuration should be valid when all required frontend settings are present'
+        );
+
+        // Test various invalid configurations
+        $invalidCases = [
+            'missing_store_id' => [
+                'settings' => [
+                    [
+                        ModuleSettingsServiceInterface::STORE_ID,
+                        Module::MODULE_ID,
+                        new UnicodeString('')
+                    ],
+                    [
+                        ModuleSettingsServiceInterface::SHARED_SECRET,
+                        Module::MODULE_ID,
+                        new UnicodeString('valid-secret')
+                    ]
+                ],
+                'message' => 'Configuration should be invalid with missing store ID'
+            ],
+            'missing_shared_secret' => [
+                'settings' => [
+                    [
+                        ModuleSettingsServiceInterface::STORE_ID,
+                        Module::MODULE_ID,
+                        new UnicodeString('valid-store')
+                    ],
+                    [
+                        ModuleSettingsServiceInterface::SHARED_SECRET,
+                        Module::MODULE_ID,
+                        new UnicodeString('')
+                    ]
+                ],
+                'message' => 'Configuration should be invalid with missing shared secret'
+            ],
+            'all_empty' => [
+                'settings' => [
+                    [
+                        ModuleSettingsServiceInterface::STORE_ID,
+                        Module::MODULE_ID,
+                        new UnicodeString('')
+                    ],
+                    [
+                        ModuleSettingsServiceInterface::SHARED_SECRET,
+                        Module::MODULE_ID,
+                        new UnicodeString('')
+                    ]
+                ],
+                'message' => 'Configuration should be invalid with all settings empty'
+            ]
+        ];
+
+        foreach ($invalidCases as $caseName => $testCase) {
+            // Create fresh mocks for each invalid case
+            $invalidSettingService = $this->createPartialMock(ModuleSettingService::class, ['getString']);
+            $invalidFileService = $this->createMock(ModuleFileSettingsServiceInterface::class);
+
+            // Configure mock with test case data
+            $invalidSettingService->method('getString')->willReturnMap($testCase['settings']);
+
+            $sut = new ModuleSettingsService($invalidSettingService, $invalidFileService);
+
+            $this->assertFalse(
+                $sut->isValidFrontendConfiguration(),
                 sprintf('[%s] %s', $caseName, $testCase['message'])
             );
         }
