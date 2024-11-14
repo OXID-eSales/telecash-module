@@ -118,10 +118,7 @@ class PaymentMain extends PaymentMain_parent
         $oxid = $this->getEditObjectId();
         $teleCashPayment = $this->getTeleCashPaymentModel();
 
-        if (
-            $teleCashPayment
-            && $teleCashPayment->loadByPaymentId($oxid)
-        ) {
+        if ($teleCashPayment->loadByPaymentId($oxid)) {
             $result = $teleCashPayment;
         }
 
@@ -136,12 +133,10 @@ class PaymentMain extends PaymentMain_parent
         $result = false;
         $teleCashPayment = $this->getTeleCashPaymentModel();
         try {
-            if ($teleCashPayment) {
-                $teleCashPayment->setPaymentId($this->getEditObjectId());
-                $teleCashPayment->setTeleCashIdent();
-                $teleCashPayment->setTeleCashCaptureType();
-                $result = (bool) $teleCashPayment->save();
-            }
+            $teleCashPayment->setPaymentId($this->getEditObjectId());
+            $teleCashPayment->setTeleCashIdent();
+            $teleCashPayment->setTeleCashCaptureType();
+            $result = (bool) $teleCashPayment->save();
         } catch (Exception $e) {
             Registry::getUtilsView()->addErrorToDisplay(
                 $this->translateService->translateString('OSC_TELECASH_PAYMENT_DATA_INITIAL_ERROR') . $e->getMessage()

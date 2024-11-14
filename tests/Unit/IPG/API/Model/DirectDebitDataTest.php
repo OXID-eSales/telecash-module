@@ -1,8 +1,11 @@
 <?php
 
-namespace OxidSolutionCatalysts\TeleCash\IPG\API\Model;
+namespace OxidSolutionCatalysts\TeleCash\Tests\Unit\IPG\API\Model;
 
-class DirectDebitDataTest extends \PHPUnit\Framework\TestCase
+use OxidSolutionCatalysts\TeleCash\IPG\API\Model\DirectDebitData;
+use PHPUnit\Framework\TestCase;
+
+class DirectDebitDataTest extends TestCase
 {
     /**
      * @param string|null $bankCode

@@ -15,4 +15,9 @@ class TeleCashException extends StandardException
     {
         return new self('TELECASHPAYMENT_EXISTS_FAIL');
     }
+
+    public function serviceNotFound(): self
+    {
+        return new self('TELECASH_SERVICE_MISSING');
+    }
 }

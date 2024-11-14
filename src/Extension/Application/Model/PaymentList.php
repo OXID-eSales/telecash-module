@@ -57,8 +57,7 @@ class PaymentList extends PaymentList_parent
             $payment = $this->getOxidPaymentModel();
             /** @var Payment $payment */
             if (
-                $payment
-                && $payment->load($paymentListElement->getId())
+                $payment->load($paymentListElement->getId())
                 && !$payment->isTeleCashPaymentValid()
             ) {
                 unset($paymentList[$oxPaymentId]);

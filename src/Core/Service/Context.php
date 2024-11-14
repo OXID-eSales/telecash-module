@@ -10,7 +10,10 @@ declare(strict_types=1);
 namespace OxidSolutionCatalysts\TeleCash\Core\Service;
 
 use OxidEsales\Eshop\Core\Config;
+use OxidEsales\EshopCommunity\Application\Model\Basket;
 use OxidSolutionCatalysts\TeleCash\Core\Module;
+use OxidSolutionCatalysts\TeleCash\Settings\Service\ModuleSettingsService;
+use OxidSolutionCatalysts\TeleCash\Settings\Service\ModuleSettingsServiceInterface;
 use Symfony\Component\Filesystem\Path;
 
 /**
@@ -29,21 +32,15 @@ use Symfony\Component\Filesystem\Path;
 class Context
 {
     /**
-     * Shop configuration instance
-     * Used for accessing shop-specific settings and directories
-     *
-     * @var Config
-     */
-    protected Config $shopConfig;
-
-    /**
      * Initializes the context service with required dependencies
      *
      * @param Config $shopConfig Shop configuration instance providing access to shop settings
+     * @param ModuleSettingsServiceInterface $moduleSettings
      */
-    public function __construct(Config $shopConfig)
-    {
-        $this->shopConfig = $shopConfig;
+    public function __construct(
+        private readonly Config $shopConfig,
+        private readonly ModuleSettingsServiceInterface $moduleSettings
+    ) {
     }
 
     /**
@@ -89,5 +86,75 @@ class Context
     protected function getCurrentDate(): string
     {
         return date('Y-m-d');
+    }
+
+    /**
+     * Get Success-URL for TeleCash-Connect
+     */
+    public function getSuccessUrl(Basket $basket): string
+    {
+        $parameter = [
+            "cl"  => "order",
+            "fnc" => "execute",
+        ];
+
+        if ($this->shopConfig->getConfigParam('blConfirmAGB')) {
+            $parameter["ord_agb"] = 1;
+        }
+
+        if ($this->shopConfig->getConfigParam('blEnableIntangibleProdAgreement')) {
+            if ($basket->hasArticlesWithDownloadableAgreement()) {
+                $parameter["oxdownloadableproductsagreement"] = "1";
+            }
+            if ($basket->hasArticlesWithIntangibleAgreement()) {
+                $parameter["oxserviceproductsagreement"] = "1";
+            }
+        }
+
+        return $this->prepareUrl($parameter);
+    }
+
+    /**
+     * Get Fail-URL for TeleCash-Connect
+     */
+    public function getFailUrl(): string
+    {
+        $parameter = [
+            "cl"           => "payment",
+            "fnc"          => "showTeleCashError",
+        ];
+
+        return $this->prepareUrl($parameter);
+    }
+
+    /**
+     * Get Notification-URL for TeleCash-Connect
+     */
+    public function getNotificationUrl(): string
+    {
+        $parameter = [
+            "cl"  => "FrontendTeleCashNotificationEndpoint",
+            "fnc" => "receiveNotifications",
+        ];
+
+        // add xdebug in sandbox for better testing
+        $sandboxMode = !$this->moduleSettings->isLiveApiMode();
+        if ($sandboxMode) {
+            $parameter['XDEBUG_SESSION_START'] = "1";
+        }
+
+        return $this->prepareUrl($parameter);
+    }
+
+    /**
+     * Helper for Url-Methods
+     * @param array<string, int|string> $parameter
+     * @return string
+     */
+    private function prepareUrl(array $parameter): string
+    {
+        return html_entity_decode(
+            $this->shopConfig->getCurrentShopUrl(false) . 'index.php?' . http_build_query($parameter)
+        );
     }
 }

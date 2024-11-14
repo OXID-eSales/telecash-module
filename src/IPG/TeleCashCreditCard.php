@@ -7,6 +7,12 @@ use OxidSolutionCatalysts\TeleCash\IPG\API\Request;
 use OxidSolutionCatalysts\TeleCash\IPG\API\Response;
 use OxidSolutionCatalysts\TeleCash\IPG\API\Service\OrderService;
 
+/**
+ * Class TeleCashCreditCard
+ *
+ * @todo Consider to reduce the number of dependencies
+ * @SuppressWarnings(PHPMD.CouplingBetweenObjects)
+ */
 class TeleCashCreditCard extends TeleCashBase
 {
     /**

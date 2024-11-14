@@ -42,7 +42,7 @@ class ModuleSettingsService implements ModuleSettingsServiceInterface
      */
     public function isLiveApiMode(): bool
     {
-        return self::API_MODE_SANDBOX === $this->getApiMode();
+        return self::API_MODE_LIVE === $this->getApiMode();
     }
 
     /**
@@ -64,6 +64,14 @@ class ModuleSettingsService implements ModuleSettingsServiceInterface
     }
 
     /**
+     * get the Connect URL by API-Mode
+     */
+    public function getConnectUrl(): string
+    {
+        return self::CONNECT_URLS[$this->getApiMode()];
+    }
+
+    /**
      * get the Store ID from Config
      * @return string
      */
@@ -80,6 +88,25 @@ class ModuleSettingsService implements ModuleSettingsServiceInterface
     public function saveStoreId(string $value): void
     {
         $this->moduleSettingService->saveString(self::STORE_ID, $value, Module::MODULE_ID);
+    }
+
+    /**
+     * get the Shared Secret from Config
+     * @return string
+     */
+    public function getSharedSecret(): string
+    {
+        return (string)$this->moduleSettingService->getString(self::SHARED_SECRET, Module::MODULE_ID);
+    }
+
+    /**
+     * save the Shared Secret to Config
+     * @param string $value
+     * @return void
+     */
+    public function saveSharedSecret(string $value): void
+    {
+        $this->moduleSettingService->saveString(self::SHARED_SECRET, $value, Module::MODULE_ID);
     }
 
     /**

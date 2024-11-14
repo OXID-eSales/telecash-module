@@ -1,13 +1,16 @@
 <?php
 
-namespace OxidSolutionCatalysts\TeleCash\IPG\API\Model;
+namespace OxidSolutionCatalysts\TeleCash\Tests\Unit\IPG\API\Model;
+
+use OxidSolutionCatalysts\TeleCash\IPG\API\Model\RecurringPaymentInformation;
+use PHPUnit\Framework\TestCase;
 
 /**
  * Test case for RecurringPaymentInformation
  *
  * @package Checkdomain\TeleCash\IPG\API\Model
  */
-class RecurringPaymentInformationTest extends \PHPUnit\Framework\TestCase
+class RecurringPaymentInformationTest extends TestCase
 {
     /**
      * @param \DateTime|null $startDate

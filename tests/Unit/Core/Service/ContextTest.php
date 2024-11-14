@@ -10,8 +10,11 @@ declare(strict_types=1);
 namespace OxidSolutionCatalysts\TeleCash\Tests\Unit\Core\Service;
 
 use OxidEsales\Eshop\Core\Config;
+use OxidEsales\EshopCommunity\Application\Model\Basket;
 use OxidSolutionCatalysts\TeleCash\Core\Module;
+use OxidSolutionCatalysts\TeleCash\Settings\Service\ModuleSettingsServiceInterface;
 use OxidSolutionCatalysts\TeleCash\Tests\Unit\Core\Service\TestClasses\ContextTestClass;
+use PHPUnit\Framework\MockObject\Exception;
 use PHPUnit\Framework\TestCase;
 use PHPUnit\Framework\MockObject\MockObject;
 
@@ -53,6 +56,13 @@ class ContextTest extends TestCase
      */
     private string $mockLogsDir = '/var/www/shop/source/log';
 
+    /** @var ModuleSettingsServiceInterface&MockObject */
+    private ModuleSettingsServiceInterface&MockObject $moduleSettings;
+
+    /** @var string */
+    private string $mockShopUrl = 'https://example.com/shop/';
+
+
     /**
      * Sets up the test environment
      *
@@ -65,8 +75,15 @@ class ContextTest extends TestCase
         $this->shopConfig = $this->createMock(Config::class);
         $this->shopConfig->method('getLogsDir')
             ->willReturn($this->mockLogsDir);
+        $this->shopConfig->method('getCurrentShopUrl')
+            ->willReturn($this->mockShopUrl);
 
-        $this->context = new ContextTestClass($this->shopConfig);
+        $this->moduleSettings = $this->createMock(ModuleSettingsServiceInterface::class);
+
+        $this->context = new ContextTestClass(
+            $this->shopConfig,
+            $this->moduleSettings
+        );
     }
 
     /**
@@ -119,7 +136,10 @@ class ContextTest extends TestCase
         $shopConfig->method('getLogsDir')
             ->willReturn($baseDir);
 
-        $context = new ContextTestClass($shopConfig);
+        // Create new moduleSettings mock for this test
+        $moduleSettings = $this->createMock(ModuleSettingsServiceInterface::class);
+
+        $context = new ContextTestClass($shopConfig, $moduleSettings);
         $context->setFixedDate($testDate);
 
         $actualPath = $context->getTeleCashLogFilePath();
@@ -194,6 +214,174 @@ class ContextTest extends TestCase
             $actualPath,
             'Log filename should be correctly generated with different dates'
         );
+    }
+
+    /**
+     * Tests success URL generation with different basket configurations
+     *
+     * @dataProvider successUrlConfigProvider
+     * @param bool $hasAGB Whether AGB confirmation is required
+     * @param bool $hasDownloadAgreement Whether download agreement is required
+     * @param bool $hasIntangibleAgreement Whether intangible products agreement is required
+     * @param array<string, string|int> $expectedParams Expected URL parameters
+     * @throws Exception
+     */
+    public function testGetSuccessUrl(
+        bool $hasAGB,
+        bool $hasDownloadAgreement,
+        bool $hasIntangibleAgreement,
+        array $expectedParams
+    ): void {
+        // Mock shopConfig getConfigParam with specific return values
+        $this->shopConfig
+            ->expects($this->any())
+            ->method('getConfigParam')
+            ->willReturnCallback(function ($param) use ($hasAGB, $hasDownloadAgreement, $hasIntangibleAgreement) {
+                return match ($param) {
+                    'blConfirmAGB' => $hasAGB,
+                    'blEnableIntangibleProdAgreement' => ($hasDownloadAgreement || $hasIntangibleAgreement),
+                    default => null,
+                };
+            });
+
+        // Mock basket methods with specific return values
+        $basket = $this->createMock(Basket::class);
+        $basket->expects($this->any())
+            ->method('hasArticlesWithDownloadableAgreement')
+            ->willReturn($hasDownloadAgreement);
+        $basket->expects($this->any())
+            ->method('hasArticlesWithIntangibleAgreement')
+            ->willReturn($hasIntangibleAgreement);
+
+        $actualUrl = $this->context->getSuccessUrl($basket);
+
+        $baseParams = [
+            'cl' => 'order',
+            'fnc' => 'execute'
+        ];
+
+        $expectedParams = array_merge($baseParams, $expectedParams);
+        $expectedUrl = $this->mockShopUrl . 'index.php?' . http_build_query($expectedParams);
+
+        $this->assertEquals(
+            $expectedUrl,
+            $actualUrl,
+            'Success URL should contain correct parameters based on configuration'
+        );
+    }
+
+    /**
+     * Provides test cases for success URL generation
+     *
+     * @return array<string, array{bool, bool, bool, array<string, string|int>}>
+     */
+    public static function successUrlConfigProvider(): array
+    {
+        return [
+            'no_agreements' => [
+                false, // hasAGB
+                false, // hasDownloadAgreement
+                false, // hasIntangibleAgreement
+                []    // expectedParams
+            ],
+            'only_agb' => [
+                true,
+                false,
+                false,
+                ['ord_agb' => 1]
+            ],
+            'all_agreements' => [
+                true,
+                true,
+                true,
+                [
+                    'ord_agb' => 1,
+                    'oxdownloadableproductsagreement' => '1',
+                    'oxserviceproductsagreement' => '1'
+                ]
+            ],
+            'download_agreement_only' => [
+                false,
+                true,
+                false,
+                ['oxdownloadableproductsagreement' => '1']
+            ],
+            'intangible_agreement_only' => [
+                false,
+                false,
+                true,
+                ['oxserviceproductsagreement' => '1']
+            ]
+        ];
+    }
+
+    /**
+     * Tests fail URL generation
+     */
+    public function testGetFailUrl(): void
+    {
+        $actualUrl = $this->context->getFailUrl();
+
+        $expectedParams = [
+            'cl' => 'payment',
+            'fnc' => 'showTeleCashError'
+        ];
+        $expectedUrl = $this->mockShopUrl . 'index.php?' . http_build_query($expectedParams);
+
+        $this->assertEquals(
+            $expectedUrl,
+            $actualUrl,
+            'Fail URL should contain correct parameters'
+        );
+    }
+
+    /**
+     * Tests notification URL generation for different API modes
+     *
+     * @dataProvider notificationUrlModeProvider
+     * @param bool $isLiveMode Whether the API is in live mode
+     * @param array<string, string|int> $expectedParams Expected URL parameters
+     */
+    public function testGetNotificationUrl(bool $isLiveMode, array $expectedParams): void
+    {
+        $this->moduleSettings->method('isLiveApiMode')
+            ->willReturn($isLiveMode);
+
+        $actualUrl = $this->context->getNotificationUrl();
+
+        // Base parameters that should always be present
+        $baseParams = [
+            'cl' => 'FrontendTeleCashNotificationEndpoint',
+            'fnc' => 'receiveNotifications'
+        ];
+
+        $expectedParams = array_merge($baseParams, $expectedParams);
+        $expectedUrl = $this->mockShopUrl . 'index.php?' . http_build_query($expectedParams);
+
+        $this->assertEquals(
+            $expectedUrl,
+            $actualUrl,
+            'Notification URL should contain correct parameters based on API mode'
+        );
+    }
+
+    /**
+     * Provides test cases for notification URL generation
+     *
+     * @return array<string, array{bool, array<string, string|int>}>
+     */
+    public static function notificationUrlModeProvider(): array
+    {
+        return [
+            'live_mode' => [
+                true,  // isLiveMode
+                []     // expectedParams
+            ],
+            'sandbox_mode' => [
+                false,
+                ['XDEBUG_SESSION_START' => '1']
+            ]
+        ];
     }
 
     /**

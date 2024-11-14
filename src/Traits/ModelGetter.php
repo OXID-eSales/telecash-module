@@ -13,33 +13,76 @@ use OxidEsales\Eshop\Application\Model\Payment;
 use OxidSolutionCatalysts\TeleCash\Application\Model\TeleCashPayment;
 use OxidSolutionCatalysts\TeleCash\Core\Service\OxNewService;
 use OxidSolutionCatalysts\TeleCash\Core\Service\TeleCashPaymentValidatorServiceInterface;
+use OxidSolutionCatalysts\TeleCash\Exception\TeleCashException;
+use OxidSolutionCatalysts\TeleCash\IPG\TeleCashConnect;
+use OxidSolutionCatalysts\TeleCash\Application\Model\TeleCashConnectData;
+use OxidSolutionCatalysts\TeleCash\Settings\Service\ModuleSettingsServiceInterface;
 
 /**
  * Convenience trait to work with Controller-Models.
  */
 trait ModelGetter
 {
-    private function getTeleCashPaymentModel(): ?TeleCashPayment
+    /**
+     * @throws TeleCashException
+     */
+    private function getTeleCashPaymentModel(): TeleCashPayment
     {
-        $oxNewService = $this->getOxNewService();
-        if (!$oxNewService) {
-            return null;
-        }
-
         $validator = $this->getRequiredService(
             TeleCashPaymentValidatorServiceInterface::class,
             'TeleCashPaymentValidatorService'
         );
-        return $oxNewService->oxNew(TeleCashPayment::class, [$validator]);
+        return $this->getOxNewService()->oxNew(TeleCashPayment::class, [$validator]);
     }
 
-    private function getOxidPaymentModel(): ?Payment
+    /**
+     * @throws TeleCashException
+     */
+    private function getOxidPaymentModel(): Payment
     {
-        return $this->getOxNewService()?->oxNew(Payment::class);
+        return $this->getOxNewService()->oxNew(Payment::class);
     }
 
-    private function getOxNewService(): ?OxNewService
+    /**
+     * @throws TeleCashException
+     */
+    private function getOxNewService(): OxNewService
     {
-        return $this->getServiceFromContainer(OxNewService::class);
+        $oxNewService = $this->getServiceFromContainer(OxNewService::class);
+        if (!$oxNewService) {
+            throw (new TeleCashException())->serviceNotFound();
+        }
+        return $oxNewService;
+    }
+
+    /**
+     * @throws TeleCashException
+     */
+    private function getTeleCashConnect(): TeleCashConnect
+    {
+        $moduleSettings = $this->getServiceFromContainer(ModuleSettingsServiceInterface::class);
+        $storeId = $moduleSettings ? $moduleSettings->getStoreId() : '';
+        $password = $moduleSettings ? $moduleSettings->getSharedSecret() : '';
+        return $this->getOxNewService()->oxNew(
+            TeleCashConnect::class,
+            [
+                $storeId,
+                $password
+            ]
+        );
+    }
+
+    /**
+     * @throws TeleCashException
+     */
+    private function getTeleCashConnectData(): TeleCashConnectData
+    {
+        return $this->getOxNewService()->oxNew(
+            TeleCashConnectData::class,
+            [
+                $this->getTeleCashConnect(),
+                $this->getOxNewService()
+            ]
+        );
     }
 }

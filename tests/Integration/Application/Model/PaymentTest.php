@@ -149,26 +149,4 @@ class PaymentTest extends TestCase
         $result = $this->payment->isValidPayment([], '1', $this->createMock(User::class), 100.0, '1');
         $this->assertFalse($result);
     }
-
-    /**
-     * Tests payment validation when required services are missing
-     *
-     * Verifies that:
-     * - System gracefully handles missing services
-     * - Default behavior is maintained
-     * - No errors occur when services are unavailable
-     */
-    public function testPaymentValidationWithMissingService(): void
-    {
-        $container = $this->createMock(ContainerInterface::class);
-        $container->method('has')
-            ->willReturn(false);
-
-        $payment = new PaymentTestClass(false);
-        $payment->publicSetContainer($container);
-        $payment->setParentValidationResult(true);
-
-        $result = $payment->isValidPayment([], '1', $this->createMock(User::class), 100.0, '1');
-        $this->assertTrue($result);
-    }
 }

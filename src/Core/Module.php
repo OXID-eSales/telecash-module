@@ -20,20 +20,25 @@ final class Module
     public const TELECASH_DB_FIELD_IDENT = self::TELECASH_PAYMENT_EXTENSION_TABLE .
         '__' . self::TELECASH_PAYMENT_EXTENSION_TABLE_IDENT;
     public const TELECASH_DB_FIELD_CAPTURETYPE = self::TELECASH_PAYMENT_EXTENSION_TABLE .
-    '__' . self::TELECASH_PAYMENT_EXTENSION_TABLE_CAPTURETYPE;
+        '__' . self::TELECASH_PAYMENT_EXTENSION_TABLE_CAPTURETYPE;
 
     public const TELECASH_PAYMENT_IDENT_DEFAULT = 'none';
-    public const TELECASH_PAYMENT_IDENT_CREDITCARD = 'creditcard';
+    public const TELECASH_PAYMENT_IDENT_TELECASH = 'telecash';
+    public const TELECASH_PAYMENT_IDENT_CC_AMERICAN = 'cc_american';
+    public const TELECASH_PAYMENT_IDENT_CC_VISA = 'cc_visa';
+    public const TELECASH_PAYMENT_IDENT_CC_MASTERCARD = 'cc_mastercard';
+
     public const TELECASH_PAYMENT_IDENT_PAYPAL = 'paypal';
     public const TELECASH_PAYMENT_IDENT_SEPA = 'sepa';
-    public const TELECASH_PAYMENT_IDENT_SOFORT = 'sofort';
 
     public const TELECASH_PAYMENT_IDENTS = [
-        self::TELECASH_PAYMENT_IDENT_DEFAULT,
-        self::TELECASH_PAYMENT_IDENT_CREDITCARD,
-        self::TELECASH_PAYMENT_IDENT_PAYPAL,
-        self::TELECASH_PAYMENT_IDENT_SEPA,
-        self::TELECASH_PAYMENT_IDENT_SOFORT,
+        self::TELECASH_PAYMENT_IDENT_DEFAULT       => '',
+        self::TELECASH_PAYMENT_IDENT_TELECASH      => '',
+        self::TELECASH_PAYMENT_IDENT_CC_AMERICAN   => 'A',
+        self::TELECASH_PAYMENT_IDENT_CC_MASTERCARD => 'M',
+        self::TELECASH_PAYMENT_IDENT_CC_VISA       => 'V',
+        self::TELECASH_PAYMENT_IDENT_SEPA          => 'debitDE',
+        self::TELECASH_PAYMENT_IDENT_PAYPAL        => 'paypal',
     ];
 
     public const TELECASH_CAPTURE_TYPE_DIRECT = 'direct';
@@ -44,7 +49,20 @@ final class Module
         self::TELECASH_PAYMENT_IDENT_DEFAULT => [
             self::TELECASH_CAPTURE_TYPE_DIRECT
         ],
-        self::TELECASH_PAYMENT_IDENT_CREDITCARD => [
+        self::TELECASH_PAYMENT_IDENT_TELECASH => [
+            self::TELECASH_CAPTURE_TYPE_DIRECT
+        ],
+        self::TELECASH_PAYMENT_IDENT_CC_AMERICAN => [
+            self::TELECASH_CAPTURE_TYPE_DIRECT,
+            self::TELECASH_CAPTURE_TYPE_ONDELIVERY,
+            self::TELECASH_CAPTURE_TYPE_MANUALLY
+        ],
+        self::TELECASH_PAYMENT_IDENT_CC_VISA => [
+            self::TELECASH_CAPTURE_TYPE_DIRECT,
+            self::TELECASH_CAPTURE_TYPE_ONDELIVERY,
+            self::TELECASH_CAPTURE_TYPE_MANUALLY
+        ],
+        self::TELECASH_PAYMENT_IDENT_CC_MASTERCARD => [
             self::TELECASH_CAPTURE_TYPE_DIRECT,
             self::TELECASH_CAPTURE_TYPE_ONDELIVERY,
             self::TELECASH_CAPTURE_TYPE_MANUALLY
@@ -57,8 +75,11 @@ final class Module
         self::TELECASH_PAYMENT_IDENT_SEPA => [
             self::TELECASH_CAPTURE_TYPE_DIRECT
         ],
-        self::TELECASH_PAYMENT_IDENT_SOFORT => [
-            self::TELECASH_CAPTURE_TYPE_DIRECT
-        ]
+    ];
+
+    public const TELECASH_TRANSACTION_TYPES = [
+        self::TELECASH_CAPTURE_TYPE_DIRECT     => 'sale',
+        self::TELECASH_CAPTURE_TYPE_ONDELIVERY => 'postauth',
+        self::TELECASH_CAPTURE_TYPE_MANUALLY   => 'postauth'
     ];
 }

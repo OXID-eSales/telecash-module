@@ -32,6 +32,9 @@ interface TeleCashPaymentInterface
      */
     public function getTeleCashIdent(): string;
 
+    /** getter for TeleCash Payment-Method */
+    public function getTeleCashPaymentMethod(): string;
+
     /**
      * Sets the TeleCash identifier
      */

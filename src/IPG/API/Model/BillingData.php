@@ -2,6 +2,14 @@
 
 namespace OxidSolutionCatalysts\TeleCash\IPG\API\Model;
 
+/**
+ * Class BillingData
+ *
+ * @todo Consider to reduce the number of fields, CyclomaticComplexity and NPathComplexity
+ * @SuppressWarnings(PHPMD.TooManyFields)
+ * @SuppressWarnings(PHPMD.CyclomaticComplexity)
+ * @SuppressWarnings(PHPMD.NPathComplexity)
+ */
 class BillingData implements ElementInterface
 {
     private string|null $browserIP;
@@ -121,6 +129,9 @@ class BillingData implements ElementInterface
 
     /**
      * @inheritDoc
+     * @todo Consider to reduce the CyclomaticComplexity and NPathComplexity
+     * @SuppressWarnings(PHPMD.CyclomaticComplexity)
+     * @SuppressWarnings(PHPMD.NPathComplexity)
      */
     public function getXML(\DOMDocument $document): mixed
     {

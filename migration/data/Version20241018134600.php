@@ -88,7 +88,7 @@ final class Version20241018134600 extends AbstractMigration
                 [
                     'columnDefinition' => sprintf(
                         "ENUM('%s') COLLATE 'latin1_general_ci' NOT NULL DEFAULT '%s'",
-                        implode("','", Module::TELECASH_PAYMENT_IDENTS),
+                        implode("','", array_keys(Module::TELECASH_PAYMENT_IDENTS)),
                         Module::TELECASH_PAYMENT_IDENT_DEFAULT
                     ),
                     'comment' => 'ident for TeleCash-Payment. The default is '
@@ -107,7 +107,7 @@ final class Version20241018134600 extends AbstractMigration
                 [
                     'columnDefinition' => sprintf(
                         "ENUM('%s') COLLATE 'latin1_general_ci' NOT NULL DEFAULT '%s'",
-                        implode("','", Module::TELECASH_CAPTURE_TYPES[Module::TELECASH_PAYMENT_IDENT_CREDITCARD]),
+                        implode("','", Module::TELECASH_CAPTURE_TYPES[Module::TELECASH_PAYMENT_IDENT_CC_VISA]),
                         Module::TELECASH_CAPTURE_TYPE_DIRECT
                     ),
                     'comment' => 'Capture-Type for TeleCash-Payment. The default is none'

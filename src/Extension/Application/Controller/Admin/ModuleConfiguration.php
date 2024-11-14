@@ -59,9 +59,20 @@ class ModuleConfiguration extends ModuleConfiguration_parent
     {
         $result = parent::render();
 
-        $this->_aViewData['sTeleCashModuleId'] = Module::MODULE_ID;
-        $this->_aViewData['sTeleCashVarGroupAPI'] = ModuleSettingsServiceInterface::MODULE_CONFIG_API_VARGROUP;
-        $this->_aViewData['sTeleCashOptionTrigger'] = ModuleSettingsServiceInterface::CLIENT_CERT_PRIVATEKEY_PASSWORD;
+        $this->addTplParam(
+            'sTeleCashModuleId',
+            Module::MODULE_ID
+        );
+
+        $this->addTplParam(
+            'sTeleCashVarGroupAPIBackend',
+            ModuleSettingsServiceInterface::MODULE_CONFIG_API_BACKEND_VARGROUP
+        );
+
+        $this->addTplParam(
+            'sTeleCashOptionTrigger',
+            ModuleSettingsServiceInterface::CLIENT_CERT_PRIVATEKEY_PASSWORD
+        );
 
         // collect setted options for template
         $aTeleCashFiles = [];

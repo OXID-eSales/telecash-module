@@ -12,6 +12,7 @@ namespace OxidSolutionCatalysts\TeleCash\Application\Controller\Admin;
 use OxidEsales\Eshop\Core\Controller\BaseController;
 use OxidSolutionCatalysts\TeleCash\Core\Module;
 use OxidSolutionCatalysts\TeleCash\Core\Service\RegistryService;
+use OxidSolutionCatalysts\TeleCash\Exception\TeleCashException;
 use OxidSolutionCatalysts\TeleCash\Traits\ModelGetter;
 use OxidSolutionCatalysts\TeleCash\Traits\Json;
 use OxidSolutionCatalysts\TeleCash\Traits\RequestGetter;
@@ -85,13 +86,14 @@ class AdminTeleCashJsonEndpoint extends BaseController
      */
     public function getPossibleTeleCashCaptureTypes(): void
     {
-        $resultArr = [];
-
-        $teleCashPayment = $this->getTeleCashPaymentModel();
-        if ($teleCashPayment) {
+        try {
+            $teleCashPayment = $this->getTeleCashPaymentModel();
             $valueKey = Module::TELECASH_DB_FIELD_IDENT;
             $teleCashIdentValue = $this->getStringRequestEscapedData($valueKey);
             $resultArr = $teleCashPayment->getPossibleTeleCashCaptureTypes($teleCashIdentValue);
+        } catch (TeleCashException $e) {
+            // Log error if needed
+            $resultArr = [];
         }
 
         $result = $this->arrayToJson($resultArr);

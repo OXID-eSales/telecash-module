@@ -8,6 +8,7 @@
 declare(strict_types=1);
 
 use OxidSolutionCatalysts\TeleCash\Settings\Service\ModuleFileSettingsServiceInterface;
+use OxidSolutionCatalysts\TeleCash\Settings\Service\ModuleLanguageSettingsServiceInterface;
 use OxidSolutionCatalysts\TeleCash\Settings\Service\ModuleSettingsServiceInterface;
 use OxidSolutionCatalysts\TeleCash\Core\Module;
 
@@ -15,8 +16,11 @@ $aLang = [
     'charset' => 'UTF-8',
 
     # Module settings
-    'SHOP_MODULE_GROUP_' . ModuleSettingsServiceInterface::MODULE_CONFIG_API_VARGROUP   => 'API',
-    'SHOP_MODULE_GROUP_' . ModuleSettingsServiceInterface::MODULE_CONFIG_DEBUG_VARGROUP => 'Fehleranalyse',
+    'SHOP_MODULE_GROUP_' . ModuleSettingsServiceInterface::MODULE_CONFIG_API_VARGROUP          => 'API',
+    'SHOP_MODULE_GROUP_' . ModuleSettingsServiceInterface::MODULE_CONFIG_API_FRONTEND_VARGROUP => 'API für OXID Shop',
+    'SHOP_MODULE_GROUP_' . ModuleSettingsServiceInterface::MODULE_CONFIG_API_BACKEND_VARGROUP  => 'API für OXID Admin',
+    'SHOP_MODULE_GROUP_' . ModuleSettingsServiceInterface::MODULE_CONFIG_LANGUAGE              => 'Sprachen',
+    'SHOP_MODULE_GROUP_' . ModuleSettingsServiceInterface::MODULE_CONFIG_DEBUG_VARGROUP        => 'Fehleranalyse',
 
     'SHOP_MODULE_' . ModuleSettingsServiceInterface::API_MODE                                                          => 'API-Modus',
     'SHOP_MODULE_' . ModuleSettingsServiceInterface::API_MODE . '_' . ModuleSettingsServiceInterface::API_MODE_LIVE    => 'Live',
@@ -28,8 +32,14 @@ $aLang = [
     'SHOP_MODULE_' . ModuleSettingsServiceInterface::LOG_LEVEL . '_' . ModuleSettingsServiceInterface::LOG_LEVEL_DEBUG => 'Debug',
     'HELP_SHOP_MODULE_' . ModuleSettingsServiceInterface::LOG_LEVEL                                                    => 'Im TeleCash-Modul werden an verschiedenen Stellen Daten gesammelt. Je nach Logger-Level werden nur Fehler (Error) oder Fehler und Informationen (Info) oder Fehler, Informationen und ausführliche Informationen (Debug) in eine Log-Datei geschrieben. Die Log-Datei befindet sich auf dem Server unter source/logs/' . Module::MODULE_ID,
 
+    'SHOP_MODULE_' . ModuleLanguageSettingsServiceInterface::LANGUAGES      => 'Sprachen',
+    'HELP_SHOP_MODULE_' . ModuleLanguageSettingsServiceInterface::LANGUAGES => 'Für jede Sprache die im Shop verwendet wird, brauchen wir eine passendes Gebietsschema. z.B. de => de_DE. Bitte ergänzen Sie alle fehlenden Schematas. Der Standard für nicht gefundene Schematas is en_US.',
+
+
     'SHOP_MODULE_' . ModuleSettingsServiceInterface::STORE_ID                             => 'Shop-ID',
     'HELP_SHOP_MODULE_' . ModuleSettingsServiceInterface::STORE_ID                        => 'Ihre Shop-ID (z.B. 10012345678), die für die Basis-Authentifizierung erforderlich ist.',
+    'SHOP_MODULE_' . ModuleSettingsServiceInterface::SHARED_SECRET                        => 'geteiltes Geheimnis ("Shared Secret")',
+    'HELP_SHOP_MODULE_' . ModuleSettingsServiceInterface::SHARED_SECRET                   => 'Ihr geteiltes Geheimnis für den Zugriff auf TeleCash via TeleCash Connect. Wenn Sie einen Zugriff auf die Telecash-Bestellungnen aus dem OXID-Admin heraus nicht benötigen, reicht es aus, wenn Sie lediglich das geteilte Geheimnis hinterlegen.',
     'SHOP_MODULE_' . ModuleSettingsServiceInterface::USER_ID                              => 'Benutzer-ID',
     'HELP_SHOP_MODULE_' . ModuleSettingsServiceInterface::USER_ID                         => 'Die Benutzer-ID, die den Benutzer bezeichnet, der auf die Web-Service-API zugreifen darf, z.B. 1. Auch dies ist für die Basis-Authentifizierung erforderlich.',
     'SHOP_MODULE_' . ModuleSettingsServiceInterface::BASIC_AUTH_PASSWORD                  => 'Passwort für Basis-Authentifizierung',

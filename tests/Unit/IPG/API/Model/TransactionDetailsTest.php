@@ -1,13 +1,18 @@
 <?php
 
-namespace OxidSolutionCatalysts\TeleCash\IPG\API\Model;
+namespace OxidSolutionCatalysts\TeleCash\Tests\Unit\IPG\API\Model;
+
+use DOMDocument;
+use DOMNode;
+use OxidSolutionCatalysts\TeleCash\IPG\API\Model\TransactionDetails;
+use PHPUnit\Framework\TestCase;
 
 /**
  * Test case for Payment
  *
  * @package Checkdomain\TeleCash\IPG\API\Model
  */
-class TransactionDetailsTest extends \PHPUnit\Framework\TestCase
+class TransactionDetailsTest extends TestCase
 {
     /**
      * @param string|null $comments
@@ -18,7 +23,7 @@ class TransactionDetailsTest extends \PHPUnit\Framework\TestCase
     public function testXMLGeneration(string|null $comments, string|null $invoiceNumber): void
     {
         $ccData   = new TransactionDetails('ns2', $comments, $invoiceNumber);
-        $document = new \DOMDocument('1.0', 'UTF-8');
+        $document = new DOMDocument('1.0', 'UTF-8');
         $xml      = $ccData->getXML($document);
         $document->appendChild($xml);
 
@@ -26,7 +31,7 @@ class TransactionDetailsTest extends \PHPUnit\Framework\TestCase
         $this->assertEquals(1, $elementPayment->length, 'Expected element TransactionDetails not found');
 
         $children = [];
-        /** @var \DOMNode $child */
+        /** @var DOMNode $child */
         foreach ($elementPayment->item(0)->childNodes as $child) {
             $children[$child->nodeName] = $child->nodeValue;
         }

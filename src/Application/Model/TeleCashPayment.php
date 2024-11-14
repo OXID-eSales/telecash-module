@@ -85,7 +85,7 @@ class TeleCashPayment extends BaseModel implements TeleCashPaymentInterface
      *
      * @param string $paymentId    The payment ID to set. This corresponds to the OXPAYMENTID field.
      * @param string $ident        The TeleCash ident to set. Must be one of the valid idents
-     *                            defined in Module::TELECASH_PAYMENT_IDENTS.
+     *                            defined as keys in Module::TELECASH_PAYMENT_IDENTS.
      * @param string $captureType  The capture type to set. Must be one of the valid types
      *                            defined in Module::TELECASH_CAPTURE_TYPES for the given ident.
      *
@@ -150,7 +150,7 @@ class TeleCashPayment extends BaseModel implements TeleCashPaymentInterface
     /** getter for possible TeleCash Idents */
     public function getPossibleTeleCashIdents(): array
     {
-        return Module::TELECASH_PAYMENT_IDENTS;
+        return array_keys(Module::TELECASH_PAYMENT_IDENTS);
     }
 
     /** getter for TeleCash Ident */
@@ -160,6 +160,13 @@ class TeleCashPayment extends BaseModel implements TeleCashPaymentInterface
             $this->telecashIdent = $this->getFieldStringData(Module::TELECASH_PAYMENT_EXTENSION_TABLE_IDENT);
         }
         return $this->telecashIdent;
+    }
+
+    /** getter for TeleCash Payment-Method */
+    public function getTeleCashPaymentMethod(): string
+    {
+        $telecashIdent = $this->getTeleCashIdent();
+        return Module::TELECASH_PAYMENT_IDENTS[$telecashIdent];
     }
 
     /** setter for TeleCash Ident */
@@ -175,7 +182,7 @@ class TeleCashPayment extends BaseModel implements TeleCashPaymentInterface
     {
         return $ident && in_array($ident, $this->getPossibleTeleCashIdents(), true) ?
             $ident :
-            Module::TELECASH_PAYMENT_IDENT_DEFAULT;
+            Module::TELECASH_PAYMENT_IDENT_TELECASH;
     }
 
     /** getter for possible TeleCash Capture-Types */
@@ -192,6 +199,13 @@ class TeleCashPayment extends BaseModel implements TeleCashPaymentInterface
             $this->captureType = $this->getFieldStringData(Module::TELECASH_PAYMENT_EXTENSION_TABLE_CAPTURETYPE);
         }
         return $this->captureType;
+    }
+
+    /** getter for TeleCash Payment-Method */
+    public function getTeleCashTransactionType(): string
+    {
+        $captureType = $this->getTeleCashCaptureType();
+        return Module::TELECASH_TRANSACTION_TYPES[$captureType];
     }
 
     /** setter for Capture Type */

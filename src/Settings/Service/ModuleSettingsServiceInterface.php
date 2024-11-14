@@ -12,7 +12,11 @@ namespace OxidSolutionCatalysts\TeleCash\Settings\Service;
 interface ModuleSettingsServiceInterface
 {
     public const MODULE_CONFIG_API_VARGROUP = 'osctelecash_api';
+    public const MODULE_CONFIG_API_FRONTEND_VARGROUP = 'osctelecash_api_frontend';
+    public const MODULE_CONFIG_API_BACKEND_VARGROUP = 'osctelecash_api_backend';
     public const MODULE_CONFIG_DEBUG_VARGROUP = 'osctelecash_debug';
+    public const MODULE_CONFIG_LANGUAGE = 'osctelecash_language';
+
     public const API_MODE = 'osctelecash_apimode';
     public const API_MODE_LIVE = 'live';
     public const API_MODE_SANDBOX = 'sandbox';
@@ -25,7 +29,17 @@ interface ModuleSettingsServiceInterface
         self::API_MODE_SANDBOX,
     ];
 
+    /**
+     * possible API-Modes
+     */
+    public const CONNECT_URLS = [
+        self::API_MODE_LIVE    => 'https://www.ipg-online.com/connect/gateway/processing',
+        self::API_MODE_SANDBOX => 'https://test.ipg-online.com/connect/gateway/processing',
+    ];
+
     public const STORE_ID = 'osctelecash_storeid';
+
+    public const SHARED_SECRET = 'osctelecash_shared_secret';
 
     public const USER_ID = 'osctelecash_userid';
 
@@ -60,9 +74,15 @@ interface ModuleSettingsServiceInterface
 
     public function saveApiMode(string $value): void;
 
+    public function getConnectUrl(): string;
+
     public function getStoreId(): string;
 
     public function saveStoreId(string $value): void;
+
+    public function getSharedSecret(): string;
+
+    public function saveSharedSecret(string $value): void;
 
     public function getUserId(): string;
 

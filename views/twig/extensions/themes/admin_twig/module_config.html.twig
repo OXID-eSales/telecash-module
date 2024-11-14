@@ -5,7 +5,7 @@
     {{ parent() }}
 
     {% if oModule.getInfo('id') == sTeleCashModuleId %}
-        {% if var_group == sTeleCashVarGroupAPI and module_var == sTeleCashOptionTrigger %}
+        {% if var_group == sTeleCashVarGroupAPIBackend and module_var == sTeleCashOptionTrigger %}
 
             {% set telecash_javascript %}
                 {% if phpStorm %}<script type="text/javascript">{% endif %}
