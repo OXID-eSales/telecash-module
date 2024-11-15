@@ -92,7 +92,7 @@ class Payment extends Payment_parent
      * @return bool True if it's a TeleCash payment, false otherwise.
      * @throws TeleCashException
      */
-    protected function isTeleCashPayment(): bool
+    public function isTeleCashPayment(): bool
     {
         $this->teleCashPayment = $this->getTeleCashPaymentModel();
         $this->teleCashPayment->loadByPaymentId($this->getId());

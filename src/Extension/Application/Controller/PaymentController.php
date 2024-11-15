@@ -36,12 +36,25 @@ class PaymentController extends PaymentController_parent
     }
 
 
+    /**
+     * Collect TeleCash-Error and transfer to OXID payerrortext and payerror
+     *
+     * @throws TeleCashException
+     * TODO remove PHPMD.UnusedLocalVariable
+     * @SuppressWarnings(PHPMD.UnusedLocalVariable)
+     */
     public function showTeleCashError(): void
     {
-        // Wir bekommen von TeleCash Post-Data
-        // Damit es ohne weitere Anpassungen in OXID funktioniert, könnten die POST-Data auf die
-        // POST oder GET-Variablen übergeben werden. Damit würde OXID sein ganz normales ErrorHandling starten
-        //   "payerror"     => "XXX",
-        //   "payerrortext" => "YYY",
+        $telecashConnect = $this->getTeleCashConnect();
+        $telecashConnect->addPostData($_POST);
+
+        /** TODO follow up the work ...
+         * We´ve got TeleCashPost-Data
+         * The transaction result contains error codes and error texts that we should map to the OXID variables.
+         * OXID can then display the error message according to the OXID standard.
+         * "payerror"     => "XXX",
+         * "payerrortext" => "YYY",
+        */
+        $transactionResult = $telecashConnect->getTransactionResult();
     }
 }
