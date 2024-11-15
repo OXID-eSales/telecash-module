@@ -12,6 +12,7 @@ use OxidEsales\Eshop\Application\Controller\PaymentController as oxPaymentContro
 use OxidEsales\Eshop\Application\Model\Address as oxAddress;
 use OxidEsales\Eshop\Application\Model\Country as oxCountry;
 use OxidEsales\Eshop\Application\Model\Payment as oxPayment;
+use OxidEsales\Eshop\Application\Model\PaymentGateway as oxPaymentGateway;
 use OxidEsales\Eshop\Application\Model\PaymentList as oxPaymentList;
 use OxidEsales\Eshop\Application\Model\State as oxState;
 use OxidEsales\Eshop\Application\Model\User as oxUser;
@@ -25,6 +26,7 @@ use OxidSolutionCatalysts\TeleCash\Extension\Application\Controller\PaymentContr
 use OxidSolutionCatalysts\TeleCash\Extension\Application\Model\Address;
 use OxidSolutionCatalysts\TeleCash\Extension\Application\Model\Country;
 use OxidSolutionCatalysts\TeleCash\Extension\Application\Model\Payment;
+use OxidSolutionCatalysts\TeleCash\Extension\Application\Model\PaymentGateway;
 use OxidSolutionCatalysts\TeleCash\Extension\Application\Model\PaymentList;
 use OxidSolutionCatalysts\TeleCash\Extension\Application\Model\User;
 use OxidSolutionCatalysts\TeleCash\Extension\Application\Model\State;
@@ -75,6 +77,7 @@ $aModule = [
         oxAddress::class             => Address::class,
         oxCountry::class             => Country::class,
         oxPayment::class             => Payment::class,
+        oxPaymentGateway::class      => PaymentGateway::class,
         oxPaymentList::class         => PaymentList::class,
         oxUser::class                => User::class,
         oxState::class               => State::class,
