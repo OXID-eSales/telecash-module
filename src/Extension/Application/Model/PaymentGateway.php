@@ -63,9 +63,15 @@ class PaymentGateway extends PaymentGateway_parent
         if (!$payment->isTeleCashPayment()) {
             return true;
         }
-        $result = false;
 
         $telecashConnect = $this->getTeleCashConnect();
+
+        if (!$telecashConnect->isValidResponse($_POST)) {
+            return false;
+        }
+
+        $result = false;
+
         $telecashConnect->addPostData($_POST);
 
         /** TODO follow up the work ... */

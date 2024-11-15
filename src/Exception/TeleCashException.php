@@ -20,4 +20,9 @@ class TeleCashException extends StandardException
     {
         return new self('TELECASH_SERVICE_MISSING');
     }
+
+    public function noValidTransactionResult(): self
+    {
+        return new self('TELECASH_NO_VALID_TRANSACTION_RESULT');
+    }
 }
