@@ -46,6 +46,11 @@ class PaymentController extends PaymentController_parent
     public function showTeleCashError(): void
     {
         $telecashConnect = $this->getTeleCashConnect();
+        if (!$telecashConnect->isValidResponse($_POST)) {
+            /** Throw an Error is too hard, but Ok for the moment, Show an Error is better */
+            throw (new TeleCashException())->noValidTransactionResult();
+        }
+
         $telecashConnect->addPostData($_POST);
 
         /** TODO follow up the work ...
