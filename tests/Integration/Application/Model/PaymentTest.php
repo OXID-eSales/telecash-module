@@ -11,6 +11,7 @@ use OxidEsales\Eshop\Application\Model\User;
 use OxidSolutionCatalysts\TeleCash\Application\Model\TeleCashPayment;
 use OxidSolutionCatalysts\TeleCash\Core\Service\OxNewService;
 use OxidSolutionCatalysts\TeleCash\Core\Service\TeleCashPaymentValidatorServiceInterface;
+use OxidSolutionCatalysts\TeleCash\Settings\Service\ModuleSettingsServiceInterface;
 use OxidSolutionCatalysts\TeleCash\Tests\Integration\Application\Model\TestClasses\PaymentTestClass;
 use PHPUnit\Framework\TestCase;
 use PHPUnit\Framework\MockObject\MockObject;
@@ -41,6 +42,7 @@ class PaymentTest extends TestCase
     private OxNewService&MockObject $oxNewService;
     private TeleCashPayment&MockObject $teleCashPayment;
     private TeleCashPaymentValidatorServiceInterface&MockObject $validatorService;
+    private ModuleSettingsServiceInterface&MockObject $moduleSettings;
 
     /**
      * Sets up the test environment before each test
@@ -60,6 +62,7 @@ class PaymentTest extends TestCase
         $this->oxNewService = $this->createMock(OxNewService::class);
         $this->teleCashPayment = $this->createMock(TeleCashPayment::class);
         $this->validatorService = $this->createMock(TeleCashPaymentValidatorServiceInterface::class);
+        $this->moduleSettings = $this->createMock(ModuleSettingsServiceInterface::class);
 
         // Setup container mock with service registration
         $this->container->method('has')
@@ -87,9 +90,12 @@ class PaymentTest extends TestCase
             )
             ->willReturn($this->teleCashPayment);
 
-        // Initialize payment model for testing
-        $this->payment = new PaymentTestClass(false);
-        $this->payment->publicSetContainer($this->container);
+        // Initialize payment model with correct parameter order
+        $this->payment = new PaymentTestClass(
+            false,
+            $this->moduleSettings, // ModuleSettingsServiceInterface mock
+            $this->container      // Optional container
+        );
     }
 
     /**
@@ -105,6 +111,12 @@ class PaymentTest extends TestCase
         $this->teleCashPayment->method('loadByPaymentId')
             ->with('testPaymentId')
             ->willReturn(false);
+
+        // Setup ModuleSettings expectations for regular payment
+        $this->moduleSettings->expects($this->never())
+            ->method('isValidBackendConfiguration');
+        $this->moduleSettings->expects($this->never())
+            ->method('isValidFrontendConfiguration');
 
         $result = $this->payment->isValidPayment([], '1', $this->createMock(User::class), 100.0, '1');
         $this->assertTrue($result);
@@ -122,6 +134,10 @@ class PaymentTest extends TestCase
     {
         $this->teleCashPayment->method('loadByPaymentId')
             ->with('testPaymentId')
+            ->willReturn(true);
+
+        // Setup ModuleSettings expectations for valid config
+        $this->moduleSettings->method('isValidFrontendConfiguration')
             ->willReturn(true);
 
         $this->payment->setModuleSettingsValidationResult(true);
@@ -143,6 +159,10 @@ class PaymentTest extends TestCase
         $this->teleCashPayment->method('loadByPaymentId')
             ->with('testPaymentId')
             ->willReturn(true);
+
+        // Setup ModuleSettings expectations for invalid config
+        $this->moduleSettings->method('isValidFrontendConfiguration')
+            ->willReturn(false);
 
         $this->payment->setModuleSettingsValidationResult(false);
 
