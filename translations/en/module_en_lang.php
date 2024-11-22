@@ -13,6 +13,7 @@ $aLang = [
     'TELECASHPAYMENT_EXISTS_FAIL'          => 'The Telecash payment method could not be saved with the Telecash Ident and the Capture type. It already exists.',
     'TELECASH_SERVICE_MISSING'             => 'A required service was not found.',
     'TELECASH_NO_VALID_TRANSACTION_RESULT' => 'The response from TeleCash is not valid. The hash check resulted in errors.',
+    'TELECASH_PAYMENT_ISNT_TELECASH'       => 'Payment method is not a TeleCash payment method',
 
     'TELECASH_ASTERISK' => '*',
 
