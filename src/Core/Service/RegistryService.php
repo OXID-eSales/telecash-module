@@ -11,6 +11,7 @@ use OxidEsales\Eshop\Core\Config;
 use OxidEsales\Eshop\Core\Language;
 use OxidEsales\Eshop\Core\Registry;
 use OxidEsales\Eshop\Core\Request;
+use OxidEsales\Eshop\Core\Session;
 use OxidEsales\Eshop\Core\Utils;
 use OxidEsales\Eshop\Core\UtilsView;
 
@@ -59,5 +60,14 @@ class RegistryService
     public function getUtils(): Utils
     {
         return Registry::getUtils();
+    }
+
+    /**
+     * for better testing and to avoid "'static' methods cannot be mocked"
+     * @SuppressWarnings(PHPMD.StaticAccess)
+     */
+    public function getSession(): Session
+    {
+        return Registry::getSession();
     }
 }
