@@ -12,6 +12,7 @@ namespace OxidSolutionCatalysts\TeleCash\Tests\Unit\Core\Service;
 use OxidEsales\Eshop\Core\Config;
 use OxidEsales\EshopCommunity\Application\Model\Basket;
 use OxidSolutionCatalysts\TeleCash\Core\Module;
+use OxidSolutionCatalysts\TeleCash\Core\Service\RegistryService;
 use OxidSolutionCatalysts\TeleCash\Settings\Service\ModuleSettingsServiceInterface;
 use OxidSolutionCatalysts\TeleCash\Tests\Unit\Core\Service\TestClasses\ContextTestClass;
 use PHPUnit\Framework\MockObject\Exception;
@@ -42,6 +43,7 @@ class ContextTest extends TestCase
     private ContextTestClass $context;
     private string $mockLogsDir = '/var/www/shop/source/log';
     private ModuleSettingsServiceInterface&MockObject $moduleSettings;
+    private RegistryService&MockObject $registryService;
     private string $mockShopUrl = 'https://example.com/shop/';
 
 
@@ -61,9 +63,11 @@ class ContextTest extends TestCase
             ->willReturn($this->mockShopUrl);
 
         $this->moduleSettings = $this->createMock(ModuleSettingsServiceInterface::class);
+        $this->registryService = $this->createMock(RegistryService::class);
 
         $this->context = new ContextTestClass(
             $this->shopConfig,
+            $this->registryService,
             $this->moduleSettings
         );
     }
@@ -119,10 +123,16 @@ class ContextTest extends TestCase
         $shopConfig->method('getLogsDir')
             ->willReturn($baseDir);
 
-        // Create new moduleSettings mock for this test
+        // Create new moduleSettings and registryService mock for this test
         $moduleSettings = $this->createMock(ModuleSettingsServiceInterface::class);
+        $registryService = $this->createMock(RegistryService::class);
 
-        $context = new ContextTestClass($shopConfig, $moduleSettings);
+        $context = new ContextTestClass(
+            $shopConfig,
+            $registryService,
+            $moduleSettings
+        );
+
         $context->setFixedDate($testDate);
 
         $actualPath = $context->getTeleCashLogFilePath();

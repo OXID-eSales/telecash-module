@@ -11,6 +11,7 @@ use OxidEsales\Eshop\Application\Controller\OrderController as oxOrderController
 use OxidEsales\Eshop\Application\Controller\PaymentController as oxPaymentController;
 use OxidEsales\Eshop\Application\Model\Address as oxAddress;
 use OxidEsales\Eshop\Application\Model\Country as oxCountry;
+use OxidEsales\Eshop\Application\Model\Order as oxOrder;
 use OxidEsales\Eshop\Application\Model\Payment as oxPayment;
 use OxidEsales\Eshop\Application\Model\PaymentGateway as oxPaymentGateway;
 use OxidEsales\Eshop\Application\Model\PaymentList as oxPaymentList;
@@ -25,6 +26,7 @@ use OxidSolutionCatalysts\TeleCash\Extension\Application\Controller\OrderControl
 use OxidSolutionCatalysts\TeleCash\Extension\Application\Controller\PaymentController;
 use OxidSolutionCatalysts\TeleCash\Extension\Application\Model\Address;
 use OxidSolutionCatalysts\TeleCash\Extension\Application\Model\Country;
+use OxidSolutionCatalysts\TeleCash\Extension\Application\Model\Order;
 use OxidSolutionCatalysts\TeleCash\Extension\Application\Model\Payment;
 use OxidSolutionCatalysts\TeleCash\Extension\Application\Model\PaymentGateway;
 use OxidSolutionCatalysts\TeleCash\Extension\Application\Model\PaymentList;
@@ -76,6 +78,7 @@ $aModule = [
         // Models
         oxAddress::class             => Address::class,
         oxCountry::class             => Country::class,
+        oxOrder::class               => Order::class,
         oxPayment::class             => Payment::class,
         oxPaymentGateway::class      => PaymentGateway::class,
         oxPaymentList::class         => PaymentList::class,

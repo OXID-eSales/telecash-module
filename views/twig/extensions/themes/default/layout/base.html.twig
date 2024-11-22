@@ -2,7 +2,7 @@
 
 {% block base_js %}
     {{ parent() }}
-    {% if oViewConf.getTopActiveClassName()|lower=="order" %}
+    {% if oViewConf.getTopActiveClassName()|lower=="order" and isTeleCashPayment %}
         {{ script({ include: oViewConf.getModuleUrl(teleCashModuleId, 'src/js/telecash_order.js'), priority: 10, dynamic: __oxid_include_dynamic }) }}
     {% endif %}
 {% endblock %}

@@ -1,34 +1,25 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<phpunit xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:noNamespaceSchemaLocation="https://schema.phpunit.de/10.5/phpunit.xsd"
-         executionOrder="depends,defects"
-         beStrictAboutOutputDuringTests="false"
-         beStrictAboutTestsThatDoNotTestAnything="false"
-         colors="true"
-         processIsolation="false"
-         stopOnError="false"
-         stopOnFailure="false"
-         stopOnIncomplete="false"
-         stopOnSkipped="false"
-         backupGlobals="true">
-    <testsuites>
-        <testsuite name="Unit">
-            <directory>Unit/</directory>
-        </testsuite>
-        <testsuite name="Integration">
-            <directory>Integration/</directory>
-        </testsuite>
-    </testsuites>
-    <coverage>
-        <report>
-            <clover outputFile="Reports/coverage_unit_osc_telecash.xml"/>
-        </report>
-        <include>
-            <directory suffix=".php">../src</directory>
-        </include>
-    </coverage>
-    <php>
-        <ini name="display_errors" value="On" />
-        <ini name="error_reporting" value="-1" />
-    </php>
+<phpunit xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://schema.phpunit.de/10.5/phpunit.xsd" executionOrder="depends,defects" beStrictAboutOutputDuringTests="false" beStrictAboutTestsThatDoNotTestAnything="false" colors="true" processIsolation="false" stopOnError="false" stopOnFailure="false" stopOnIncomplete="false" stopOnSkipped="false" backupGlobals="true">
+  <testsuites>
+    <testsuite name="Unit">
+      <directory>Unit/</directory>
+    </testsuite>
+    <testsuite name="Integration">
+      <directory>Integration/</directory>
+    </testsuite>
+  </testsuites>
+  <coverage>
+    <report>
+      <clover outputFile="Reports/coverage_unit_osc_telecash.xml"/>
+    </report>
+  </coverage>
+  <php>
+    <ini name="display_errors" value="On"/>
+    <ini name="error_reporting" value="-1"/>
+  </php>
+  <source>
+    <include>
+      <directory suffix=".php">../src</directory>
+    </include>
+  </source>
 </phpunit>

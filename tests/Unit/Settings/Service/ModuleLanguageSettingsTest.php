@@ -217,7 +217,7 @@ class ModuleLanguageSettingsTest extends TestCase
      *
      * @return array Test cases with [countryIso, expectedLocale]
      */
-    public function localeForExplicitCountryIsoProvider(): array
+    public static function localeForExplicitCountryIsoProvider(): array
     {
         return [
             'existing lowercase iso' => [

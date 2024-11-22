@@ -63,7 +63,7 @@ class PriceTest extends TestCase
      *
      * @return array<string, array{bruttoPrice: float, currency: object, expectedResult: string}>
      */
-    public function priceFormattingProvider(): array
+    public static function priceFormattingProvider(): array
     {
         return [
             'standard_de_format' => [
