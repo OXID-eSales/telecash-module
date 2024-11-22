@@ -10,11 +10,10 @@ declare(strict_types=1);
 namespace OxidSolutionCatalysts\TeleCash\Extension\Application\Controller;
 
 use OxidEsales\Eshop\Application\Model\Address;
-use OxidEsales\Eshop\Application\Model\Payment;
-use OxidSolutionCatalysts\TeleCash\Application\Model\TeleCashPayment;
 use OxidSolutionCatalysts\TeleCash\Core\Module;
 use OxidSolutionCatalysts\TeleCash\Core\Service\Context;
 use OxidSolutionCatalysts\TeleCash\Exception\TeleCashException;
+use OxidSolutionCatalysts\TeleCash\Extension\Application\Model\Payment;
 use OxidSolutionCatalysts\TeleCash\Settings\Service\ModuleLanguageSettingsServiceInterface;
 use OxidSolutionCatalysts\TeleCash\Settings\Service\ModuleSettingsServiceInterface;
 use OxidSolutionCatalysts\TeleCash\Traits\ModelGetter;
@@ -26,8 +25,6 @@ class OrderController extends OrderController_parent
     use ServiceContainer;
     use ModelGetter;
     use RequestGetter;
-
-    protected ?TeleCashPayment $teleCashPayment = null;
 
     public function __construct()
     {
@@ -57,77 +54,85 @@ class OrderController extends OrderController_parent
      */
     private function addTeleCashToTemplate(): void
     {
-        $teleCashPayment = $this->getTeleCashPayment();
-        $context = $this->getServiceFromContainer(Context::class);
-        $moduleSettings = $this->getServiceFromContainer(ModuleSettingsServiceInterface::class);
-        $languageSettings = $this->getServiceFromContainer(ModuleLanguageSettingsServiceInterface::class);
+        /** @var Payment $payment */
+        $payment = $this->getPayment();
+        $isTeleCashPayment = $payment->isTeleCashPayment();
 
         // these variables are needed in any case
         $this->addTplParam('teleCashModuleId', Module::MODULE_ID);
-        $this->addTplParam('isTeleCashPayment', (bool) $teleCashPayment);
+        $this->addTplParam('isTeleCashPayment', $isTeleCashPayment);
 
-        if ($teleCashPayment) {
-            $basket = $this->getBasket();
-
-            $teleCashConnectData = $this->getTeleCashConnectData();
-
-            // Language
-            $language = $languageSettings ?
-                $languageSettings->getLocaleForCountryIso() :
-                ModuleLanguageSettingsServiceInterface::DEFAULT_LOCALE;
-
-            // possible DeliveryAddress
-            $deliveryId = $this->getStringRequestEscapedData("deladrid");
-            if ($deliveryId) {
-                $address = $this->getOxNewService()->oxNew(Address::class);
-                if ($address->load($deliveryId)) {
-                    $teleCashConnectData->setOxidAddress($address);
-                }
-            }
-
-            //Urls
-            $failUrl = $context ? $context->getFailUrl() : '';
-            $successUrl = $context ? $context->getSuccessUrl($basket) : '';
-            $notificationUrl = $context ? $context->getNotificationUrl() : '';
-            $connectUrl = $moduleSettings ? $moduleSettings->getConnectUrl() : '';
-
-            $teleCashConnectData->setOxidBasket($basket);
-            $teleCashConnectData->setOxidLanguage($language);
-            $teleCashConnectData->setFailUrl($failUrl);
-            $teleCashConnectData->setSuccessUrl($successUrl);
-            $teleCashConnectData->setNotificationUrl($notificationUrl);
-            $teleCashConnectData->setTransactionType($teleCashPayment->getTeleCashTransactionType());
-            $teleCashConnectData->setPaymentMethod($teleCashPayment->getTeleCashPaymentMethod());
-
-            $hiddenFields = $teleCashConnectData->getTeleCashConnectDataAsHiddenFields();
+        if ($isTeleCashPayment) {
             $this->addTplParam(
                 'teleCashHiddenData',
-                $hiddenFields
+                $this->collectHiddenData($payment)
             );
             $this->addTplParam(
                 'teleCashConnectUrl',
-                $connectUrl
+                $this->collectConnectUrl()
             );
         }
     }
 
     /**
+     * collect all necessary Datas as a huge hidden field
+     *
      * @throws TeleCashException
      */
-    private function getTeleCashPayment(): ?TeleCashPayment
+    private function collectHiddenData(Payment $payment): string
     {
-        if (is_null($this->teleCashPayment)) {
-            /** @var Payment $payment */
-            $payment = $this->getPayment();
-            if ($payment) {
-                $oxid = $payment->getId();
-                $teleCashPayment = $this->getTeleCashPaymentModel();
-                if ($teleCashPayment->loadByPaymentId($oxid)) {
-                    $this->teleCashPayment = $teleCashPayment;
-                }
+        $context = $this->getServiceFromContainer(Context::class);
+        $languageSettings = $this->getServiceFromContainer(ModuleLanguageSettingsServiceInterface::class);
+
+        $teleCashPayment = $payment->getTeleCashPayment();
+
+        if (!$teleCashPayment) {
+            return '';
+        }
+
+        $basket = $this->getBasket();
+
+        $teleCashConnectData = $this->getTeleCashConnectData();
+
+        // Language
+        $language = $languageSettings ?
+            $languageSettings->getLocaleForCountryIso() :
+            ModuleLanguageSettingsServiceInterface::DEFAULT_LOCALE;
+
+        // possible DeliveryAddress
+        $deliveryId = $this->getStringRequestEscapedData("deladrid");
+        if ($deliveryId) {
+            $address = $this->getOxNewService()->oxNew(Address::class);
+            if ($address->load($deliveryId)) {
+                $teleCashConnectData->setOxidAddress($address);
             }
         }
 
-        return $this->teleCashPayment;
+        //Urls
+        $failUrl = $context ? $context->getFailUrl() : '';
+        $successUrl = $context ? $context->getSuccessUrl($basket, $this->getDeliveryAddressMD5()) : '';
+        $notificationUrl = $context ? $context->getNotificationUrl() : '';
+
+        $transactionType = $teleCashPayment->getTeleCashTransactionType();
+        $paymentMethod = $teleCashPayment->getTeleCashPaymentMethod();
+
+        $teleCashConnectData->setOxidBasket($basket);
+        $teleCashConnectData->setOxidLanguage($language);
+        $teleCashConnectData->setFailUrl($failUrl);
+        $teleCashConnectData->setSuccessUrl($successUrl);
+        $teleCashConnectData->setNotificationUrl($notificationUrl);
+        $teleCashConnectData->setTransactionType($transactionType);
+        $teleCashConnectData->setPaymentMethod($paymentMethod);
+
+        return $teleCashConnectData->getTeleCashConnectDataAsHiddenFields();
+    }
+
+    /**
+     * collect the Connect-Url als Form-Post-Parameter
+     */
+    private function collectConnectUrl(): string
+    {
+        $moduleSettings = $this->getServiceFromContainer(ModuleSettingsServiceInterface::class);
+        return $moduleSettings ? $moduleSettings->getConnectUrl() : '';
     }
 }
