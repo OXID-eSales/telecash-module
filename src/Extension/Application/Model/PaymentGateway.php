@@ -9,7 +9,7 @@ declare(strict_types=1);
 
 namespace OxidSolutionCatalysts\TeleCash\Extension\Application\Model;
 
-use OxidEsales\Eshop\Application\Model\Order;
+use OxidEsales\Eshop\Application\Model\Order as oxOrder;
 use OxidSolutionCatalysts\TeleCash\Exception\TeleCashException;
 use OxidSolutionCatalysts\TeleCash\Traits\ModelGetter;
 use OxidSolutionCatalysts\TeleCash\Traits\ServiceContainer;
@@ -18,6 +18,26 @@ class PaymentGateway extends PaymentGateway_parent
 {
     use ModelGetter;
     use ServiceContainer;
+
+    /**
+     * Constructor for PaymentGateway.
+     *
+     * Initializes a new instance of the PaymentGateway class. This constructor can be used
+     * in both production and test environments due to its flexible parameter configuration.
+     *
+     * @param bool $initParent  Whether to initialize the parent BaseModel.
+     *                          Set to false in test environment to avoid
+     *                          OXID framework dependencies. Default is true.
+     */
+    public function __construct(
+        bool $initParent = true
+    ) {
+        if ($initParent) {
+            parent::__construct();
+        }
+
+        $this->setContainer($this->getContainer());
+    }
 
     /**
      * OXID-Core
@@ -33,7 +53,7 @@ class PaymentGateway extends PaymentGateway_parent
      */
     public function executePayment($dAmount, &$oOrder)
     {
-        /** @var Order $oOrder */
+        /** @var oxOrder $oOrder */
         $result = parent::executePayment($dAmount, $oOrder);
 
         if ($result) {
@@ -47,7 +67,7 @@ class PaymentGateway extends PaymentGateway_parent
      * Executes TeleCash-Payment, returns true on success and true if it is no TeleCashPayment
      *
      * @param float $amount Goods amount
-     * @param Order $order User ordering object
+     * @param oxOrder $order User ordering object
      *
      * @return bool
      * @throws TeleCashException
@@ -55,11 +75,14 @@ class PaymentGateway extends PaymentGateway_parent
      * @SuppressWarnings(PHPMD.UnusedLocalVariable)
      * @SuppressWarnings(PHPMD.UnusedFormalParameter)
      */
-    protected function executeTeleCashPayment(float $amount, Order $order): bool
+    protected function executeTeleCashPayment(float $amount, oxOrder $order): bool
     {
-
         /** @var Payment $payment */
-        $payment = $order->getPayment();
+        /** @var Order $order */
+        $payment = $this->getOxidPaymentModel();
+        $paymentId = $order->getFieldStringData('oxpaymenttype');
+        $payment->load($paymentId);
+
         if (!$payment->isTeleCashPayment()) {
             return true;
         }
