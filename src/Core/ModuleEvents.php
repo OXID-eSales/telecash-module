@@ -9,6 +9,9 @@ declare(strict_types=1);
 
 namespace OxidSolutionCatalysts\TeleCash\Core;
 
+use OxidEsales\DoctrineMigrationWrapper\MigrationsBuilder;
+use Symfony\Component\Console\Output\BufferedOutput;
+
 /**
  * Class defines what module does on Shop events.
  */
@@ -19,8 +22,8 @@ final class ModuleEvents
      */
     public static function onActivate(): void
     {
-        // execute some calculations or actions on module activation.
-        // think twice before putting anything here, maybe it can be solved differently?
+        // execute module migrations
+        self::executeModuleMigrations();
     }
 
     /**
@@ -28,7 +31,21 @@ final class ModuleEvents
      */
     public static function onDeactivate(): void
     {
-        // execute some calculations or actions on module deactivation.
-        // think twice before putting anything here, maybe it can be solved differently?
+    }
+
+    /**
+     * Execute necessary module migrations on activate event
+     */
+    private static function executeModuleMigrations(): void
+    {
+        $migrations = (new MigrationsBuilder())->build();
+
+        $output = new BufferedOutput();
+        $migrations->setOutput($output);
+        $needsUpdate = $migrations->execute('migrations:up-to-date', Module::MODULE_ID);
+
+        if ($needsUpdate) {
+            $migrations->execute('migrations:migrate', Module::MODULE_ID);
+        }
     }
 }
