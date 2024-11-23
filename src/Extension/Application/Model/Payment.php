@@ -24,6 +24,10 @@ class Payment extends Payment_parent
 
     protected ModuleSettingsServiceInterface $moduleSettings;
 
+    protected ?TeleCashPayment $teleCashPayment = null;
+
+    protected ?bool $teleCashPaymentIsLoaded = null;
+
     /**
      * Constructor for Payment.
      *
@@ -48,19 +52,18 @@ class Payment extends Payment_parent
         );
     }
 
-    protected ?TeleCashPayment $teleCashPayment = null;
-
     /**
      * Core-Extension - var-types and return value only in doc-block
      * {@inheritDoc}
      *
      * @param array<string, mixed> $aDynValue dynamical value (in this case oxiddebitnote is checked only)
-     * @param string               $sShopId id of current shop
-     * @param User                 $oUser the current user
-     * @param double               $dBasketPrice the current basket price (oBasket->dPrice)
-     * @param string               $sShipSetId the current ship set
+     * @param string $sShopId id of current shop
+     * @param User $oUser the current user
+     * @param double $dBasketPrice the current basket price (oBasket->dPrice)
+     * @param string $sShipSetId the current ship set
      *
      * @return bool true if payment is valid
+     * @throws TeleCashException
      */
     public function isValidPayment($aDynValue, $sShopId, $oUser, $dBasketPrice, $sShipSetId)
     {
@@ -94,9 +97,30 @@ class Payment extends Payment_parent
      */
     public function isTeleCashPayment(): bool
     {
-        $this->teleCashPayment = $this->getTeleCashPaymentModel();
-        $this->teleCashPayment->loadByPaymentId($this->getId());
-        return $this->teleCashPayment->getTeleCashIdent() !== Module::TELECASH_PAYMENT_IDENT_DEFAULT;
+        return $this->getTeleCashPayment() !== false;
+    }
+
+    /**
+     * Load the teleCash-Payment. For performance, it is only loaded once a time
+     *
+     * @throws TeleCashException
+     */
+    public function getTeleCashPayment(): ?TeleCashPayment
+    {
+        if (is_null($this->teleCashPaymentIsLoaded)) {
+            $this->teleCashPaymentIsLoaded = false;
+            $teleCashPayment = $this->getTeleCashPaymentModel();
+            $paymentId = $this->getId();
+            $isLoaded = $teleCashPayment->loadByPaymentId($paymentId);
+            if (
+                $isLoaded &&
+                $teleCashPayment->getTeleCashIdent() !== Module::TELECASH_PAYMENT_IDENT_DEFAULT
+            ) {
+                $this->teleCashPaymentIsLoaded = true;
+                $this->teleCashPayment = $teleCashPayment;
+            }
+        }
+        return $this->teleCashPayment;
     }
 
     /**

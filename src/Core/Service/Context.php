@@ -10,6 +10,7 @@ declare(strict_types=1);
 namespace OxidSolutionCatalysts\TeleCash\Core\Service;
 
 use OxidEsales\Eshop\Core\Config;
+use OxidEsales\Eshop\Core\Session;
 use OxidEsales\EshopCommunity\Application\Model\Basket;
 use OxidSolutionCatalysts\TeleCash\Core\Module;
 use OxidSolutionCatalysts\TeleCash\Settings\Service\ModuleSettingsService;
@@ -31,16 +32,21 @@ use Symfony\Component\Filesystem\Path;
  */
 class Context
 {
+    private Session $session;
+
     /**
      * Initializes the context service with required dependencies
      *
      * @param Config $shopConfig Shop configuration instance providing access to shop settings
+     * @param RegistryService $registryService
      * @param ModuleSettingsServiceInterface $moduleSettings
      */
     public function __construct(
         private readonly Config $shopConfig,
+        private readonly RegistryService $registryService,
         private readonly ModuleSettingsServiceInterface $moduleSettings
     ) {
+        $this->session = $this->registryService->getSession();
     }
 
     /**
@@ -91,15 +97,20 @@ class Context
     /**
      * Get Success-URL for TeleCash-Connect
      */
-    public function getSuccessUrl(Basket $basket): string
+    public function getSuccessUrl(Basket $basket, string $deliveryAddressMD5 = ''): string
     {
         $parameter = [
-            "cl"  => "order",
-            "fnc" => "execute",
+            "cl"     => "order",
+            "fnc"    => "execute",
+            "stoken" => $this->session->getSessionChallengeToken()
         ];
 
         if ($this->shopConfig->getConfigParam('blConfirmAGB')) {
             $parameter["ord_agb"] = 1;
+        }
+
+        if ($deliveryAddressMD5) {
+            $parameter["sDeliveryAddressMD5"] = $deliveryAddressMD5;
         }
 
         if ($this->shopConfig->getConfigParam('blEnableIntangibleProdAgreement')) {

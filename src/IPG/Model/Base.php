@@ -51,4 +51,15 @@ class Base
     {
         return $this->values;
     }
+
+    /**
+     * Returns one stored field value
+     *
+     * @param string $field
+     * @return null|string|float|bool|int
+     */
+    public function getValue(string $field): null|string|float|bool|int
+    {
+        return $this->values[$field] ?? null;
+    }
 }

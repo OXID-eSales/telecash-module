@@ -111,25 +111,38 @@ class JsonTest extends TestCase
     public function testArrayToJson(): void
     {
         $testCases = [
-            // Simple array
+            // Simple array - note that numbers stay as strings now
             [
                 'input' => ['key' => 'value', 'number' => '42'],
-                'expectedContains' => ['"key": "value"', '"number": 42']
+                'expectedContains' => ['"key": "value"', '"number": "42"']  // Changed: number remains string
             ],
             // Nested array
             [
                 'input' => ['nested' => ['deep' => 'value']],
                 'expectedContains' => ['"nested": {', '"deep": "value"']
             ],
-            // Array with multiple types
+            // Array with multiple types - numeric strings remain strings
             [
-                'input' => ['string' => 'text', 'number' => 42, 'boolean' => true],
-                'expectedContains' => ['"string": "text"', '"number": 42', '"boolean": true']
+                'input' => [
+                    'string' => 'text',
+                    'number' => '42',  // Changed: explicitly as string
+                    'boolean' => true
+                ],
+                'expectedContains' => [
+                    '"string": "text"',
+                    '"number": "42"',  // Changed: expect string format
+                    '"boolean": true'
+                ]
             ],
             // Empty array
             [
                 'input' => [],
                 'expectedContains' => ['{}']
+            ],
+            // Test case for processor response code
+            [
+                'input' => ['processor_response_code' => '00'],
+                'expectedContains' => ['"processor_response_code": "00"']  // Specifically test leading zeros
             ]
         ];
 
@@ -138,14 +151,22 @@ class JsonTest extends TestCase
 
             // Verify JSON structure
             foreach ($case['expectedContains'] as $expected) {
-                $this->assertStringContainsString($expected, $result);
+                $this->assertStringContainsString(
+                    $expected,
+                    $result,
+                    "Failed to find expected content in JSON result"
+                );
             }
 
-            // Verify the JSON is valid
+            // Verify the JSON is valid and maintains data types
             $this->assertIsString($result);
             $decodedResult = json_decode($result, true);
             $this->assertIsArray($decodedResult);
-            $this->assertEquals($case['input'], $decodedResult);
+            $this->assertEquals(
+                $case['input'],
+                $decodedResult,
+                "JSON conversion altered the original data"
+            );
         }
     }
 

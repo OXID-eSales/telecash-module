@@ -28,7 +28,7 @@ final class Version20241018134600 extends AbstractMigration
         $this->platform->registerDoctrineTypeMapping('enum', 'string');
 
         //add payment-extension-table
-        $this->createPaymentTeleCashTable($schema);
+        $this->createTeleCashPaymentTable($schema);
     }
 
     public function down(Schema $schema): void
@@ -40,7 +40,7 @@ final class Version20241018134600 extends AbstractMigration
      * create a telecash payment-extend-table
      * @throws SchemaException
      */
-    private function createPaymentTeleCashTable(Schema $schema): void
+    private function createTeleCashPaymentTable(Schema $schema): void
     {
         if (!$schema->hasTable(Module::TELECASH_PAYMENT_EXTENSION_TABLE)) {
             $paymentTable = $schema->createTable(Module::TELECASH_PAYMENT_EXTENSION_TABLE);

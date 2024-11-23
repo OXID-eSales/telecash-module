@@ -342,20 +342,20 @@ final class ModuleSettingsTest extends TestCase
     {
         return [
             'empty_value' => [
-                'stored_value' => '',
-                'expected' => ModuleSettingsServiceInterface::API_MODE_LIVE
+                'storedValue' => '',
+                'expectedMode' => ModuleSettingsServiceInterface::API_MODE_LIVE
             ],
             'invalid_value' => [
-                'stored_value' => 'invalid_mode',
-                'expected' => ModuleSettingsServiceInterface::API_MODE_LIVE
+                'storedValue' => 'invalid_mode',
+                'expectedMode' => ModuleSettingsServiceInterface::API_MODE_LIVE
             ],
             'live_mode' => [
-                'stored_value' => ModuleSettingsServiceInterface::API_MODE_LIVE,
-                'expected' => ModuleSettingsServiceInterface::API_MODE_LIVE
+                'storedValue' => ModuleSettingsServiceInterface::API_MODE_LIVE,
+                'expectedMode' => ModuleSettingsServiceInterface::API_MODE_LIVE
             ],
             'sandbox_mode' => [
-                'stored_value' => ModuleSettingsServiceInterface::API_MODE_SANDBOX,
-                'expected' => ModuleSettingsServiceInterface::API_MODE_SANDBOX
+                'storedValue' => ModuleSettingsServiceInterface::API_MODE_SANDBOX,
+                'expectedMode' => ModuleSettingsServiceInterface::API_MODE_SANDBOX
             ]
         ];
     }
@@ -408,12 +408,12 @@ final class ModuleSettingsTest extends TestCase
     {
         return [
             'live_mode' => [
-                'stored_mode' => ModuleSettingsServiceInterface::API_MODE_LIVE,
-                'expected_result' => true
+                'storedMode' => ModuleSettingsServiceInterface::API_MODE_LIVE,
+                'expectedResult' => true
             ],
             'sandbox_mode' => [
-                'stored_mode' => ModuleSettingsServiceInterface::API_MODE_SANDBOX,
-                'expected_result' => false
+                'storedMode' => ModuleSettingsServiceInterface::API_MODE_SANDBOX,
+                'expectedResult' => false
             ]
         ];
     }
@@ -881,24 +881,24 @@ final class ModuleSettingsTest extends TestCase
     {
         return [
             'empty_value' => [
-                'stored_value' => '',
-                'expected' => ModuleSettingsServiceInterface::LOG_LEVEL_ERROR
+                'storedValue' => '',
+                'expectedLevel' => ModuleSettingsServiceInterface::LOG_LEVEL_ERROR
             ],
             'invalid_value' => [
-                'stored_value' => 'invalid_level',
-                'expected' => ModuleSettingsServiceInterface::LOG_LEVEL_ERROR
+                'storedValue' => 'invalid_level',
+                'expectedLevel' => ModuleSettingsServiceInterface::LOG_LEVEL_ERROR
             ],
             'error_level' => [
-                'stored_value' => ModuleSettingsServiceInterface::LOG_LEVEL_ERROR,
-                'expected' => ModuleSettingsServiceInterface::LOG_LEVEL_ERROR
+                'storedValue' => ModuleSettingsServiceInterface::LOG_LEVEL_ERROR,
+                'expectedLevel' => ModuleSettingsServiceInterface::LOG_LEVEL_ERROR
             ],
             'info_level' => [
-                'stored_value' => ModuleSettingsServiceInterface::LOG_LEVEL_INFO,
-                'expected' => ModuleSettingsServiceInterface::LOG_LEVEL_INFO
+                'storedValue' => ModuleSettingsServiceInterface::LOG_LEVEL_INFO,
+                'expectedLevel' => ModuleSettingsServiceInterface::LOG_LEVEL_INFO
             ],
             'debug_level' => [
-                'stored_value' => ModuleSettingsServiceInterface::LOG_LEVEL_DEBUG,
-                'expected' => ModuleSettingsServiceInterface::LOG_LEVEL_DEBUG
+                'storedValue' => ModuleSettingsServiceInterface::LOG_LEVEL_DEBUG,
+                'expectedLevel' => ModuleSettingsServiceInterface::LOG_LEVEL_DEBUG
             ]
         ];
     }
@@ -915,6 +915,7 @@ final class ModuleSettingsTest extends TestCase
      *
      * @param string $apiMode The API mode to test
      * @param string $expectedUrl The expected Connect URL
+     * @throws Exception
      */
     public function testGetConnectUrl(string $apiMode, string $expectedUrl): void
     {
@@ -950,20 +951,20 @@ final class ModuleSettingsTest extends TestCase
     {
         return [
             'live_mode' => [
-                'api_mode' => ModuleSettingsServiceInterface::API_MODE_LIVE,
-                'expected_url' => ModuleSettingsServiceInterface::CONNECT_URLS[
+                'apiMode' => ModuleSettingsServiceInterface::API_MODE_LIVE,
+                'expectedUrl' => ModuleSettingsServiceInterface::CONNECT_URLS[
                     ModuleSettingsServiceInterface::API_MODE_LIVE
                 ]
             ],
             'sandbox_mode' => [
-                'api_mode' => ModuleSettingsServiceInterface::API_MODE_SANDBOX,
-                'expected_url' => ModuleSettingsServiceInterface::CONNECT_URLS[
+                'apiMode' => ModuleSettingsServiceInterface::API_MODE_SANDBOX,
+                'expectedUrl' => ModuleSettingsServiceInterface::CONNECT_URLS[
                     ModuleSettingsServiceInterface::API_MODE_SANDBOX
                 ]
             ],
             'invalid_mode' => [
-                'api_mode' => 'invalid_mode',
-                'expected_url' => ModuleSettingsServiceInterface::CONNECT_URLS[
+                'apiMode' => 'invalid_mode',
+                'expectedUrl' => ModuleSettingsServiceInterface::CONNECT_URLS[
                     ModuleSettingsServiceInterface::API_MODE_LIVE
                 ]
             ]

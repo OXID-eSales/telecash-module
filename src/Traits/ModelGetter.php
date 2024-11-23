@@ -10,6 +10,7 @@ declare(strict_types=1);
 namespace OxidSolutionCatalysts\TeleCash\Traits;
 
 use OxidEsales\Eshop\Application\Model\Payment;
+use OxidSolutionCatalysts\TeleCash\Application\Model\TeleCashOrder;
 use OxidSolutionCatalysts\TeleCash\Application\Model\TeleCashPayment;
 use OxidSolutionCatalysts\TeleCash\Core\Service\OxNewService;
 use OxidSolutionCatalysts\TeleCash\Core\Service\TeleCashPaymentValidatorServiceInterface;
@@ -26,6 +27,18 @@ trait ModelGetter
     /**
      * @throws TeleCashException
      */
+    private function getOxNewService(): OxNewService
+    {
+        $oxNewService = $this->getServiceFromContainer(OxNewService::class);
+        if (!$oxNewService) {
+            throw (new TeleCashException())->serviceNotFound();
+        }
+        return $oxNewService;
+    }
+
+    /**
+     * @throws TeleCashException
+     */
     private function getTeleCashPaymentModel(): TeleCashPayment
     {
         $validator = $this->getRequiredService(
@@ -38,22 +51,20 @@ trait ModelGetter
     /**
      * @throws TeleCashException
      */
-    private function getOxidPaymentModel(): Payment
+    private function getTeleCashOrderModel(string $oxOrderId): TeleCashOrder
     {
-        return $this->getOxNewService()->oxNew(Payment::class);
+        return $this->getOxNewService()->oxNew(TeleCashOrder::class, [$oxOrderId]);
     }
 
     /**
      * @throws TeleCashException
      */
-    private function getOxNewService(): OxNewService
+    private function getOxidPaymentModel(): Payment
     {
-        $oxNewService = $this->getServiceFromContainer(OxNewService::class);
-        if (!$oxNewService) {
-            throw (new TeleCashException())->serviceNotFound();
-        }
-        return $oxNewService;
+        return $this->getOxNewService()->oxNew(Payment::class);
     }
+
+
 
     /**
      * @throws TeleCashException

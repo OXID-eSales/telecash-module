@@ -1,9 +1,11 @@
 {% extends 'page/checkout/order.html.twig' %}
 
 {% block checkout_order_btn_confirm_bottom %}
-    <form id="teleCashConnectForm" method="post" action="{{ teleCashConnectUrl|raw }}">
-        {{ teleCashHiddenData|raw }}
-    </form>
+    {% if isTeleCashPayment %}
+        <form id="teleCashConnectForm" method="post" action="{{ teleCashConnectUrl|raw }}">
+            {{ teleCashHiddenData|raw }}
+        </form>
+    {% endif %}
     {{ parent() }}
 {% endblock %}
 
