@@ -90,7 +90,7 @@ trait Json
 
             $result = json_encode(
                 $data,
-                JSON_THROW_ON_ERROR | JSON_PRETTY_PRINT | JSON_NUMERIC_CHECK | JSON_FORCE_OBJECT
+                JSON_THROW_ON_ERROR | JSON_PRETTY_PRINT | JSON_FORCE_OBJECT
             );
         } catch (JsonException) {
             $result = '';
