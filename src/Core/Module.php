@@ -22,6 +22,11 @@ final class Module
     public const TELECASH_DB_FIELD_CAPTURETYPE = self::TELECASH_PAYMENT_EXTENSION_TABLE .
         '__' . self::TELECASH_PAYMENT_EXTENSION_TABLE_CAPTURETYPE;
 
+    public const TELECASH_ORDER_EXTENSION_TABLE = 'osc_telecash_order';
+    public const TELECASH_ORDER_EXTENSION_TABLE_OXORDERID = 'oxorderid';
+    public const TELECASH_ORDER_EXTENSION_TABLE_RESPONSE = 'telecashresponse';
+
+
     public const TELECASH_PAYMENT_IDENT_DEFAULT = 'none';
     public const TELECASH_PAYMENT_IDENT_TELECASH = 'telecash';
     public const TELECASH_PAYMENT_IDENT_CC_AMERICAN = 'cc_american';
