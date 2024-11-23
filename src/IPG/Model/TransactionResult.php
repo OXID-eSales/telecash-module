@@ -29,11 +29,10 @@ class TransactionResult extends Base
     ];
 
     /**
-     * DirectDebitData constructor.
+     * TransactionResult constructor.
      *
      * @param array<string, string> $data Input data array to parse
      */
-
     public function __construct(array $data)
     {
         $this->parseFromArray($data);
