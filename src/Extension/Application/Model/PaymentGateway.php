@@ -9,6 +9,7 @@ declare(strict_types=1);
 
 namespace OxidSolutionCatalysts\TeleCash\Extension\Application\Model;
 
+use Exception;
 use OxidEsales\Eshop\Application\Model\Order as oxOrder;
 use OxidSolutionCatalysts\TeleCash\Exception\TeleCashException;
 use OxidSolutionCatalysts\TeleCash\Traits\ModelGetter;
@@ -57,7 +58,7 @@ class PaymentGateway extends PaymentGateway_parent
         $result = parent::executePayment($dAmount, $oOrder);
 
         if ($result) {
-            $result = $this->executeTeleCashPayment($dAmount, $oOrder);
+            $result = $this->executeTeleCashPayment($oOrder);
         }
 
         return $result;
@@ -66,21 +67,21 @@ class PaymentGateway extends PaymentGateway_parent
     /**
      * Executes TeleCash-Payment, returns true on success and true if it is no TeleCashPayment
      *
-     * @param float $amount Goods amount
      * @param oxOrder $order User ordering object
      *
      * @return bool
      * @throws TeleCashException
-     * TODO remove PHPMD.UnusedLocalVariable, UnusedFormalParameter
-     * @SuppressWarnings(PHPMD.UnusedLocalVariable)
+     * @throws Exception
      * @SuppressWarnings(PHPMD.UnusedFormalParameter)
      */
-    protected function executeTeleCashPayment(float $amount, oxOrder $order): bool
+    protected function executeTeleCashPayment(oxOrder $order): bool
     {
         /** @var Payment $payment */
         /** @var Order $order */
         $payment = $this->getOxidPaymentModel();
         $paymentId = $order->getFieldStringData('oxpaymenttype');
+        $orderId = $order->getId();
+
         $payment->load($paymentId);
 
         if (!$payment->isTeleCashPayment()) {
@@ -93,13 +94,10 @@ class PaymentGateway extends PaymentGateway_parent
             return false;
         }
 
-        $result = false;
-
-        $telecashConnect->addPostData($_POST);
-
-        /** TODO follow up the work ... */
+        // save the transaction-Result
         $transactionResult = $telecashConnect->getTransactionResult();
-
-        return $result;
+        $teleCashOrder = $this->getTeleCashOrderModel($orderId);
+        $teleCashOrder->setTransactionResult($transactionResult);
+        return (bool) $teleCashOrder->save();
     }
 }
