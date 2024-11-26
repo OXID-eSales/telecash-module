@@ -10,6 +10,7 @@ declare(strict_types=1);
 namespace OxidSolutionCatalysts\TeleCash\Application\Controller;
 
 use OxidEsales\Eshop\Core\Controller\BaseController;
+use OxidSolutionCatalysts\TeleCash\Exception\TeleCashException;
 use OxidSolutionCatalysts\TeleCash\Traits\ModelGetter;
 use OxidSolutionCatalysts\TeleCash\Traits\RequestGetter;
 use OxidSolutionCatalysts\TeleCash\Traits\ServiceContainer;
@@ -46,11 +47,25 @@ class FrontendTeleCashNotificationEndpoint extends BaseController
     }
 
     /**
-     * receive Notifications from TeleCash
+     * Collect TeleCash-Notification and add this to order
      *
-     * @return void
+     * @throws TeleCashException
+     * TODO remove PHPMD.UnusedLocalVariable
+     * @SuppressWarnings(PHPMD.UnusedLocalVariable)
      */
     public function receiveNotifications(): void
     {
+        $telecashConnect = $this->getTeleCashConnect();
+        $telecashConnect->setResponseData($_POST);
+        if (!$telecashConnect->isValidResponse()) {
+            /** Throw an Error is too hard, but Ok for the moment, Show an Error is better */
+            throw (new TeleCashException())->noValidTransactionResult();
+        }
+
+        /** TODO follow up the work ...
+         * We´ve got TeleCashPost-Data
+         * The notification result contains new informations for the order.
+         */
+        $notificationResult = $telecashConnect->getTransactionResult();
     }
 }
