@@ -35,7 +35,6 @@ class PaymentController extends PaymentController_parent
         $this->setContainer($this->getContainer());
     }
 
-
     /**
      * Collect TeleCash-Error and transfer to OXID payerrortext and payerror
      *
