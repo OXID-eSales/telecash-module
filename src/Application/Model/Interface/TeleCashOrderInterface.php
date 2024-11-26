@@ -9,6 +9,8 @@ declare(strict_types=1);
 
 namespace OxidSolutionCatalysts\TeleCash\Application\Model\Interface;
 
+use DateTime;
+
 interface TeleCashOrderInterface
 {
     /**
@@ -21,7 +23,7 @@ interface TeleCashOrderInterface
     public function getTxnType(): string;
 
     /** get the Txn DateTime */
-    public function getTxnDateTime(): string;
+    public function getTxnDateTime(): ?DateTime;
 
     /** get the Oid */
     public function getOid(): string;

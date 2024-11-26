@@ -7,6 +7,7 @@
 
 namespace OxidSolutionCatalysts\TeleCash\Tests\Unit\Application\Model;
 
+use DateTime;
 use OxidSolutionCatalysts\TeleCash\Tests\Unit\Application\Model\TestClasses\TeleCashOrderTestClass;
 use PHPUnit\Framework\TestCase;
 
@@ -69,13 +70,33 @@ class TeleCashOrderTest extends TestCase
     }
 
     /**
-     * Test transaction datetime retrieval
+     * Test transaction datetime retrieval and validation
      *
-     * Ensures the datetime string is properly returned without modification
+     * Ensures the datetime string is properly parsed and
+     * handles invalid formats correctly
      */
     public function testGetTxnDateTime(): void
     {
-        $this->assertEquals('2024-01-15 10:30:00', $this->order->getTxnDateTime());
+        // Test valid date
+        $validData = $this->sampleTransactionData;
+        $validData['txndatetime'] = '2024:01:15-10:30:00';
+        $this->order->setTransactionResult($validData);
+
+        $result = $this->order->getTxnDateTime();
+        $this->assertInstanceOf(DateTime::class, $result);
+        $this->assertEquals('2024-01-15 10:30:00', $result->format('Y-m-d H:i:s'));
+
+        // Test invalid date format
+        $invalidData = $this->sampleTransactionData;
+        $invalidData['txndatetime'] = 'invalid-date-format';
+        $this->order->setTransactionResult($invalidData);
+        $this->assertNull($this->order->getTxnDateTime());
+
+        // Test empty date
+        $emptyData = $this->sampleTransactionData;
+        $emptyData['txndatetime'] = '';
+        $this->order->setTransactionResult($emptyData);
+        $this->assertNull($this->order->getTxnDateTime());
     }
 
     /**

@@ -9,10 +9,15 @@ declare(strict_types=1);
 
 namespace OxidSolutionCatalysts\TeleCash\Application\Model;
 
+use DateTime;
+use Doctrine\DBAL\Connection;
+use Doctrine\DBAL\Exception;
 use InvalidArgumentException;
 use OxidEsales\Eshop\Core\Model\BaseModel;
+use OxidEsales\EshopCommunity\Internal\Framework\Database\ConnectionProviderInterface;
 use OxidSolutionCatalysts\TeleCash\Application\Model\Interface\TeleCashOrderInterface;
 use OxidSolutionCatalysts\TeleCash\Core\Module;
+use OxidSolutionCatalysts\TeleCash\Exception\TeleCashException;
 use OxidSolutionCatalysts\TeleCash\IPG\Model\TransactionResult;
 use OxidSolutionCatalysts\TeleCash\IPG\TeleCashCurrency;
 use OxidSolutionCatalysts\TeleCash\Traits\DataGetter;
@@ -25,17 +30,16 @@ class TeleCashOrder extends BaseModel implements TeleCashOrderInterface
     use DataGetter;
     use Json;
 
-    protected $_sClassName = 'OxidSolutionCatalysts\TeleCash\Application\TeleCashOrder';
-    protected $_sCoreTable = Module::TELECASH_ORDER_EXTENSION_TABLE;
-
-    protected TransactionResult $transactionResult;
-
     protected string $oxOrderId = '';
 
-    /**
-     * Helper Class for Currency Handling
-     */
+    protected Connection $connection;
+    protected TransactionResult $transactionResult;
+
+    /** Helper Class for Currency Handling */
     protected TeleCashCurrency $teleCashCurrency;
+
+    protected $_sClassName = 'OxidSolutionCatalysts\TeleCash\Application\TeleCashOrder';
+    protected $_sCoreTable = Module::TELECASH_ORDER_EXTENSION_TABLE;
 
     /**
      * Constructor for TeleCashOrder.
@@ -43,24 +47,72 @@ class TeleCashOrder extends BaseModel implements TeleCashOrderInterface
      * Initializes a new instance of the TeleCashPayment class. This constructor can be used
      * in both production and test environments due to its flexible parameter configuration.
      *
-     * @param bool                           $initParent  Whether to initialize the parent BaseModel.
-     *                                                    Set to false in test environment to avoid
-     *                                                    OXID framework dependencies. Default is true.
+     * @param string           $oxOrderId orderID from OXID
+     * @param Connection|null $connection Optional database connection. If null, the connection
+     *                                    will be retrieved from the service container.
+     *                                    Primarily used for testing.
+     * @param bool           $initParent  Whether to initialize the parent BaseModel.
+     *                                    Set to false in test environment to avoid
+     *                                    OXID framework dependencies. Default is true.
      */
     public function __construct(
         string $oxOrderId,
+        ?Connection $connection = null,
         bool $initParent = true
     ) {
         if ($initParent) {
             parent::__construct();
         }
 
+        $this->setContainer($this->getContainer());
+        $this->init($this->_sCoreTable);
+
         $this->oxOrderId = $oxOrderId;
         $this->teleCashCurrency = new TeleCashCurrency();
         $this->transactionResult = new TransactionResult([]);
 
-        $this->init($this->_sCoreTable);
-        $this->setContainer($this->getContainer());
+        if ($connection !== null) {
+            $this->connection = $connection;
+        } else {
+            $connectionProvider = $this->getRequiredService(
+                ConnectionProviderInterface::class,
+                'ConnectionProviderInterface'
+            );
+            $this->connection = $connectionProvider->get();
+        }
+    }
+
+    /**
+     * Loads TeleCash-Order by using orderid instead of oxid.
+     *
+     * @param string $orderId content load ID
+     *
+     * @return bool
+     */
+    public function loadByOrderId(string $orderId = ''): bool
+    {
+        $orderId = $orderId ?: $this->oxOrderId;
+
+        //getting at least one field before lazy loading the object
+        $this->addField('oxid', 0);
+
+        $table = $this->getViewName();
+
+        $query = $this->buildSelectString([
+            $table . '.' . Module::TELECASH_ORDER_EXTENSION_TABLE_OXORDERID => $orderId
+        ]);
+
+        try {
+            $result = $this->connection->fetchAssociative($query);
+            if ($result !== false && is_array($result)) {
+                $this->assign($result);
+                $this->_isLoaded = true;
+            }
+        } catch (Exception) {
+            $this->_isLoaded = false;
+        }
+
+        return $this->isLoaded();
     }
 
     /**
@@ -83,10 +135,15 @@ class TeleCashOrder extends BaseModel implements TeleCashOrderInterface
         return $txnType;
     }
 
-    /** get the Txn DateTime */
-    public function getTxnDateTime(): string
+    /**
+     * get the Txn DateTime
+     * @SuppressWarnings(PHPMD.StaticAccess)
+     */
+    public function getTxnDateTime(): ?DateTime
     {
-        return (string) $this->transactionResult->getValue('txndatetime');
+        $txnDateTime = (string) $this->transactionResult->getValue('txndatetime');
+        $result = DateTime::createFromFormat('Y:m:d-H:i:s', $txnDateTime);
+        return $result ?: null;
     }
 
     /** get the Oid */
@@ -132,7 +189,9 @@ class TeleCashOrder extends BaseModel implements TeleCashOrderInterface
     /** get the EndpointTransactionId */
     public function getChargeTotal(): float
     {
-        $chargeTotalString = $this->transactionResult->getValue('chargetotal');
+        $chargeTotalString = (string) $this->transactionResult->getValue('chargetotal');
+        // bulletproof because is_numeric does not recognize that German commas are numeric
+        $chargeTotalString = str_replace(',', '.', $chargeTotalString);
         return is_numeric($chargeTotalString) ? (float) $chargeTotalString : 0.0;
     }
 
@@ -187,6 +246,9 @@ class TeleCashOrder extends BaseModel implements TeleCashOrderInterface
     /** load the transaction */
     public function loadTransactionResultFromDb(): void
     {
+        if ($this->oxOrderId && !$this->isLoaded()) {
+            $this->loadByOrderId();
+        }
         $data = $this->getFieldStringData(Module::TELECASH_ORDER_EXTENSION_TABLE_RESPONSE);
 
         if (!empty($data)) {

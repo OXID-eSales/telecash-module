@@ -18,6 +18,7 @@ use OxidEsales\Eshop\Application\Model\PaymentList as oxPaymentList;
 use OxidEsales\Eshop\Application\Model\State as oxState;
 use OxidEsales\Eshop\Application\Model\User as oxUser;
 use OxidSolutionCatalysts\TeleCash\Application\Controller\Admin\AdminTeleCashJsonEndpoint;
+use OxidSolutionCatalysts\TeleCash\Application\Controller\Admin\OrderTeleCash;
 use OxidSolutionCatalysts\TeleCash\Application\Controller\FrontendTeleCashNotificationEndpoint;
 use OxidSolutionCatalysts\TeleCash\Core\Module;
 use OxidSolutionCatalysts\TeleCash\Extension\Application\Controller\Admin\ModuleConfiguration;
@@ -61,7 +62,10 @@ $aModule = [
     'email'       => '',
     'controllers' => [
         // Admin
-        'AdminTeleCashJsonEndpoint'            => AdminTeleCashJsonEndpoint::class,
+        'AdminTeleCashJsonEndpoint' => AdminTeleCashJsonEndpoint::class,
+        'OrderTeleCash'             => OrderTeleCash::class,
+
+        // Frontend
         'FrontendTeleCashNotificationEndpoint' => FrontendTeleCashNotificationEndpoint::class,
     ],
     'events' => [

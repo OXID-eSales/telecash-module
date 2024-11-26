@@ -11,6 +11,7 @@ namespace OxidSolutionCatalysts\TeleCash\Extension\Application\Controller\Admin;
 
 use Exception;
 use OxidEsales\Eshop\Core\Registry;
+use OxidSolutionCatalysts\TeleCash\Core\Service\RegistryService;
 use OxidSolutionCatalysts\TeleCash\Exception\TeleCashException;
 use OxidSolutionCatalysts\TeleCash\Application\Model\TeleCashPayment;
 use OxidSolutionCatalysts\TeleCash\Core\Module;
@@ -27,6 +28,8 @@ class PaymentMain extends PaymentMain_parent
 
     protected TranslateServiceInterface $translateService;
 
+    protected RegistryService $registryService;
+
     public function __construct()
     {
         parent::__construct();
@@ -35,6 +38,10 @@ class PaymentMain extends PaymentMain_parent
             TranslateServiceInterface::class,
             'TranslateServiceInterface'
         );
+        $this->registryService = $this->getRequiredService(
+            RegistryService::class,
+            'RegistryService'
+        );
     }
 
     /**
@@ -42,6 +49,7 @@ class PaymentMain extends PaymentMain_parent
      * {@inheritDoc}
      *
      * @return string
+     * @throws TeleCashException
      */
     public function render()
     {
@@ -75,6 +83,9 @@ class PaymentMain extends PaymentMain_parent
         $this->saveTeleCashPayment();
     }
 
+    /**
+     * @throws TeleCashException
+     */
     private function addTeleCashToTemplate(): void
     {
         $teleCashPayment = $this->getTeleCashPayment();
@@ -111,6 +122,9 @@ class PaymentMain extends PaymentMain_parent
         }
     }
 
+    /**
+     * @throws TeleCashException
+     */
     private function getTeleCashPayment(): ?TeleCashPayment
     {
         $result = null;
@@ -127,10 +141,10 @@ class PaymentMain extends PaymentMain_parent
 
     /**
      * create TeleCashPayment Datas
+     * @throws TeleCashException
      */
     private function createTeleCashPayment(): bool
     {
-        $result = false;
         $teleCashPayment = $this->getTeleCashPaymentModel();
         try {
             $teleCashPayment->setPaymentId($this->getEditObjectId());
@@ -138,7 +152,7 @@ class PaymentMain extends PaymentMain_parent
             $teleCashPayment->setTeleCashCaptureType();
             $result = (bool) $teleCashPayment->save();
         } catch (Exception $e) {
-            Registry::getUtilsView()->addErrorToDisplay(
+            $this->registryService->getUtilsView()->addErrorToDisplay(
                 $this->translateService->translateString('OSC_TELECASH_PAYMENT_DATA_INITIAL_ERROR') . $e->getMessage()
             );
             return false;
@@ -148,6 +162,7 @@ class PaymentMain extends PaymentMain_parent
 
     /**
      * save TeleCashPayment if exists
+     * @throws TeleCashException
      */
     private function saveTeleCashPayment(): bool
     {
@@ -167,7 +182,7 @@ class PaymentMain extends PaymentMain_parent
             try {
                 $result = (bool) $teleCashPayment->save();
             } catch (TeleCashException | Exception $e) {
-                Registry::getUtilsView()->addErrorToDisplay(
+                $this->registryService->getUtilsView()->addErrorToDisplay(
                     $e->getMessage()
                 );
             }

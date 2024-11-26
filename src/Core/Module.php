@@ -82,9 +82,12 @@ final class Module
         ],
     ];
 
+    public const TELECASH_TXN_TYPE_SALE = 'sale';
+    public const TELECASH_TXN_TYPE_POSTAUTH = 'postauth';
+
     public const TELECASH_TRANSACTION_TYPES = [
-        self::TELECASH_CAPTURE_TYPE_DIRECT     => 'sale',
-        self::TELECASH_CAPTURE_TYPE_ONDELIVERY => 'postauth',
-        self::TELECASH_CAPTURE_TYPE_MANUALLY   => 'postauth'
+        self::TELECASH_CAPTURE_TYPE_DIRECT     => self::TELECASH_TXN_TYPE_SALE,
+        self::TELECASH_CAPTURE_TYPE_ONDELIVERY => self::TELECASH_TXN_TYPE_POSTAUTH,
+        self::TELECASH_CAPTURE_TYPE_MANUALLY   => self::TELECASH_TXN_TYPE_POSTAUTH
     ];
 }

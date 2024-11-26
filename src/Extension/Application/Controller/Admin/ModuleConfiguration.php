@@ -79,7 +79,7 @@ class ModuleConfiguration extends ModuleConfiguration_parent
         foreach (ModuleFileSettingsService::TELECASH_GET_FILENAME_METHODS as $teleCashFile => $teleCashGetMethod) {
             $aTeleCashFiles[$teleCashFile] = $this->fileSettingsService->$teleCashGetMethod($teleCashFile);
         }
-        $this->_aViewData['aTeleCashFiles'] = $aTeleCashFiles;
+        $this->addTplParam('aTeleCashFiles', $aTeleCashFiles);
 
         return $result;
     }

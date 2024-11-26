@@ -26,7 +26,7 @@ class TeleCashException extends StandardException
         return new self('TELECASH_NO_VALID_TRANSACTION_RESULT');
     }
 
-    public function isNotTeleCashPayment(): self
+    public function isNotTeleCash(): self
     {
         return new self('TELECASH_PAYMENT_ISNT_TELECASH');
     }

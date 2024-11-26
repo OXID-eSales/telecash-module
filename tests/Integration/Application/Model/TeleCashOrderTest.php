@@ -7,8 +7,13 @@
 
 namespace OxidSolutionCatalysts\TeleCash\Tests\Integration\Application\Model;
 
+use DateTime;
+use OxidEsales\EshopCommunity\Internal\Container\ContainerFactory;
+use OxidEsales\EshopCommunity\Internal\Framework\Database\ConnectionProviderInterface;
 use OxidSolutionCatalysts\TeleCash\Application\Model\TeleCashOrder;
 use PHPUnit\Framework\TestCase;
+use Psr\Container\ContainerExceptionInterface;
+use Psr\Container\NotFoundExceptionInterface;
 
 /**
  * Integration Test Suite for TeleCashOrder
@@ -78,8 +83,10 @@ class TeleCashOrderTest extends TestCase
             $loadedOrder->getTxnType(),
             'Transaction type mismatch'
         );
+
+        $txnDateTime = $this->sampleTransactionData['txndatetime'];
         $this->assertEquals(
-            $this->sampleTransactionData['txndatetime'],
+            DateTime::createFromFormat('Y:m:d-H:i:s', $txnDateTime),
             $loadedOrder->getTxnDateTime(),
             'Transaction datetime mismatch'
         );
@@ -135,6 +142,20 @@ class TeleCashOrderTest extends TestCase
      */
     protected function tearDown(): void
     {
+        // Delete test order by orderId
+        $container = ContainerFactory::getInstance()->getContainer();
+        try {
+            $container->get(ConnectionProviderInterface::class)
+                ->get()
+                ->executeStatement(
+                    'DELETE FROM ' . $this->order->_sCoreTable . ' WHERE ' .
+                    'oxorderid = ?',
+                    [$this->testOrderId]
+                );
+        } catch (NotFoundExceptionInterface | ContainerExceptionInterface) {
+            // nothing todo
+        }
+
         parent::tearDown();
     }
 }

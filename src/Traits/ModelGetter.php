@@ -9,7 +9,9 @@ declare(strict_types=1);
 
 namespace OxidSolutionCatalysts\TeleCash\Traits;
 
+use OxidEsales\Eshop\Application\Model\Order;
 use OxidEsales\Eshop\Application\Model\Payment;
+use OxidEsales\Eshop\Core\Price;
 use OxidSolutionCatalysts\TeleCash\Application\Model\TeleCashOrder;
 use OxidSolutionCatalysts\TeleCash\Application\Model\TeleCashPayment;
 use OxidSolutionCatalysts\TeleCash\Core\Service\OxNewService;
@@ -59,11 +61,35 @@ trait ModelGetter
     /**
      * @throws TeleCashException
      */
+    private function getOxidOrderModel(): Order
+    {
+        return $this->getOxNewService()->oxNew(Order::class);
+    }
+
+    /**
+     * @throws TeleCashException
+     */
     private function getOxidPaymentModel(): Payment
     {
         return $this->getOxNewService()->oxNew(Payment::class);
     }
 
+    /**
+     * @throws TeleCashException
+     */
+    private function getPriceObj(float $value, bool $isNettoMode): Price
+    {
+        $price = $this->getOxNewService()->oxNew(Price::class);
+
+        if ($isNettoMode) {
+            $price->setNettoPriceMode();
+        } else {
+            $price->setBruttoPriceMode();
+        }
+        $price->setPrice($value);
+
+        return $price;
+    }
 
 
     /**
