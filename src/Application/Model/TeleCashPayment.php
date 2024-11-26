@@ -124,7 +124,7 @@ class TeleCashPayment extends BaseModel implements TeleCashPaymentInterface
                 if (isset($result[Module::TELECASH_PAYMENT_EXTENSION_TABLE_IDENT])) {
                     $ident = $result[Module::TELECASH_PAYMENT_EXTENSION_TABLE_IDENT];
                     if ($ident === Module::TELECASH_PAYMENT_IDENT_DEFAULT) {
-                        throw (new TeleCashException())->isNotTeleCashPayment();
+                        throw (new TeleCashException())->isNotTeleCash();
                     }
                     $this->assign($result);
                     $this->_isLoaded = true;
