@@ -10,7 +10,10 @@ declare(strict_types=1);
 use OxidSolutionCatalysts\TeleCash\Core\Module;
 
 $aLang = [
-    'charset'                                                                      => 'UTF-8',
+    'charset' => 'UTF-8',
+
+    'tbclorder_telecash' => 'TeleCash',
+
     'OSC_TELECASH_PAYMENT_DATA_INITIAL_ERROR'                                      => 'Beim initialen Einrichten der Zahlart ist ein Fehler aufgetreten:',
     'OSC_TELECASH_PAYMENT_IDENT'                                                   => 'Telecash Zahlart',
     'OSC_TELECASH_PAYMENT_IDENT_' . Module::TELECASH_PAYMENT_IDENT_DEFAULT         => 'keine TeleCash Zahlart',
