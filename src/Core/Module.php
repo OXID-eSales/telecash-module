@@ -83,7 +83,7 @@ final class Module
     ];
 
     public const TELECASH_TXN_TYPE_SALE = 'sale';
-    public const TELECASH_TXN_TYPE_POSTAUTH = 'postauth';
+    public const TELECASH_TXN_TYPE_POSTAUTH = 'preauth';
 
     public const TELECASH_TRANSACTION_TYPES = [
         self::TELECASH_CAPTURE_TYPE_DIRECT     => self::TELECASH_TXN_TYPE_SALE,
