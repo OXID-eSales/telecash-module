@@ -14,6 +14,7 @@ use OxidEsales\Eshop\Application\Model\Payment;
 use OxidEsales\Eshop\Core\Price;
 use OxidSolutionCatalysts\TeleCash\Application\Model\TeleCashOrder;
 use OxidSolutionCatalysts\TeleCash\Application\Model\TeleCashPayment;
+use OxidSolutionCatalysts\TeleCash\Core\Service\Logger;
 use OxidSolutionCatalysts\TeleCash\Core\Service\OxNewService;
 use OxidSolutionCatalysts\TeleCash\Core\Service\TeleCashPaymentValidatorServiceInterface;
 use OxidSolutionCatalysts\TeleCash\Exception\TeleCashException;
@@ -57,6 +58,7 @@ trait ModelGetter
     {
         return $this->getOxNewService()->oxNew(TeleCashOrder::class, [$oxOrderId]);
     }
+
 
     /**
      * @throws TeleCashException
@@ -114,11 +116,14 @@ trait ModelGetter
      */
     private function getTeleCashConnectData(): TeleCashConnectData
     {
+        $logger = $this->getServiceFromContainer(Logger::class);
+
         return $this->getOxNewService()->oxNew(
             TeleCashConnectData::class,
             [
                 $this->getTeleCashConnect(),
-                $this->getOxNewService()
+                $this->getOxNewService(),
+                $logger
             ]
         );
     }

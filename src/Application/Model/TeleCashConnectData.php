@@ -20,9 +20,11 @@ use OxidEsales\Eshop\Application\Model\User;
 use OxidEsales\Eshop\Core\Exception\DatabaseConnectionException;
 use OxidEsales\Eshop\Core\Exception\StandardException;
 use OxidSolutionCatalysts\TeleCash\Application\Model\Interface\TeleCashConnectDataInterface;
+use OxidSolutionCatalysts\TeleCash\Core\Service\Logger;
 use OxidSolutionCatalysts\TeleCash\Core\Service\OxNewService;
 use OxidSolutionCatalysts\TeleCash\Core\Service\Price;
 use OxidSolutionCatalysts\TeleCash\IPG\TeleCashConnect;
+use OxidSolutionCatalysts\TeleCash\Traits\Json;
 
 /**
  * Class TeleCashConnectData - Provider for TeleCashData
@@ -31,6 +33,8 @@ use OxidSolutionCatalysts\TeleCash\IPG\TeleCashConnect;
  */
 class TeleCashConnectData implements TeleCashConnectDataInterface
 {
+    use Json;
+
     protected ?User $user = null;
 
     protected ?Address $address = null;
@@ -60,7 +64,8 @@ class TeleCashConnectData implements TeleCashConnectDataInterface
      */
     public function __construct(
         private readonly TeleCashConnect $teleCashConnect,
-        private readonly OxNewService $oxNewService
+        private readonly OxNewService $oxNewService,
+        private readonly Logger $logger
     ) {
     }
 
@@ -140,6 +145,11 @@ class TeleCashConnectData implements TeleCashConnectDataInterface
         );
         $extHash = $this->teleCashConnect->calculateExtendedHashFromArray($allFields);
         $allFields['hashExtended'] = $extHash;
+
+        $this->logger->log(
+            'debug',
+            'Debug: getTeleCashConnectData: ' . $this->arrayToJson($allFields)
+        );
 
         return $allFields;
     }

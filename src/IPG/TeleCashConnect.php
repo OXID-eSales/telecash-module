@@ -11,18 +11,24 @@ namespace OxidSolutionCatalysts\TeleCash\IPG;
 
 use DateTime;
 use InvalidArgumentException;
+use OxidSolutionCatalysts\TeleCash\Core\Service\Logger;
 use OxidSolutionCatalysts\TeleCash\IPG\Model\BillingAddress;
 use OxidSolutionCatalysts\TeleCash\IPG\Model\CreditCardData;
 use OxidSolutionCatalysts\TeleCash\IPG\Model\CustomData;
 use OxidSolutionCatalysts\TeleCash\IPG\Model\DirectDebitData;
 use OxidSolutionCatalysts\TeleCash\IPG\Model\ShippingAddress;
 use OxidSolutionCatalysts\TeleCash\IPG\Model\TransactionResult;
+use OxidSolutionCatalysts\TeleCash\Traits\Json;
+use OxidSolutionCatalysts\TeleCash\Traits\ServiceContainer;
 
 /**
  * Base class for handling TeleCash Connect integration
  */
 class TeleCashConnect
 {
+    use Json;
+    use ServiceContainer;
+
     private string $hashMethod;
     private string $secretKey;
     private string $storeName;
@@ -53,12 +59,20 @@ class TeleCashConnect
      */
     private TeleCashCurrency $teleCashCurrency;
 
-    public function __construct(string $storeName, string $secretKey, string $hashMethod = 'HMACSHA256')
-    {
+    private ?Logger $logger;
+
+    public function __construct(
+        string $storeName,
+        string $secretKey,
+        string $hashMethod = 'HMACSHA256'
+    ) {
+        $this->setContainer($this->getContainer());
+
         $this->hashMethod = $hashMethod;
         $this->secretKey = $secretKey;
         $this->storeName = $storeName;
         $this->teleCashCurrency = new TeleCashCurrency();
+        $this->logger = $this->getServiceFromContainer(Logger::class);
     }
 
     /**
@@ -324,6 +338,10 @@ class TeleCashConnect
     public function setResponseData(array $data): void
     {
         $this->responseData = $data;
+        $this->logger?->log(
+            'debug',
+            'Debug: setResponseData: ' . $this->arrayToJson($data)
+        );
     }
 
     /**
