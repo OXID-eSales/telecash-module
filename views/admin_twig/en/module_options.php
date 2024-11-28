@@ -18,7 +18,7 @@ $aLang = [
     # Module settings
     'SHOP_MODULE_GROUP_' . ModuleSettingsServiceInterface::MODULE_CONFIG_API_VARGROUP          => 'API',
     'SHOP_MODULE_GROUP_' . ModuleSettingsServiceInterface::MODULE_CONFIG_API_FRONTEND_VARGROUP => 'API for OXID Frontend',
-    'SHOP_MODULE_GROUP_' . ModuleSettingsServiceInterface::MODULE_CONFIG_API_BACKEND_VARGROUP  => 'API für OXID Backend',
+    'SHOP_MODULE_GROUP_' . ModuleSettingsServiceInterface::MODULE_CONFIG_API_BACKEND_VARGROUP  => 'API for OXID Backend',
     'SHOP_MODULE_GROUP_' . ModuleSettingsServiceInterface::MODULE_CONFIG_LANGUAGE              => 'Languages',
     'SHOP_MODULE_GROUP_' . ModuleSettingsServiceInterface::MODULE_CONFIG_DEBUG_VARGROUP        => 'Debugging',
 
