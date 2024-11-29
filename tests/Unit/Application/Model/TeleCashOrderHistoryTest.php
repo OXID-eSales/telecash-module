@@ -8,19 +8,19 @@
 namespace OxidSolutionCatalysts\TeleCash\Tests\Unit\Application\Model;
 
 use DateTime;
-use OxidSolutionCatalysts\TeleCash\Tests\Unit\Application\Model\TestClasses\TeleCashOrderTestClass;
+use OxidSolutionCatalysts\TeleCash\Tests\Unit\Application\Model\TestClasses\TeleCashOrderHistoryTestClass;
 use PHPUnit\Framework\TestCase;
 
 /**
- * Unit Test Suite for TeleCashOrder
+ * Unit Test Suite for TeleCashOrderHistory
  *
- * Tests the business logic of the TeleCashOrder class without database dependencies.
+ * Tests the business logic of the TeleCashOrderHistory class without database dependencies.
  * Focuses on transaction data handling, value conversions and data validation.
  */
-class TeleCashOrderTest extends TestCase
+class TeleCashOrderHistoryTest extends TestCase
 {
     private array $sampleTransactionData;
-    private TeleCashOrderTestClass $order;
+    private TeleCashOrderHistoryTestClass $order;
 
     /**
      * Set up test environment
@@ -31,7 +31,7 @@ class TeleCashOrderTest extends TestCase
     protected function setUp(): void
     {
         // Initialize test class without database connection
-        $this->order = new TeleCashOrderTestClass('testOrderId');
+        $this->order = new TeleCashOrderHistoryTestClass('testOrderId');
 
         // Prepare comprehensive sample transaction data
         $this->sampleTransactionData = [

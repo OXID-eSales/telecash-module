@@ -7,7 +7,7 @@
 
 namespace OxidSolutionCatalysts\TeleCash\Tests\Unit\Application\Model\TestClasses;
 
-use OxidSolutionCatalysts\TeleCash\Application\Model\TeleCashOrder;
+use OxidSolutionCatalysts\TeleCash\Application\Model\TeleCashOrderHistory;
 use OxidSolutionCatalysts\TeleCash\IPG\Model\TransactionResult;
 use OxidSolutionCatalysts\TeleCash\IPG\TeleCashCurrency;
 
@@ -21,7 +21,7 @@ use OxidSolutionCatalysts\TeleCash\IPG\TeleCashCurrency;
  * - Overriding database operations
  * - Maintaining only essential functionality
  */
-class TeleCashOrderTestClass extends TeleCashOrder
+class TeleCashOrderHistoryTestClass extends TeleCashOrderHistory
 {
     /**
      * Currency handling service, made protected for testing

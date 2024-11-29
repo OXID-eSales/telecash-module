@@ -28,7 +28,7 @@ final class Version20241122134700 extends AbstractMigration
         $this->platform->registerDoctrineTypeMapping('enum', 'string');
 
         //add order-extension-table
-        $this->createTeleCashOrderTable($schema);
+        $this->createTeleCashOrderHistoryTable($schema);
     }
 
     public function down(Schema $schema): void
@@ -40,12 +40,12 @@ final class Version20241122134700 extends AbstractMigration
      * create a telecash order-extend-table
      * @throws SchemaException
      */
-    private function createTeleCashOrderTable(Schema $schema): void
+    private function createTeleCashOrderHistoryTable(Schema $schema): void
     {
-        if (!$schema->hasTable(Module::TELECASH_ORDER_EXTENSION_TABLE)) {
-            $paymentTable = $schema->createTable(Module::TELECASH_ORDER_EXTENSION_TABLE);
+        if (!$schema->hasTable(Module::TELECASH_ORDER_HISTORY_EXTENSION_TABLE)) {
+            $paymentTable = $schema->createTable(Module::TELECASH_ORDER_HISTORY_EXTENSION_TABLE);
         } else {
-            $paymentTable = $schema->getTable(Module::TELECASH_ORDER_EXTENSION_TABLE);
+            $paymentTable = $schema->getTable(Module::TELECASH_ORDER_HISTORY_EXTENSION_TABLE);
         }
 
         if (!$paymentTable->hasColumn('OXID')) {
@@ -56,7 +56,7 @@ final class Version20241122134700 extends AbstractMigration
             );
         }
 
-        $oxOrderIdColName = strtoupper(Module::TELECASH_ORDER_EXTENSION_TABLE_OXORDERID);
+        $oxOrderIdColName = strtoupper(Module::TELECASH_ORDER_HISTORY_EXTENSION_TABLE_OXORDERID);
         if (!$paymentTable->hasColumn($oxOrderIdColName)) {
             $paymentTable->addColumn(
                 $oxOrderIdColName,
@@ -69,7 +69,7 @@ final class Version20241122134700 extends AbstractMigration
         }
 
 
-        $oxResponseColName = strtoupper(Module::TELECASH_ORDER_EXTENSION_TABLE_RESPONSE);
+        $oxResponseColName = strtoupper(Module::TELECASH_ORDER_HISTORY_EXTENSION_TABLE_RESPONSE);
         if (!$paymentTable->hasColumn($oxResponseColName)) {
             $paymentTable->addColumn(
                 $oxResponseColName,

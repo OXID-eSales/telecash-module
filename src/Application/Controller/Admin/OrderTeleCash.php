@@ -11,7 +11,7 @@ namespace OxidSolutionCatalysts\TeleCash\Application\Controller\Admin;
 
 use DateTime;
 use OxidEsales\Eshop\Application\Controller\Admin\AdminController;
-use OxidSolutionCatalysts\TeleCash\Application\Model\TeleCashOrder;
+use OxidSolutionCatalysts\TeleCash\Application\Model\TeleCashOrderHistory;
 use OxidSolutionCatalysts\TeleCash\Application\Model\TeleCashPayment;
 use OxidSolutionCatalysts\TeleCash\Core\Module;
 use OxidSolutionCatalysts\TeleCash\Core\Service\RegistryService;
@@ -107,7 +107,7 @@ class OrderTeleCash extends AdminController
      * @throws TeleCashException
      */
     private function addTeleCashOrderToTemplate(
-        TeleCashOrder $teleCashOrder,
+        TeleCashOrderHistory $teleCashOrder,
         bool $isNettoMode,
         ?TeleCashPayment $teleCashPayment
     ): void {

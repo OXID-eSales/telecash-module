@@ -9,7 +9,7 @@ declare(strict_types=1);
 
 namespace OxidSolutionCatalysts\TeleCash\Extension\Application\Model;
 
-use OxidSolutionCatalysts\TeleCash\Application\Model\TeleCashOrder;
+use OxidSolutionCatalysts\TeleCash\Application\Model\TeleCashOrderHistory;
 use OxidSolutionCatalysts\TeleCash\Exception\TeleCashException;
 use OxidSolutionCatalysts\TeleCash\Traits\DataGetter;
 use OxidSolutionCatalysts\TeleCash\Traits\ModelGetter;
@@ -21,7 +21,7 @@ class Order extends Order_parent
     use ModelGetter;
     use ServiceContainer;
 
-    protected ?TeleCashOrder $teleCashOrder = null;
+    protected ?TeleCashOrderHistory $teleCashOrder = null;
 
     protected ?bool $teleCashOrderIsLoaded = null;
 
@@ -64,7 +64,7 @@ class Order extends Order_parent
      *
      * @throws TeleCashException
      */
-    public function getTeleCashOrder(): ?TeleCashOrder
+    public function getTeleCashOrder(): ?TeleCashOrderHistory
     {
         if (is_null($this->teleCashOrderIsLoaded)) {
             $this->teleCashOrderIsLoaded = false;

@@ -10,22 +10,22 @@ namespace OxidSolutionCatalysts\TeleCash\Tests\Integration\Application\Model;
 use DateTime;
 use OxidEsales\EshopCommunity\Internal\Container\ContainerFactory;
 use OxidEsales\EshopCommunity\Internal\Framework\Database\ConnectionProviderInterface;
-use OxidSolutionCatalysts\TeleCash\Application\Model\TeleCashOrder;
+use OxidSolutionCatalysts\TeleCash\Application\Model\TeleCashOrderHistory;
 use PHPUnit\Framework\TestCase;
 use Psr\Container\ContainerExceptionInterface;
 use Psr\Container\NotFoundExceptionInterface;
 
 /**
- * Integration Test Suite for TeleCashOrder
+ * Integration Test Suite for TeleCashOrderHistory
  *
- * Tests the database interaction of TeleCashOrder, specifically:
+ * Tests the database interaction of TeleCashOrderHistory, specifically:
  * - Saving transaction data
  * - Loading transaction data
  * - Data consistency through save/load cycle
  */
-class TeleCashOrderTest extends TestCase
+class TeleCashOrderHistoryTest extends TestCase
 {
-    private TeleCashOrder $order;
+    private TeleCashOrderHistory $order;
     private array $sampleTransactionData;
     private string $testOrderId = 'testOrderId';
 
@@ -37,7 +37,7 @@ class TeleCashOrderTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        $this->order = new TeleCashOrder($this->testOrderId);
+        $this->order = new TeleCashOrderHistory($this->testOrderId);
 
         $this->sampleTransactionData = [
             'txntype' => 'sale',
@@ -70,7 +70,7 @@ class TeleCashOrderTest extends TestCase
         $this->assertTrue($oxid !== false, 'Failed to save order data');
 
         // Load data in new instance
-        $loadedOrder = new TeleCashOrder($this->testOrderId);
+        $loadedOrder = new TeleCashOrderHistory($this->testOrderId);
         $loadResult = $loadedOrder->load($oxid);
         $this->assertTrue($loadResult, 'Failed to load order data');
 

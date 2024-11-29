@@ -24,7 +24,7 @@ use OxidSolutionCatalysts\TeleCash\Traits\DataGetter;
 use OxidSolutionCatalysts\TeleCash\Traits\Json;
 use OxidSolutionCatalysts\TeleCash\Traits\ServiceContainer;
 
-class TeleCashOrder extends BaseModel implements TeleCashOrderInterface
+class TeleCashOrderHistory extends BaseModel implements TeleCashOrderInterface
 {
     use ServiceContainer;
     use DataGetter;
@@ -39,7 +39,7 @@ class TeleCashOrder extends BaseModel implements TeleCashOrderInterface
     protected TeleCashCurrency $teleCashCurrency;
 
     protected $_sClassName = 'OxidSolutionCatalysts\TeleCash\Application\TeleCashOrder';
-    protected $_sCoreTable = Module::TELECASH_ORDER_EXTENSION_TABLE;
+    protected $_sCoreTable = Module::TELECASH_ORDER_HISTORY_EXTENSION_TABLE;
 
     /**
      * Constructor for TeleCashOrder.
@@ -99,7 +99,7 @@ class TeleCashOrder extends BaseModel implements TeleCashOrderInterface
         $table = $this->getViewName();
 
         $query = $this->buildSelectString([
-            $table . '.' . Module::TELECASH_ORDER_EXTENSION_TABLE_OXORDERID => $orderId
+            $table . '.' . Module::TELECASH_ORDER_HISTORY_EXTENSION_TABLE_OXORDERID => $orderId
         ]);
 
         try {
@@ -235,8 +235,8 @@ class TeleCashOrder extends BaseModel implements TeleCashOrderInterface
         $dataAsString = $this->arrayToJson($data);
 
         $params = [
-            Module::TELECASH_ORDER_EXTENSION_TABLE_OXORDERID => $this->oxOrderId,
-            Module::TELECASH_ORDER_EXTENSION_TABLE_RESPONSE  => $dataAsString
+            Module::TELECASH_ORDER_HISTORY_EXTENSION_TABLE_OXORDERID => $this->oxOrderId,
+            Module::TELECASH_ORDER_HISTORY_EXTENSION_TABLE_RESPONSE  => $dataAsString
         ];
         $this->assign($params);
 
@@ -249,7 +249,7 @@ class TeleCashOrder extends BaseModel implements TeleCashOrderInterface
         if ($this->oxOrderId && !$this->isLoaded()) {
             $this->loadByOrderId();
         }
-        $data = $this->getFieldStringData(Module::TELECASH_ORDER_EXTENSION_TABLE_RESPONSE);
+        $data = $this->getFieldStringData(Module::TELECASH_ORDER_HISTORY_EXTENSION_TABLE_RESPONSE);
 
         if (!empty($data)) {
             /** @var array<string, string> $transactionData */
