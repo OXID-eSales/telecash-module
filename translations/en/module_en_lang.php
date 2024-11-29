@@ -37,4 +37,5 @@ $aLang = [
     'TELECASH_SEPA_HOLDERNAME_VALIDATE'    => 'Please enter the account holder name.',
     'TELECASH_SEPA_HOLDERNAME_PLACEHOLDER' => 'First and last name of account holder',
 
+    'TELECASH_DEFAULT_PAYMENT_ERROR' => 'An error occurred while processing the TeleCash payment.',
 ];

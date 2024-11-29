@@ -37,4 +37,5 @@ $aLang = [
     'TELECASH_SEPA_HOLDERNAME_VALIDATE'    => 'Bitte geben Sie den Namen des Kontoinhabers ein.',
     'TELECASH_SEPA_HOLDERNAME_PLACEHOLDER' => 'Vor- und Nachname des Kontoinhabers',
 
+    'TELECASH_DEFAULT_PAYMENT_ERROR' => 'Bei der Durchführung der TeleCash-Bezahlung ist ein Fehler aufgetreten.',
 ];
