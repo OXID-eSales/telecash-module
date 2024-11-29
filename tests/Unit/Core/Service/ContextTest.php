@@ -276,8 +276,8 @@ class ContextTest extends TestCase
         // Test live mode
         $actualUrl = $this->context->getFailUrl();
         $expectedParams = [
-            'cl' => 'payment',
-            'fnc' => 'showTeleCashError'
+            'cl'  => 'payment',
+            'fnc' => 'provideTeleCashError'
         ];
         $expectedUrl = $this->mockShopUrl . 'index.php?' . http_build_query($expectedParams);
         $this->assertEquals(

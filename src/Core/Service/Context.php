@@ -131,8 +131,8 @@ class Context
     public function getFailUrl(): string
     {
         $parameter = [
-            "cl"           => "payment",
-            "fnc"          => "showTeleCashError",
+            "cl"  => "payment",
+            "fnc" => "provideTeleCashError",
         ];
 
         return $this->prepareUrl($parameter);
