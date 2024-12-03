@@ -9,9 +9,8 @@ declare(strict_types=1);
 
 namespace OxidSolutionCatalysts\TeleCash\Application\Controller\Admin;
 
-use DateTime;
 use OxidEsales\Eshop\Application\Controller\Admin\AdminController;
-use OxidSolutionCatalysts\TeleCash\Application\Model\TeleCashOrderHistory;
+use OxidSolutionCatalysts\TeleCash\Application\Model\TeleCashOrder;
 use OxidSolutionCatalysts\TeleCash\Application\Model\TeleCashPayment;
 use OxidSolutionCatalysts\TeleCash\Core\Module;
 use OxidSolutionCatalysts\TeleCash\Core\Service\RegistryService;
@@ -107,28 +106,31 @@ class OrderTeleCash extends AdminController
      * @throws TeleCashException
      */
     private function addTeleCashOrderToTemplate(
-        TeleCashOrderHistory $teleCashOrder,
+        TeleCashOrder $teleCashOrder,
         bool $isNettoMode,
         ?TeleCashPayment $teleCashPayment
     ): void {
+
         $chargeTotal = $teleCashOrder->getChargeTotal();
         $currency = $teleCashOrder->getCurrency();
         $priceChargeTotal = $this->getPriceObj($chargeTotal, $isNettoMode);
         $currencyObj = $this->registryService->getConfig()->getCurrencyObject($currency);
 
-        $dateTime = $teleCashOrder->getTxnDateTime();
-        $txnDateTime = $dateTime ? $dateTime->format('d.m.Y H:i:s') : '';
+        // History
+        $teleCashOrderHistoryList = $teleCashOrder->getTeleCashOrderHistoryList();
 
         $this->addTplParam('priceChargeTotal', $priceChargeTotal);
         $this->addTplParam('currencyObj', $currencyObj);
         $this->addTplParam('paymentMethod', $teleCashOrder->getPaymentMethod());
         $this->addTplParam('status', $teleCashOrder->getStatus());
-        $this->addTplParam('responseCode', $teleCashOrder->getProcessorResponseCode());
-        $this->addTplParam('txnDateTime', $txnDateTime);
         $this->addTplParam('txnType', $teleCashOrder->getTxnType());
-        $this->addTplParam('ipgTransactionId', $teleCashOrder->getIpgTransactionId());
-        $this->addTplParam('endpointTransactionId', $teleCashOrder->getEndpointTransactionId());
-        $this->addTplParam('terminalId', $teleCashOrder->getTerminalId());
+        $this->addTplParam('teleCashOrderHistoryList', $teleCashOrderHistoryList);
+
+        //$this->addTplParam('responseCode', $teleCashOrderHistory->getProcessorResponseCode());
+        //$this->addTplParam('txnDateTime', $txnDateTime);
+        //$this->addTplParam('ipgTransactionId', $teleCashOrderHistory->getIpgTransactionId());
+        //$this->addTplParam('endpointTransactionId', $teleCashOrderHistory->getEndpointTransactionId());
+        //$this->addTplParam('terminalId', $teleCashOrderHistory->getTerminalId());
 
         if ($teleCashPayment) {
             $this->addTplParam('captureType', $teleCashPayment->getTeleCashCaptureType());
