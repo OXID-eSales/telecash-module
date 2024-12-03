@@ -27,9 +27,11 @@ final class Module
     public const TELECASH_ORDER_EXTENSION_TABLE_OID = 'oid';
     public const TELECASH_ORDER_EXTENSION_TABLE_STATUS = 'status';
     public const TELECASH_ORDER_EXTENSION_TABLE_CURRENCY = 'currency';
+    public const TELECASH_ORDER_EXTENSION_TABLE_TXNTYPE = 'txntype';
+    public const TELECASH_ORDER_EXTENSION_TABLE_PAYMENTMETHOD = 'paymentmethod';
     public const TELECASH_ORDER_EXTENSION_TABLE_CHARGETOTAL = 'chargetotal';
     public const TELECASH_ORDER_HISTORY_EXTENSION_TABLE = 'osc_telecash_order_history';
-    public const TELECASH_ORDER_HISTORY_EXTENSION_TABLE_OXORDERID = 'oxorderid';
+    public const TELECASH_ORDER_HISTORY_EXTENSION_TABLE_OID = 'oxorderid';
     public const TELECASH_ORDER_HISTORY_EXTENSION_TABLE_RESPONSE = 'telecashresponse';
 
 
