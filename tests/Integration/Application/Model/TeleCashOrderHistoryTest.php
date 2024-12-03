@@ -25,7 +25,7 @@ use Psr\Container\NotFoundExceptionInterface;
  */
 class TeleCashOrderHistoryTest extends TestCase
 {
-    private TeleCashOrderHistory $order;
+    private TeleCashOrderHistory $orderHistory;
     private array $sampleTransactionData;
     private string $testOrderId = 'testOrderId';
 
@@ -37,7 +37,7 @@ class TeleCashOrderHistoryTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        $this->order = new TeleCashOrderHistory($this->testOrderId);
+        $this->orderHistory = new TeleCashOrderHistory($this->testOrderId);
 
         $this->sampleTransactionData = [
             'txntype' => 'sale',
@@ -65,8 +65,8 @@ class TeleCashOrderHistoryTest extends TestCase
     public function testSaveAndLoad(): void
     {
         // Save transaction data
-        $this->order->setTransactionResult($this->sampleTransactionData);
-        $oxid = $this->order->save();
+        $this->orderHistory->setTransactionResult($this->sampleTransactionData);
+        $oxid = $this->orderHistory->save();
         $this->assertTrue($oxid !== false, 'Failed to save order data');
 
         // Load data in new instance
@@ -148,7 +148,7 @@ class TeleCashOrderHistoryTest extends TestCase
             $container->get(ConnectionProviderInterface::class)
                 ->get()
                 ->executeStatement(
-                    'DELETE FROM ' . $this->order->_sCoreTable . ' WHERE ' .
+                    'DELETE FROM ' . $this->orderHistory->_sCoreTable . ' WHERE ' .
                     'oxorderid = ?',
                     [$this->testOrderId]
                 );

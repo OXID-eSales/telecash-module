@@ -20,7 +20,7 @@ use PHPUnit\Framework\TestCase;
 class TeleCashOrderHistoryTest extends TestCase
 {
     private array $sampleTransactionData;
-    private TeleCashOrderHistoryTestClass $order;
+    private TeleCashOrderHistoryTestClass $orderHistory;
 
     /**
      * Set up test environment
@@ -31,7 +31,7 @@ class TeleCashOrderHistoryTest extends TestCase
     protected function setUp(): void
     {
         // Initialize test class without database connection
-        $this->order = new TeleCashOrderHistoryTestClass('testOrderId');
+        $this->orderHistory = new TeleCashOrderHistoryTestClass('testOrderId');
 
         // Prepare comprehensive sample transaction data
         $this->sampleTransactionData = [
@@ -48,7 +48,7 @@ class TeleCashOrderHistoryTest extends TestCase
             'paymentMethod' => 'V'  // VISA code
         ];
 
-        $this->order->setTransactionResult($this->sampleTransactionData);
+        $this->orderHistory->setTransactionResult($this->sampleTransactionData);
     }
 
     /**
@@ -60,13 +60,13 @@ class TeleCashOrderHistoryTest extends TestCase
      */
     public function testGetTxnType(): void
     {
-        $this->assertEquals('sale', $this->order->getTxnType());
+        $this->assertEquals('sale', $this->orderHistory->getTxnType());
 
         // Test invalid txntype
         $invalidData = $this->sampleTransactionData;
         $invalidData['txntype'] = 'invalid';
-        $this->order->setTransactionResult($invalidData);
-        $this->assertEquals('', $this->order->getTxnType());
+        $this->orderHistory->setTransactionResult($invalidData);
+        $this->assertEquals('', $this->orderHistory->getTxnType());
     }
 
     /**
@@ -80,23 +80,23 @@ class TeleCashOrderHistoryTest extends TestCase
         // Test valid date
         $validData = $this->sampleTransactionData;
         $validData['txndatetime'] = '2024:01:15-10:30:00';
-        $this->order->setTransactionResult($validData);
+        $this->orderHistory->setTransactionResult($validData);
 
-        $result = $this->order->getTxnDateTime();
+        $result = $this->orderHistory->getTxnDateTime();
         $this->assertInstanceOf(DateTime::class, $result);
         $this->assertEquals('2024-01-15 10:30:00', $result->format('Y-m-d H:i:s'));
 
         // Test invalid date format
         $invalidData = $this->sampleTransactionData;
         $invalidData['txndatetime'] = 'invalid-date-format';
-        $this->order->setTransactionResult($invalidData);
-        $this->assertNull($this->order->getTxnDateTime());
+        $this->orderHistory->setTransactionResult($invalidData);
+        $this->assertNull($this->orderHistory->getTxnDateTime());
 
         // Test empty date
         $emptyData = $this->sampleTransactionData;
         $emptyData['txndatetime'] = '';
-        $this->order->setTransactionResult($emptyData);
-        $this->assertNull($this->order->getTxnDateTime());
+        $this->orderHistory->setTransactionResult($emptyData);
+        $this->assertNull($this->orderHistory->getTxnDateTime());
     }
 
     /**
@@ -106,7 +106,7 @@ class TeleCashOrderHistoryTest extends TestCase
      */
     public function testGetOid(): void
     {
-        $this->assertEquals('test123', $this->order->getOid());
+        $this->assertEquals('test123', $this->orderHistory->getOid());
     }
 
     /**
@@ -116,7 +116,7 @@ class TeleCashOrderHistoryTest extends TestCase
      */
     public function testGetEndpointTransactionId(): void
     {
-        $this->assertEquals('endpoint123', $this->order->getEndpointTransactionId());
+        $this->assertEquals('endpoint123', $this->orderHistory->getEndpointTransactionId());
     }
 
     /**
@@ -126,7 +126,7 @@ class TeleCashOrderHistoryTest extends TestCase
      */
     public function testGetTerminalId(): void
     {
-        $this->assertEquals('term123', $this->order->getTerminalId());
+        $this->assertEquals('term123', $this->orderHistory->getTerminalId());
     }
 
     /**
@@ -136,7 +136,7 @@ class TeleCashOrderHistoryTest extends TestCase
      */
     public function testGetIpgTransactionId(): void
     {
-        $this->assertEquals('ipg123', $this->order->getIpgTransactionId());
+        $this->assertEquals('ipg123', $this->orderHistory->getIpgTransactionId());
     }
 
     /**
@@ -148,13 +148,13 @@ class TeleCashOrderHistoryTest extends TestCase
      */
     public function testGetCurrency(): void
     {
-        $this->assertEquals('EUR', $this->order->getCurrency());
+        $this->assertEquals('EUR', $this->orderHistory->getCurrency());
 
         // Test invalid currency
         $invalidData = $this->sampleTransactionData;
         $invalidData['currency'] = 'invalid';
-        $this->order->setTransactionResult($invalidData);
-        $this->assertEquals('', $this->order->getCurrency());
+        $this->orderHistory->setTransactionResult($invalidData);
+        $this->assertEquals('', $this->orderHistory->getCurrency());
     }
 
     /**
@@ -166,13 +166,13 @@ class TeleCashOrderHistoryTest extends TestCase
      */
     public function testGetChargeTotal(): void
     {
-        $this->assertEquals(99.99, $this->order->getChargeTotal());
+        $this->assertEquals(99.99, $this->orderHistory->getChargeTotal());
 
         // Test invalid charge total
         $invalidData = $this->sampleTransactionData;
         $invalidData['chargetotal'] = 'invalid';
-        $this->order->setTransactionResult($invalidData);
-        $this->assertEquals(0.0, $this->order->getChargeTotal());
+        $this->orderHistory->setTransactionResult($invalidData);
+        $this->assertEquals(0.0, $this->orderHistory->getChargeTotal());
     }
 
     /**
@@ -182,7 +182,7 @@ class TeleCashOrderHistoryTest extends TestCase
      */
     public function testGetStatus(): void
     {
-        $this->assertEquals('APPROVED', $this->order->getStatus());
+        $this->assertEquals('APPROVED', $this->orderHistory->getStatus());
     }
 
     /**
@@ -193,7 +193,7 @@ class TeleCashOrderHistoryTest extends TestCase
      */
     public function testGetProcessorResponseCode(): void
     {
-        $this->assertEquals('00', $this->order->getProcessorResponseCode());
+        $this->assertEquals('00', $this->orderHistory->getProcessorResponseCode());
     }
 
     /**
@@ -223,11 +223,11 @@ class TeleCashOrderHistoryTest extends TestCase
         foreach ($testCases as $input => $expected) {
             $testData = $this->sampleTransactionData;
             $testData['paymentMethod'] = $input;
-            $this->order->setTransactionResult($testData);
+            $this->orderHistory->setTransactionResult($testData);
 
             $this->assertEquals(
                 $expected,
-                $this->order->getPaymentMethod(),
+                $this->orderHistory->getPaymentMethod(),
                 sprintf("Payment method '%s' should return '%s'", $input, $expected)
             );
         }
