@@ -68,15 +68,38 @@ final class Version20241129122600 extends AbstractMigration
             );
         }
 
-
         $oxOidColName = strtoupper(Module::TELECASH_ORDER_EXTENSION_TABLE_OID);
         if (!$paymentTable->hasColumn($oxOidColName)) {
             $paymentTable->addColumn(
                 $oxOidColName,
                 Types::STRING,
                 [
-                    'columnDefinition' => 'char(32) collate latin1_general_ci',
+                    'columnDefinition' => 'char(40) collate latin1_general_ci',
                     'comment' => 'Telecash OID'
+                ]
+            );
+        }
+
+        $oxTxnTypeColName = strtoupper(Module::TELECASH_ORDER_EXTENSION_TABLE_TXNTYPE);
+        if (!$paymentTable->hasColumn($oxTxnTypeColName)) {
+            $paymentTable->addColumn(
+                $oxTxnTypeColName,
+                Types::STRING,
+                [
+                    'columnDefinition' => 'char(8) collate latin1_general_ci',
+                    'comment' => 'Telecash TXNType'
+                ]
+            );
+        }
+
+        $oxPaymentMethodColName = strtoupper(Module::TELECASH_ORDER_EXTENSION_TABLE_PAYMENTMETHOD);
+        if (!$paymentTable->hasColumn($oxPaymentMethodColName)) {
+            $paymentTable->addColumn(
+                $oxPaymentMethodColName,
+                Types::STRING,
+                [
+                    'columnDefinition' => 'char(8) collate latin1_general_ci',
+                    'comment' => 'Telecash PaymentMethod'
                 ]
             );
         }
@@ -100,7 +123,7 @@ final class Version20241129122600 extends AbstractMigration
                 Types::STRING,
                 [
                     'columnDefinition' => 'char(3) collate latin1_general_ci',
-                    'comment' => 'Telecash Status'
+                    'comment' => 'Telecash Currency'
                 ]
             );
         }
@@ -131,7 +154,7 @@ final class Version20241129122600 extends AbstractMigration
 
         if (!$paymentTable->hasIndex('UNIQUE_ENTRY')) {
             $paymentTable->addUniqueIndex(
-                [$oxOrderIdColName],
+                [$oxOrderIdColName, $oxOidColName],
                 'UNIQUE_ENTRY'
             );
         }

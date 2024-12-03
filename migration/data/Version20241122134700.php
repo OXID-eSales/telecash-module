@@ -56,14 +56,14 @@ final class Version20241122134700 extends AbstractMigration
             );
         }
 
-        $oxOrderIdColName = strtoupper(Module::TELECASH_ORDER_HISTORY_EXTENSION_TABLE_OXORDERID);
-        if (!$paymentTable->hasColumn($oxOrderIdColName)) {
+        $oxOidColName = strtoupper(Module::TELECASH_ORDER_HISTORY_EXTENSION_TABLE_OID);
+        if (!$paymentTable->hasColumn($oxOidColName)) {
             $paymentTable->addColumn(
-                $oxOrderIdColName,
+                $oxOidColName,
                 Types::STRING,
                 [
-                    'columnDefinition' => 'char(32) collate latin1_general_ci',
-                    'comment' => 'OXID Order id (oxorder)'
+                    'columnDefinition' => 'char(40) collate latin1_general_ci',
+                    'comment' => 'Telecash OID'
                 ]
             );
         }
