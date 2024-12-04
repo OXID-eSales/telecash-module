@@ -185,13 +185,14 @@ class TeleCashOrder extends BaseModel implements TeleCashOrderInterface
     /** get the EndpointTransactionId */
     public function getChargeTotal(): float
     {
-        $chargeTotalString = $this->getValue(
-            Module::TELECASH_ORDER_EXTENSION_TABLE_CHARGETOTAL,
-            'chargetotal'
-        );
+        if ($this->isLoaded()) {
+            return $this->getFieldFloatData(Module::TELECASH_ORDER_EXTENSION_TABLE_CHARGETOTAL);
+        }
 
+        $chargeTotalString = (string) $this->transactionResult->getValue('chargetotal');
         // bulletproof because is_numeric does not recognize that German commas are numeric
         $chargeTotalString = str_replace(',', '.', $chargeTotalString);
+
         return is_numeric($chargeTotalString) ? (float) $chargeTotalString : 0.0;
     }
 
@@ -207,11 +208,11 @@ class TeleCashOrder extends BaseModel implements TeleCashOrderInterface
     /** get the used Payment Method */
     public function getPaymentMethod(): string
     {
-        $paymentMethod = $this->getValue(
-            Module::TELECASH_ORDER_EXTENSION_TABLE_PAYMENTMETHOD,
-            'paymentMethod'
-        );
+        if ($this->isLoaded()) {
+            return $this->getFieldStringData(Module::TELECASH_ORDER_EXTENSION_TABLE_PAYMENTMETHOD);
+        }
 
+        $paymentMethod = (string) $this->transactionResult->getValue('paymentMethod');
         if (empty($paymentMethod)) {
             return '';
         }
