@@ -126,12 +126,6 @@ class OrderTeleCash extends AdminController
         $this->addTplParam('txnType', $teleCashOrder->getTxnType());
         $this->addTplParam('teleCashOrderHistoryList', $teleCashOrderHistoryList);
 
-        //$this->addTplParam('responseCode', $teleCashOrderHistory->getProcessorResponseCode());
-        //$this->addTplParam('txnDateTime', $txnDateTime);
-        //$this->addTplParam('ipgTransactionId', $teleCashOrderHistory->getIpgTransactionId());
-        //$this->addTplParam('endpointTransactionId', $teleCashOrderHistory->getEndpointTransactionId());
-        //$this->addTplParam('terminalId', $teleCashOrderHistory->getTerminalId());
-
         if ($teleCashPayment) {
             $this->addTplParam('captureType', $teleCashPayment->getTeleCashCaptureType());
         }
