@@ -43,13 +43,13 @@ final class Version20241129122600 extends AbstractMigration
     private function createTeleCashOrderTable(Schema $schema): void
     {
         if (!$schema->hasTable(Module::TELECASH_ORDER_EXTENSION_TABLE)) {
-            $paymentTable = $schema->createTable(Module::TELECASH_ORDER_EXTENSION_TABLE);
+            $teleCashOrderTable = $schema->createTable(Module::TELECASH_ORDER_EXTENSION_TABLE);
         } else {
-            $paymentTable = $schema->getTable(Module::TELECASH_ORDER_EXTENSION_TABLE);
+            $teleCashOrderTable = $schema->getTable(Module::TELECASH_ORDER_EXTENSION_TABLE);
         }
 
-        if (!$paymentTable->hasColumn('OXID')) {
-            $paymentTable->addColumn(
+        if (!$teleCashOrderTable->hasColumn('OXID')) {
+            $teleCashOrderTable->addColumn(
                 'OXID',
                 Types::STRING,
                 ['columnDefinition' => 'char(32) collate latin1_general_ci']
@@ -57,8 +57,8 @@ final class Version20241129122600 extends AbstractMigration
         }
 
         $oxOrderIdColName = strtoupper(Module::TELECASH_ORDER_EXTENSION_TABLE_OXORDERID);
-        if (!$paymentTable->hasColumn($oxOrderIdColName)) {
-            $paymentTable->addColumn(
+        if (!$teleCashOrderTable->hasColumn($oxOrderIdColName)) {
+            $teleCashOrderTable->addColumn(
                 $oxOrderIdColName,
                 Types::STRING,
                 [
@@ -69,8 +69,8 @@ final class Version20241129122600 extends AbstractMigration
         }
 
         $oxOidColName = strtoupper(Module::TELECASH_ORDER_EXTENSION_TABLE_OID);
-        if (!$paymentTable->hasColumn($oxOidColName)) {
-            $paymentTable->addColumn(
+        if (!$teleCashOrderTable->hasColumn($oxOidColName)) {
+            $teleCashOrderTable->addColumn(
                 $oxOidColName,
                 Types::STRING,
                 [
@@ -81,8 +81,8 @@ final class Version20241129122600 extends AbstractMigration
         }
 
         $oxTxnTypeColName = strtoupper(Module::TELECASH_ORDER_EXTENSION_TABLE_TXNTYPE);
-        if (!$paymentTable->hasColumn($oxTxnTypeColName)) {
-            $paymentTable->addColumn(
+        if (!$teleCashOrderTable->hasColumn($oxTxnTypeColName)) {
+            $teleCashOrderTable->addColumn(
                 $oxTxnTypeColName,
                 Types::STRING,
                 [
@@ -93,8 +93,8 @@ final class Version20241129122600 extends AbstractMigration
         }
 
         $oxPaymentMethodColName = strtoupper(Module::TELECASH_ORDER_EXTENSION_TABLE_PAYMENTMETHOD);
-        if (!$paymentTable->hasColumn($oxPaymentMethodColName)) {
-            $paymentTable->addColumn(
+        if (!$teleCashOrderTable->hasColumn($oxPaymentMethodColName)) {
+            $teleCashOrderTable->addColumn(
                 $oxPaymentMethodColName,
                 Types::STRING,
                 [
@@ -105,8 +105,8 @@ final class Version20241129122600 extends AbstractMigration
         }
 
         $oxStatusColName = strtoupper(Module::TELECASH_ORDER_EXTENSION_TABLE_STATUS);
-        if (!$paymentTable->hasColumn($oxStatusColName)) {
-            $paymentTable->addColumn(
+        if (!$teleCashOrderTable->hasColumn($oxStatusColName)) {
+            $teleCashOrderTable->addColumn(
                 $oxStatusColName,
                 Types::STRING,
                 [
@@ -117,8 +117,8 @@ final class Version20241129122600 extends AbstractMigration
         }
 
         $oxCurrencyColName = strtoupper(Module::TELECASH_ORDER_EXTENSION_TABLE_CURRENCY);
-        if (!$paymentTable->hasColumn($oxCurrencyColName)) {
-            $paymentTable->addColumn(
+        if (!$teleCashOrderTable->hasColumn($oxCurrencyColName)) {
+            $teleCashOrderTable->addColumn(
                 $oxCurrencyColName,
                 Types::STRING,
                 [
@@ -129,8 +129,8 @@ final class Version20241129122600 extends AbstractMigration
         }
 
         $oxChargeTotalColName = strtoupper(Module::TELECASH_ORDER_EXTENSION_TABLE_CHARGETOTAL);
-        if (!$paymentTable->hasColumn($oxChargeTotalColName)) {
-            $paymentTable->addColumn(
+        if (!$teleCashOrderTable->hasColumn($oxChargeTotalColName)) {
+            $teleCashOrderTable->addColumn(
                 $oxChargeTotalColName,
                 Types::FLOAT,
                 [
@@ -140,20 +140,20 @@ final class Version20241129122600 extends AbstractMigration
             );
         }
 
-        if (!$paymentTable->hasColumn('OXTIMESTAMP')) {
-            $paymentTable->addColumn(
+        if (!$teleCashOrderTable->hasColumn('OXTIMESTAMP')) {
+            $teleCashOrderTable->addColumn(
                 'OXTIMESTAMP',
                 Types::DATETIME_MUTABLE,
                 ['columnDefinition' => 'timestamp default current_timestamp on update current_timestamp']
             );
         }
 
-        if (!$paymentTable->hasPrimaryKey()) {
-            $paymentTable->setPrimaryKey(['OXID']);
+        if (!$teleCashOrderTable->hasPrimaryKey()) {
+            $teleCashOrderTable->setPrimaryKey(['OXID']);
         }
 
-        if (!$paymentTable->hasIndex('UNIQUE_ENTRY')) {
-            $paymentTable->addUniqueIndex(
+        if (!$teleCashOrderTable->hasIndex('UNIQUE_ENTRY')) {
+            $teleCashOrderTable->addUniqueIndex(
                 [$oxOrderIdColName, $oxOidColName],
                 'UNIQUE_ENTRY'
             );
