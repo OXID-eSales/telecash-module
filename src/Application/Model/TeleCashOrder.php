@@ -138,10 +138,11 @@ class TeleCashOrder extends BaseModel implements TeleCashOrderInterface
     /** get the TxnType */
     public function getTxnType(): string
     {
-        if ($this->isLoaded()) {
-            return $this->getFieldStringData('txntype');
-        }
-        $txnType = $this->transactionResult->getValue('txntype');
+        $txnType = $this->getValue(
+            Module::TELECASH_ORDER_EXTENSION_TABLE_TXNTYPE,
+            'txntype'
+        );
+
         // validate TxnType
         if (!in_array($txnType, Module::TELECASH_TRANSACTION_TYPES, true)) {
             $txnType = '';
@@ -152,19 +153,23 @@ class TeleCashOrder extends BaseModel implements TeleCashOrderInterface
     /** get the Oid */
     public function getOid(): string
     {
-        if ($this->isLoaded()) {
-            return $this->getFieldStringData(Module::TELECASH_ORDER_EXTENSION_TABLE_OID);
-        }
-        return (string) $this->transactionResult->getValue('oid');
+        return $this->getValue(
+            Module::TELECASH_ORDER_EXTENSION_TABLE_OID,
+            'oid'
+        );
     }
 
     /** get the Currency */
     public function getCurrency(): string
     {
+        $currency = $this->getValue(
+            Module::TELECASH_ORDER_EXTENSION_TABLE_CURRENCY,
+            'currency'
+        );
         if ($this->isLoaded()) {
             return $this->getFieldStringData(Module::TELECASH_ORDER_EXTENSION_TABLE_CURRENCY);
         }
-        $currency = (string) $this->transactionResult->getValue('currency');
+
         // validate Currency
         if (empty($currency)) {
             return '';
@@ -180,10 +185,11 @@ class TeleCashOrder extends BaseModel implements TeleCashOrderInterface
     /** get the EndpointTransactionId */
     public function getChargeTotal(): float
     {
-        if ($this->isLoaded()) {
-            return $this->getFieldFloatData(Module::TELECASH_ORDER_EXTENSION_TABLE_CHARGETOTAL);
-        }
-        $chargeTotalString = (string) $this->transactionResult->getValue('chargetotal');
+        $chargeTotalString = $this->getValue(
+            Module::TELECASH_ORDER_EXTENSION_TABLE_CHARGETOTAL,
+            'chargetotal'
+        );
+
         // bulletproof because is_numeric does not recognize that German commas are numeric
         $chargeTotalString = str_replace(',', '.', $chargeTotalString);
         return is_numeric($chargeTotalString) ? (float) $chargeTotalString : 0.0;
@@ -192,19 +198,20 @@ class TeleCashOrder extends BaseModel implements TeleCashOrderInterface
     /** get the Status translated in transaction-language */
     public function getStatus(): string
     {
-        if ($this->isLoaded()) {
-            return $this->getFieldStringData(Module::TELECASH_ORDER_EXTENSION_TABLE_STATUS);
-        }
-        return (string) $this->transactionResult->getValue('status');
+        return $this->getValue(
+            Module::TELECASH_ORDER_EXTENSION_TABLE_STATUS,
+            'status'
+        );
     }
 
     /** get the used Payment Method */
     public function getPaymentMethod(): string
     {
-        if ($this->isLoaded()) {
-            return $this->getFieldStringData(Module::TELECASH_ORDER_EXTENSION_TABLE_PAYMENTMETHOD);
-        }
-        $paymentMethod = (string) $this->transactionResult->getValue('paymentMethod');
+        $paymentMethod = $this->getValue(
+            Module::TELECASH_ORDER_EXTENSION_TABLE_PAYMENTMETHOD,
+            'paymentMethod'
+        );
+
         if (empty($paymentMethod)) {
             return '';
         }
@@ -224,14 +231,10 @@ class TeleCashOrder extends BaseModel implements TeleCashOrderInterface
         if (is_null($this->teleCashOrderHistoryIsLoaded)) {
             $this->teleCashOrderHistoryIsLoaded = false;
             $teleCashOrderHistoryList = $this->getOxNewService()->oxNew(TeleCashOrderHistoryList::class);
-            try {
-                $teleCashOrderHistoryList->getTeleCashOrderHistoryList($this->getOid());
-                if ($teleCashOrderHistoryList->count()) {
-                    $this->teleCashOrderHistoryIsLoaded = true;
-                    $this->teleCashOrderHistoryList = $teleCashOrderHistoryList;
-                }
-            } catch (\Doctrine\DBAL\Driver\Exception | Exception) {
-                // do nothing
+            $teleCashOrderHistoryList->getTeleCashOrderHistoryList($this->getOid());
+            if ($teleCashOrderHistoryList->count()) {
+                $this->teleCashOrderHistoryIsLoaded = true;
+                $this->teleCashOrderHistoryList = $teleCashOrderHistoryList;
             }
         }
         return $this->teleCashOrderHistoryList;
@@ -264,5 +267,13 @@ class TeleCashOrder extends BaseModel implements TeleCashOrderInterface
         $this->assign($params);
 
         return parent::save();
+    }
+
+    private function getValue(string $tableColumn, string $fallbackDataItem): string
+    {
+        if ($this->isLoaded()) {
+            return $this->getFieldStringData($tableColumn);
+        }
+        return (string) $this->transactionResult->getValue($fallbackDataItem);
     }
 }
