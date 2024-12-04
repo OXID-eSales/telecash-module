@@ -51,22 +51,6 @@
                                     </tr>
                                     <tr>
                                         <td class="edittext">
-                                            {{ translate({ ident: "OSC_TELECASH_STATUS", suffix: "COLON" }) }}
-                                        </td>
-                                        <td class="edittext">
-                                            {{ status }} ({{ translate({ ident: "OSC_TELECASH_RESPONSECODE", suffix: "COLON" }) }}{{ responseCode }})
-                                        </td>
-                                    </tr>
-                                    <tr>
-                                        <td class="edittext">
-                                            {{ translate({ ident: "OSC_TELECASH_DATE", suffix: "COLON" }) }}
-                                        </td>
-                                        <td class="edittext">
-                                            {{ txnDateTime }} {{ translate({ ident: "OSC_TELECASH_OCLOCK" }) }}
-                                        </td>
-                                    </tr>
-                                    <tr>
-                                        <td class="edittext">
                                             {{ translate({ ident: "OSC_TELECASH_TYPE", suffix: "COLON" }) }}
                                         </td>
                                         <td class="edittext">
@@ -74,30 +58,6 @@
                                             {% if captureType %}
                                                 ({{ translate({ ident: "OSC_TELECASH_PAYMENT_CAPTURETYPE_" ~ captureType }) }})
                                             {% endif %}
-                                        </td>
-                                    </tr>
-                                    <tr>
-                                        <td class="edittext">
-                                            {{ translate({ ident: "OSC_TELECASH_IPG_TRANSACTION_ID", suffix: "COLON" }) }}
-                                        </td>
-                                        <td class="edittext">
-                                            {{ ipgTransactionId }}
-                                        </td>
-                                    </tr>
-                                    <tr>
-                                        <td class="edittext">
-                                            {{ translate({ ident: "OSC_TELECASH_ENDPOINT_TRANSACTION_ID", suffix: "COLON" }) }}
-                                        </td>
-                                        <td class="edittext">
-                                            {{ endpointTransactionId }}
-                                        </td>
-                                    </tr>
-                                    <tr>
-                                        <td class="edittext">
-                                            {{ translate({ ident: "OSC_TELECASH_TERMINAL_ID", suffix: "COLON" }) }}
-                                        </td>
-                                        <td class="edittext">
-                                            {{ terminalId }}
                                         </td>
                                     </tr>
                                     {% endblock %}
@@ -119,13 +79,13 @@
                                 <tr>
                                     {% block admin_order_telecash_history_head %}
                                         <td class="edittext">
+                                            <b>{{ translate({ ident: "OSC_TELECASH_DATE" }) }}</b>
+                                        </td>
+                                        <td class="edittext">
                                             <b>{{ translate({ ident: "OSC_TELECASH_CHARGE_TOTAL" }) }}</b>
                                         </td>
                                         <td class="edittext">
                                             <b>{{ translate({ ident: "OSC_TELECASH_STATUS" }) }}</b>
-                                        </td>
-                                        <td class="edittext">
-                                            <b>{{ translate({ ident: "OSC_TELECASH_DATE" }) }}</b>
                                         </td>
                                         <td class="edittext">
                                             <b>{{ translate({ ident: "OSC_TELECASH_TYPE" }) }}</b>
@@ -148,13 +108,13 @@
                                             <tr>
                                                 {% block admin_order_telecash_history_row %}
                                                     <td class="edittext">
+                                                        {{ historyItem.getTxnDate() }} {{ translate({ ident: "OSC_TELECASH_OCLOCK" }) }}
+                                                    </td>
+                                                    <td class="edittext">
                                                         {{ format_price(historyItem.getChargeTotal(), { currency: currencyObj }) }}
                                                     </td>
                                                     <td class="edittext">
-                                                        {{ historyItem.getStatus() }} ({{ translate({ ident: "OSC_TELECASH_RESPONSECODE", suffix: "COLON" }) }}{{ responseCode }})
-                                                    </td>
-                                                    <td class="edittext">
-                                                        {{ historyItem.getTxnDate() }} {{ translate({ ident: "OSC_TELECASH_OCLOCK" }) }}
+                                                        {{ historyItem.getStatus() }} ({{ translate({ ident: "OSC_TELECASH_RESPONSECODE", suffix: "COLON" }) }} {{ historyItem.getProcessorResponseCode() }})
                                                     </td>
                                                     <td class="edittext">
                                                         {{ translate({ ident: "OSC_TELECASH_TXNTYPE_" ~ historyItem.getTxnType() }) }}
