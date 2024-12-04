@@ -9,17 +9,16 @@ declare(strict_types=1);
 
 namespace OxidSolutionCatalysts\TeleCash\Application\Model;
 
-use Doctrine\DBAL\Exception;
-use Doctrine\DBAL\ForwardCompatibility\Result;
-use Doctrine\DBAL\Query\QueryBuilder;
+use Doctrine\DBAL\Driver\Connection;
 use OxidEsales\Eshop\Core\Model\ListModel;
-use OxidEsales\EshopCommunity\Internal\Framework\Database\QueryBuilderFactoryInterface;
-use OxidSolutionCatalysts\TeleCash\Core\Module;
+use OxidEsales\EshopCommunity\Internal\Framework\Database\ConnectionProviderInterface;
 use OxidSolutionCatalysts\TeleCash\Traits\ServiceContainer;
 
 class TeleCashOrderHistoryList extends ListModel
 {
     use ServiceContainer;
+
+    protected Connection $connection;
 
     /**
      * List Object class name
@@ -28,16 +27,17 @@ class TeleCashOrderHistoryList extends ListModel
      */
     protected $_sObjectsInListName = TeleCashOrderHistory::class;
 
-    private QueryBuilderFactoryInterface $queryBuilderFactory;
-
     /**
      * Class Constructor
      *
-     * @param string $sObjectName Associated list item object type
+     * @param string|null $sObjectName Associated list item object type
+     * @param Connection|null $connection
+     * @param bool $initParent
      * @SuppressWarnings(PHPMD.StaticAccess)
      */
     public function __construct(
-        $sObjectName = null,
+        string $sObjectName = null,
+        ?Connection $connection = null,
         bool $initParent = true
     ) {
         if ($initParent) {
@@ -45,9 +45,15 @@ class TeleCashOrderHistoryList extends ListModel
         }
 
         $this->setContainer($this->getContainer());
-        $queryBuilderFactory = $this->getServiceFromContainer(QueryBuilderFactoryInterface::class);
-        if ($queryBuilderFactory) {
-            $this->queryBuilderFactory = $queryBuilderFactory;
+
+        if ($connection !== null) {
+            $this->connection = $connection;
+        } else {
+            $connectionProvider = $this->getRequiredService(
+                ConnectionProviderInterface::class,
+                'ConnectionProviderInterface'
+            );
+            $this->connection = $connectionProvider->get();
         }
     }
 
@@ -55,30 +61,25 @@ class TeleCashOrderHistoryList extends ListModel
      * @param string $oId
      * @param string $orderDirection
      * @return void
-     * @throws Exception|\Doctrine\DBAL\Driver\Exception
      */
     public function getTeleCashOrderHistoryList(string $oId, string $orderDirection = 'asc'): void
     {
-        /** @var QueryBuilder $queryBuilder */
-        $queryBuilder = $this->queryBuilderFactory->create();
+        $oBaseObject = $this->getBaseObject();
+        $sFields = $oBaseObject->getSelectFields();
+        $sViewName = $oBaseObject->getViewName();
 
-        $listObject = $this->getBaseObject();
+        /** @var \Doctrine\DBAL\Connection $connection */
+        $connection = $this->connection;
 
-        $queryBuilder->select($listObject->getSelectFields())
-            ->from(Module::TELECASH_ORDER_HISTORY_EXTENSION_TABLE)
-            ->where('oid = :oid')
-            ->orderBy('oxtimestamp', $orderDirection);
+        $select = "select " . $sFields . "
+            from " . $sViewName . "
+            where " . $sViewName . "." .
+            $connection->quoteIdentifier('oid') . " = :oid
+            order by " . $sViewName . "." .
+            $connection->quoteIdentifier('oxtimestamp') . " " . $orderDirection;
 
-        $parameters = [
-            'oid' => $oId
-        ];
-
-        $resultDB = $queryBuilder->setParameters($parameters)
-            ->execute();
-
-        if (is_object($resultDB) && is_a($resultDB, Result::class)) {
-            $dbData = $resultDB->fetchAllAssociative();
-            $this->assignArray($dbData);
-        }
+        $this->selectString($select, [
+            ':oid' => $oId
+        ]);
     }
 }
