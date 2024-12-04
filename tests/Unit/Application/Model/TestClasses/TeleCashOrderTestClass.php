@@ -1,89 +1,108 @@
 <?php
 
-/**
- * Copyright © OXID eSales AG. All rights reserved.
- * See LICENSE file for license details.
- */
-
 namespace OxidSolutionCatalysts\TeleCash\Tests\Unit\Application\Model\TestClasses;
 
+use Doctrine\DBAL\Connection;
 use OxidSolutionCatalysts\TeleCash\Application\Model\TeleCashOrder;
 use OxidSolutionCatalysts\TeleCash\IPG\Model\TransactionResult;
 use OxidSolutionCatalysts\TeleCash\IPG\TeleCashCurrency;
+use Psr\Container\ContainerInterface;
 
 /**
- * Test Class for TeleCashOrder
+ * Test Double for TeleCashOrder
  *
- * This class extends TeleCashOrder and overrides database-related functionality
- * to enable isolated unit testing without database dependencies.
- * It provides a clean testing environment by:
- * - Skipping parent constructor initialization
- * - Overriding database operations
- * - Maintaining only essential functionality
+ * Provides a testable version of TeleCashOrder that:
+ * - Works without database connection
+ * - Skips framework initialization
+ * - Simulates data loading/saving
+ * - Allows testing both data sources
  */
 class TeleCashOrderTestClass extends TeleCashOrder
 {
     /**
-     * Currency handling service, made protected for testing
+     * Simulated database storage
+     *
+     * @var array
      */
-    protected TeleCashCurrency $teleCashCurrency;
+    private array $dbData = [];
 
     /**
-     * Transaction result container, made protected for testing
+     * Indicates if data was "loaded" from database
+     *
+     * @var bool
      */
+    private bool $isLoaded = false;
+
     protected TransactionResult $transactionResult;
 
     /**
-     * Simplified constructor for testing purposes
+     * Constructor that skips framework initialization
      *
-     * Initializes only the essential components needed for testing:
-     * - Order ID
-     * - Currency handler
-     * - Empty transaction result
-     *
-     * @param string $oxOrderId The order ID to be used in tests
+     * @param Connection|null $connection Optional database connection (unused)
+     * @param bool $initParent Whether to initialize parent (unused)
      */
-    public function __construct(string $oxOrderId)
+    public function __construct(?Connection $connection = null, bool $initParent = true)
     {
-        // Skip parent constructor to avoid database operations
-        $this->oxOrderId = $oxOrderId;
+        // Skip all parent initialization
         $this->teleCashCurrency = new TeleCashCurrency();
         $this->transactionResult = new TransactionResult([]);
     }
 
-    /**
-     * Override database table initialization
-     *
-     * @param string|null $tableName Unused in test context
-     * @param bool $forceAllFields Unused in test context
-     */
-    public function init($tableName = null, $forceAllFields = false): void
+    // Mock container methods
+    protected function getContainer(): ContainerInterface
     {
-        // Disable database initialization
+        return new class implements ContainerInterface {
+            public function get(string $id)
+            {
+                return null;
+            }
+
+            public function has(string $id): bool
+            {
+                return false;
+            }
+        };
     }
 
     /**
-     * Override database field addition
+     * Simulates loading data from database
      *
-     * @param string $fieldName Unused in test context
-     * @param mixed $fieldStatus Unused in test context
-     * @param mixed $type Unused in test context
-     * @param mixed $length Unused in test context
+     * Sets the provided data as if it was loaded from the database
+     * and marks the instance as loaded.
+     *
+     * @param array $data The data to simulate as database content
+     * @return void
      */
-    protected function addField($fieldName, $fieldStatus = null, $type = null, $length = null)
+    public function simulateLoadedFromDb(array $data): void
     {
-        // Disable field operations
+        $this->dbData = $data;
+        $this->isLoaded = true;
+    }
+
+    public function isLoaded(): bool
+    {
+        return $this->isLoaded;
     }
 
     /**
-     * Override database record assignment
+     * Simulates database field retrieval for string values
      *
-     * @param mixed $dbRecord Unused in test context
-     * @return bool Always returns true in test context
+     * @param string $fieldName The field name to retrieve
+     * @return string The field value or empty string if not found
      */
-    public function assign($dbRecord)
+    public function getFieldStringData($fieldName): string
     {
-        // Disable database assignments
-        return true;
+        return (string)($this->dbData[$fieldName] ?? '');
+    }
+
+    /**
+     * Simulates database field retrieval for float values
+     *
+     * @param string $fieldName The field name to retrieve
+     * @return float The field value or 0.0 if not found
+     */
+    public function getFieldFloatData($fieldName): float
+    {
+        return (float)($this->dbData[$fieldName] ?? 0.0);
     }
 }

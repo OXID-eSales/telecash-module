@@ -46,4 +46,5 @@ $aLang = [
     'OSC_TELECASH_ENDPOINT_TRANSACTION_ID' => 'Endpoint Transaction ID',
     'OSC_TELECASH_TERMINAL_ID'             => 'Terminal ID',
     'OSC_TELECASH_OCLOCK'                  => 'Uhr',
+    'OSC_TELECASH_HISTORY'                 => 'TeleCash-Bestell-Historie',
 ];

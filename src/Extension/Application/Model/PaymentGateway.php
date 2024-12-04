@@ -96,7 +96,8 @@ class PaymentGateway extends PaymentGateway_parent
 
         // save the transaction-Result
         $transactionResult = $telecashConnect->getTransactionResult();
-        $teleCashOrder = $this->getTeleCashOrderModel($orderId);
+        $teleCashOrder = $this->getTeleCashOrderModel();
+        $teleCashOrder->setOxOrderId($orderId);
         $teleCashOrder->setTransactionResult($transactionResult);
         return (bool) $teleCashOrder->save();
     }

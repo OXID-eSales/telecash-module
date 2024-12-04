@@ -7,7 +7,6 @@
 
 namespace OxidSolutionCatalysts\TeleCash\Tests\Unit\Application\Model;
 
-use DateTime;
 use OxidSolutionCatalysts\TeleCash\Tests\Unit\Application\Model\TestClasses\TeleCashOrderTestClass;
 use PHPUnit\Framework\TestCase;
 
@@ -31,7 +30,7 @@ class TeleCashOrderTest extends TestCase
     protected function setUp(): void
     {
         // Initialize test class without database connection
-        $this->order = new TeleCashOrderTestClass('testOrderId');
+        $this->order = new TeleCashOrderTestClass(null, false);
 
         // Prepare comprehensive sample transaction data
         $this->sampleTransactionData = [
@@ -57,9 +56,11 @@ class TeleCashOrderTest extends TestCase
      * Verifies that:
      * - Valid transaction types are correctly returned
      * - Invalid types are handled properly (empty string)
+     * - Both DB and TransactionResult sources work
      */
     public function testGetTxnType(): void
     {
+        // Test from TransactionResult
         $this->assertEquals('sale', $this->order->getTxnType());
 
         // Test invalid txntype
@@ -67,76 +68,30 @@ class TeleCashOrderTest extends TestCase
         $invalidData['txntype'] = 'invalid';
         $this->order->setTransactionResult($invalidData);
         $this->assertEquals('', $this->order->getTxnType());
-    }
 
-    /**
-     * Test transaction datetime retrieval and validation
-     *
-     * Ensures the datetime string is properly parsed and
-     * handles invalid formats correctly
-     */
-    public function testGetTxnDateTime(): void
-    {
-        // Test valid date
-        $validData = $this->sampleTransactionData;
-        $validData['txndatetime'] = '2024:01:15-10:30:00';
-        $this->order->setTransactionResult($validData);
-
-        $result = $this->order->getTxnDateTime();
-        $this->assertInstanceOf(DateTime::class, $result);
-        $this->assertEquals('2024-01-15 10:30:00', $result->format('Y-m-d H:i:s'));
-
-        // Test invalid date format
-        $invalidData = $this->sampleTransactionData;
-        $invalidData['txndatetime'] = 'invalid-date-format';
-        $this->order->setTransactionResult($invalidData);
-        $this->assertNull($this->order->getTxnDateTime());
-
-        // Test empty date
-        $emptyData = $this->sampleTransactionData;
-        $emptyData['txndatetime'] = '';
-        $this->order->setTransactionResult($emptyData);
-        $this->assertNull($this->order->getTxnDateTime());
+        // Test from DB (simulated)
+        $this->order->simulateLoadedFromDb([
+            'txntype' => 'sale'
+        ]);
+        $this->assertEquals('sale', $this->order->getTxnType());
     }
 
     /**
      * Test order ID retrieval
      *
-     * Verifies the original order ID is correctly returned
+     * Verifies the order ID is correctly returned from both
+     * transaction data and database
      */
     public function testGetOid(): void
     {
+        // Test from TransactionResult
         $this->assertEquals('test123', $this->order->getOid());
-    }
 
-    /**
-     * Test endpoint transaction ID retrieval
-     *
-     * Ensures the unique transaction identifier is properly returned
-     */
-    public function testGetEndpointTransactionId(): void
-    {
-        $this->assertEquals('endpoint123', $this->order->getEndpointTransactionId());
-    }
-
-    /**
-     * Test terminal ID retrieval
-     *
-     * Verifies the correct terminal identification is returned
-     */
-    public function testGetTerminalId(): void
-    {
-        $this->assertEquals('term123', $this->order->getTerminalId());
-    }
-
-    /**
-     * Test IPG transaction ID retrieval
-     *
-     * Ensures the correct IPG transaction identifier is returned
-     */
-    public function testGetIpgTransactionId(): void
-    {
-        $this->assertEquals('ipg123', $this->order->getIpgTransactionId());
+        // Test from DB
+        $this->order->simulateLoadedFromDb([
+            'oid' => 'dbtest123'
+        ]);
+        $this->assertEquals('dbtest123', $this->order->getOid());
     }
 
     /**
@@ -145,9 +100,11 @@ class TeleCashOrderTest extends TestCase
      * Verifies that:
      * - Numeric currency codes are correctly converted to ISO codes
      * - Invalid codes are handled properly (empty string)
+     * - Both data sources work correctly
      */
     public function testGetCurrency(): void
     {
+        // Test from TransactionResult
         $this->assertEquals('EUR', $this->order->getCurrency());
 
         // Test invalid currency
@@ -155,6 +112,12 @@ class TeleCashOrderTest extends TestCase
         $invalidData['currency'] = 'invalid';
         $this->order->setTransactionResult($invalidData);
         $this->assertEquals('', $this->order->getCurrency());
+
+        // Test from DB
+        $this->order->simulateLoadedFromDb([
+            'currency' => 'EUR'
+        ]);
+        $this->assertEquals('EUR', $this->order->getCurrency());
     }
 
     /**
@@ -162,10 +125,19 @@ class TeleCashOrderTest extends TestCase
      *
      * Verifies that:
      * - Valid amounts are correctly converted to float
-     * - Invalid amounts are handled properly (0.0)
+     * - German decimal separator is handled
+     * - Invalid amounts return 0.0
+     * - Both data sources work correctly
      */
     public function testGetChargeTotal(): void
     {
+        // Test from TransactionResult
+        $this->assertEquals(99.99, $this->order->getChargeTotal());
+
+        // Test German decimal separator
+        $germanData = $this->sampleTransactionData;
+        $germanData['chargetotal'] = '99,99';
+        $this->order->setTransactionResult($germanData);
         $this->assertEquals(99.99, $this->order->getChargeTotal());
 
         // Test invalid charge total
@@ -173,27 +145,30 @@ class TeleCashOrderTest extends TestCase
         $invalidData['chargetotal'] = 'invalid';
         $this->order->setTransactionResult($invalidData);
         $this->assertEquals(0.0, $this->order->getChargeTotal());
+
+        // Test from DB
+        $this->order->simulateLoadedFromDb([
+            'chargetotal' => 99.99
+        ]);
+        $this->assertEquals(99.99, $this->order->getChargeTotal());
     }
 
     /**
      * Test status retrieval
      *
      * Ensures the transaction status is correctly returned
+     * from both data sources
      */
     public function testGetStatus(): void
     {
+        // Test from TransactionResult
         $this->assertEquals('APPROVED', $this->order->getStatus());
-    }
 
-    /**
-     * Test processor response code handling
-     *
-     * Verifies that the response code is returned exactly as received,
-     * preserving leading zeros
-     */
-    public function testGetProcessorResponseCode(): void
-    {
-        $this->assertEquals('00', $this->order->getProcessorResponseCode());
+        // Test from DB
+        $this->order->simulateLoadedFromDb([
+            'status' => 'DECLINED'
+        ]);
+        $this->assertEquals('DECLINED', $this->order->getStatus());
     }
 
     /**
@@ -205,8 +180,7 @@ class TeleCashOrderTest extends TestCase
      * - PayPal
      * - Empty values
      * - Invalid codes
-     *
-     * Verifies correct mapping between external codes and internal identifiers
+     * - Both data sources
      */
     public function testGetPaymentMethodVariants(): void
     {
@@ -220,6 +194,7 @@ class TeleCashOrderTest extends TestCase
             'invalid' => '',             // Invalid payment method
         ];
 
+        // Test TransactionResult variants
         foreach ($testCases as $input => $expected) {
             $testData = $this->sampleTransactionData;
             $testData['paymentMethod'] = $input;
@@ -228,7 +203,20 @@ class TeleCashOrderTest extends TestCase
             $this->assertEquals(
                 $expected,
                 $this->order->getPaymentMethod(),
-                sprintf("Payment method '%s' should return '%s'", $input, $expected)
+                sprintf("Payment method '%s' should return '%s' from TransactionResult", $input, $expected)
+            );
+        }
+
+        // Test DB variants
+        foreach ($testCases as $input => $expected) {
+            $this->order->simulateLoadedFromDb([
+                'paymentmethod' => $expected
+            ]);
+
+            $this->assertEquals(
+                $expected,
+                $this->order->getPaymentMethod(),
+                sprintf("Payment method '%s' should return '%s' from DB", $input, $expected)
             );
         }
     }

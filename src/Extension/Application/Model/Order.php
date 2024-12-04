@@ -10,6 +10,7 @@ declare(strict_types=1);
 namespace OxidSolutionCatalysts\TeleCash\Extension\Application\Model;
 
 use OxidSolutionCatalysts\TeleCash\Application\Model\TeleCashOrder;
+use OxidSolutionCatalysts\TeleCash\Application\Model\TeleCashOrderHistory;
 use OxidSolutionCatalysts\TeleCash\Exception\TeleCashException;
 use OxidSolutionCatalysts\TeleCash\Traits\DataGetter;
 use OxidSolutionCatalysts\TeleCash\Traits\ModelGetter;
@@ -22,6 +23,8 @@ class Order extends Order_parent
     use ServiceContainer;
 
     protected ?TeleCashOrder $teleCashOrder = null;
+
+    protected ?TeleCashOrderHistory $teleCashOrderHistory = null;
 
     protected ?bool $teleCashOrderIsLoaded = null;
 
@@ -57,9 +60,6 @@ class Order extends Order_parent
     }
 
     /**
-     * Load
-
-    /**
      * Load the teleCash-Order. For performance, it is only loaded once a time
      *
      * @throws TeleCashException
@@ -69,12 +69,10 @@ class Order extends Order_parent
         if (is_null($this->teleCashOrderIsLoaded)) {
             $this->teleCashOrderIsLoaded = false;
             $orderId = $this->getId();
-            $teleCashOrder = $this->getTeleCashOrderModel($orderId);
-            $teleCashOrder->loadTransactionResultFromDb();
-            if ($teleCashOrder->getOid()) {
-                $this->teleCashOrderIsLoaded = true;
-                $this->teleCashOrder = $teleCashOrder;
-            }
+            $teleCashOrder = $this->getTeleCashOrderModel();
+            $teleCashOrder->loadByOrderId($orderId);
+            $this->teleCashOrderIsLoaded = $teleCashOrder->isLoaded();
+            $this->teleCashOrder = $teleCashOrder;
         }
         return $this->teleCashOrder;
     }

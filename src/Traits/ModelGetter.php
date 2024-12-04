@@ -13,6 +13,7 @@ use OxidEsales\Eshop\Application\Model\Order;
 use OxidEsales\Eshop\Application\Model\Payment;
 use OxidEsales\Eshop\Core\Price;
 use OxidSolutionCatalysts\TeleCash\Application\Model\TeleCashOrder;
+use OxidSolutionCatalysts\TeleCash\Application\Model\TeleCashOrderHistory;
 use OxidSolutionCatalysts\TeleCash\Application\Model\TeleCashPayment;
 use OxidSolutionCatalysts\TeleCash\Core\Service\Logger;
 use OxidSolutionCatalysts\TeleCash\Core\Service\OxNewService;
@@ -54,11 +55,18 @@ trait ModelGetter
     /**
      * @throws TeleCashException
      */
-    private function getTeleCashOrderModel(string $oxOrderId): TeleCashOrder
+    private function getTeleCashOrderModel(): TeleCashOrder
     {
-        return $this->getOxNewService()->oxNew(TeleCashOrder::class, [$oxOrderId]);
+        return $this->getOxNewService()->oxNew(TeleCashOrder::class);
     }
 
+    /**
+     * @throws TeleCashException
+     */
+    private function getTeleCashOrderHistoryModel(): TeleCashOrderHistory
+    {
+        return $this->getOxNewService()->oxNew(TeleCashOrderHistory::class);
+    }
 
     /**
      * @throws TeleCashException
