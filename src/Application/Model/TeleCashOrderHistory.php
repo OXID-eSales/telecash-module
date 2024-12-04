@@ -36,6 +36,8 @@ class TeleCashOrderHistory extends BaseModel implements TeleCashOrderHistoryInte
     protected $_sClassName = self::class;
     protected $_sCoreTable = Module::TELECASH_ORDER_HISTORY_EXTENSION_TABLE;
 
+    protected bool $transactionResultIsLoaded = false;
+
     /**
      * Constructor for TeleCashOrder.
      *
@@ -61,35 +63,20 @@ class TeleCashOrderHistory extends BaseModel implements TeleCashOrderHistoryInte
     }
 
     /**
-     * OXID Core
-     * *
-     * * {@inheritDoc}
- *
-     * @param string $oxid Object ID
-     *
-     * @return bool
-     */
-    public function load($oxid)
-    {
-        $result = parent::load($oxid);
-        $this->loadTransactionResultFromDb();
-        return $result;
-    }
-
-    /**
      * Set the TeleCash Transaction Result
      * @param array<string, string> $transactionData
      */
     public function setTransactionResult(array $transactionData): void
     {
+        $this->transactionResultIsLoaded = true;
         $this->transactionResult = new TransactionResult($transactionData);
-        $this->oId = (string) $this->transactionResult->getValue('oid');
+        $this->oId = $this->getValue('oid');
     }
 
     /** get the TxnType */
     public function getTxnType(): string
     {
-        $txnType = $this->transactionResult->getValue('txntype');
+        $txnType = $this->getValue('txntype');
         // validate TxnType
         if (!in_array($txnType, Module::TELECASH_TRANSACTION_TYPES, true)) {
             $txnType = '';
@@ -98,12 +85,20 @@ class TeleCashOrderHistory extends BaseModel implements TeleCashOrderHistoryInte
     }
 
     /**
+     * get the OId
+     */
+    public function getOid(): string
+    {
+        return $this->oId ?: $this->getValue('oid');
+    }
+
+    /**
      * get the Txn DateTime as DateTime-Object
      * @SuppressWarnings(PHPMD.StaticAccess)
      */
     public function getTxnDateTime(): ?DateTime
     {
-        $txnDateTime = (string) $this->transactionResult->getValue('txndatetime');
+        $txnDateTime = $this->getValue('txndatetime');
         $result = DateTime::createFromFormat('Y:m:d-H:i:s', $txnDateTime);
         return $result ?: null;
     }
@@ -120,25 +115,25 @@ class TeleCashOrderHistory extends BaseModel implements TeleCashOrderHistoryInte
     /** get the EndpointTransactionId */
     public function getEndpointTransactionId(): string
     {
-        return (string) $this->transactionResult->getValue('endpointTransactionId');
+        return $this->getValue('endpointTransactionId');
     }
 
     /** get the Terminal ID */
     public function getTerminalId(): string
     {
-        return (string) $this->transactionResult->getValue('terminal_id');
+        return $this->getValue('terminal_id');
     }
 
     /** get the IPG Transaction ID */
     public function getIpgTransactionId(): string
     {
-        return (string) $this->transactionResult->getValue('ipgTransactionId');
+        return $this->getValue('ipgTransactionId');
     }
 
     /** get the Currency */
     public function getCurrency(): string
     {
-        $currency = (string) $this->transactionResult->getValue('currency');
+        $currency = $this->getValue('currency');
         // validate Currency
         if (empty($currency)) {
             return '';
@@ -154,7 +149,7 @@ class TeleCashOrderHistory extends BaseModel implements TeleCashOrderHistoryInte
     /** get the EndpointTransactionId */
     public function getChargeTotal(): float
     {
-        $chargeTotalString = (string) $this->transactionResult->getValue('chargetotal');
+        $chargeTotalString = $this->getValue('chargetotal');
         // bulletproof because is_numeric does not recognize that German commas are numeric
         $chargeTotalString = str_replace(',', '.', $chargeTotalString);
         return is_numeric($chargeTotalString) ? (float) $chargeTotalString : 0.0;
@@ -163,19 +158,19 @@ class TeleCashOrderHistory extends BaseModel implements TeleCashOrderHistoryInte
     /** get the Status translated in transaction-language */
     public function getStatus(): string
     {
-        return (string) $this->transactionResult->getValue('status');
+        return $this->getValue('status');
     }
 
     /** get the Status as Code, named in TeleCash as ProcessorResponseCode */
     public function getProcessorResponseCode(): string
     {
-        return (string) $this->transactionResult->getValue('processor_response_code');
+        return $this->getValue('processor_response_code');
     }
 
     /** get the used Payment Method */
     public function getPaymentMethod(): string
     {
-        $paymentMethod = (string) $this->transactionResult->getValue('paymentMethod');
+        $paymentMethod = $this->getValue('paymentMethod');
         if (empty($paymentMethod)) {
             return '';
         }
@@ -211,12 +206,20 @@ class TeleCashOrderHistory extends BaseModel implements TeleCashOrderHistoryInte
     /** load the transaction */
     public function loadTransactionResultFromDb(): void
     {
+        $this->transactionResultIsLoaded = true;
         $data = $this->getFieldStringData(Module::TELECASH_ORDER_HISTORY_EXTENSION_TABLE_RESPONSE);
-
         if (!empty($data)) {
             /** @var array<string, string> $transactionData */
             $transactionData = $this->jsonToArray($data);
             $this->transactionResult = new TransactionResult($transactionData);
         }
+    }
+
+    private function getValue(string $item): string
+    {
+        if (!$this->transactionResultIsLoaded) {
+            $this->loadTransactionResultFromDb();
+        }
+        return (string) $this->transactionResult->getValue($item);
     }
 }

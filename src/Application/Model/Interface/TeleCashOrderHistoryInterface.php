@@ -25,6 +25,9 @@ interface TeleCashOrderHistoryInterface
     /** get the Txn DateTime */
     public function getTxnDateTime(): ?DateTime;
 
+    /** get the Txn DateTime as formated string */
+    public function getTxnDate(): string;
+
     /** get the EndpointTransactionId */
     public function getEndpointTransactionId(): string;
 

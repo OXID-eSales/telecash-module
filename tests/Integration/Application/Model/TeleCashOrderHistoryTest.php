@@ -42,7 +42,7 @@ class TeleCashOrderHistoryTest extends TestCase
         $this->sampleTransactionData = [
             'txntype' => 'sale',
             'txndatetime' => '2024-01-15 10:30:00',
-            'oid' => 'test123',
+            'oid' => $this->testOrderId,
             'endpointTransactionId' => 'endpoint123',
             'terminal_id' => 'term123',
             'ipgTransactionId' => 'ipg123',
@@ -70,7 +70,7 @@ class TeleCashOrderHistoryTest extends TestCase
         $this->assertTrue($oxid !== false, 'Failed to save order data');
 
         // Load data in new instance
-        $loadedOrder = new TeleCashOrderHistory($this->testOrderId);
+        $loadedOrder = new TeleCashOrderHistory();
         $loadResult = $loadedOrder->load($oxid);
         $this->assertTrue($loadResult, 'Failed to load order data');
 
@@ -90,46 +90,55 @@ class TeleCashOrderHistoryTest extends TestCase
             $loadedOrder->getTxnDateTime(),
             'Transaction datetime mismatch'
         );
+
         $this->assertEquals(
             $this->sampleTransactionData['oid'],
             $loadedOrder->getOid(),
             'Order ID mismatch'
         );
+
         $this->assertEquals(
             $this->sampleTransactionData['endpointTransactionId'],
             $loadedOrder->getEndpointTransactionId(),
             'Endpoint transaction ID mismatch'
         );
+
         $this->assertEquals(
             $this->sampleTransactionData['terminal_id'],
             $loadedOrder->getTerminalId(),
             'Terminal ID mismatch'
         );
+
         $this->assertEquals(
             $this->sampleTransactionData['ipgTransactionId'],
             $loadedOrder->getIpgTransactionId(),
             'IPG transaction ID mismatch'
         );
+
         $this->assertEquals(
             'EUR',
             $loadedOrder->getCurrency(),
             'Currency mismatch'
         );
+
         $this->assertEquals(
             (float)$this->sampleTransactionData['chargetotal'],
             $loadedOrder->getChargeTotal(),
             'Charge total mismatch'
         );
+
         $this->assertEquals(
             $this->sampleTransactionData['status'],
             $loadedOrder->getStatus(),
             'Status mismatch'
         );
+
         $this->assertEquals(
             $this->sampleTransactionData['processor_response_code'],
             $loadedOrder->getProcessorResponseCode(),
             'Processor response code mismatch'
         );
+
         $this->assertEquals(
             'cc_visa',
             $loadedOrder->getPaymentMethod(),
@@ -149,7 +158,7 @@ class TeleCashOrderHistoryTest extends TestCase
                 ->get()
                 ->executeStatement(
                     'DELETE FROM ' . $this->orderHistory->_sCoreTable . ' WHERE ' .
-                    'oxorderid = ?',
+                    'oid = ?',
                     [$this->testOrderId]
                 );
         } catch (NotFoundExceptionInterface | ContainerExceptionInterface) {
