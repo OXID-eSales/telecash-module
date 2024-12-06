@@ -40,7 +40,6 @@ final class Module
     public const TELECASH_PAYMENT_IDENT_CC_AMERICAN = 'cc_american';
     public const TELECASH_PAYMENT_IDENT_CC_VISA = 'cc_visa';
     public const TELECASH_PAYMENT_IDENT_CC_MASTERCARD = 'cc_mastercard';
-
     public const TELECASH_PAYMENT_IDENT_PAYPAL = 'paypal';
     public const TELECASH_PAYMENT_IDENT_SEPA = 'sepa';
 

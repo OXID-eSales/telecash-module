@@ -81,6 +81,14 @@ class ModuleSettingsService implements ModuleSettingsServiceInterface
     }
 
     /**
+     * get the Service URL by API-Mode
+     */
+    public function getServiceUrl(): string
+    {
+        return self::SERVICE_URLS[$this->getApiMode()];
+    }
+
+    /**
      * get the Store ID from Config
      * @return string
      */
