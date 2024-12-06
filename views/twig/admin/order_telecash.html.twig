@@ -60,6 +60,14 @@
                                             {% endif %}
                                         </td>
                                     </tr>
+                                    <tr>
+                                        <td class="edittext">
+                                            {{ translate({ ident: "OSC_TELECASH_OID", suffix: "COLON" }) }}
+                                        </td>
+                                        <td class="edittext">
+                                            {{ oId }}
+                                        </td>
+                                    </tr>
                                     {% endblock %}
                                 </tbody>
                             </table>
@@ -111,7 +119,7 @@
                                                         {{ historyItem.getTxnDate() }} {{ translate({ ident: "OSC_TELECASH_OCLOCK" }) }}
                                                     </td>
                                                     <td class="edittext">
-                                                        {{ format_price(historyItem.getChargeTotal(), { currency: currencyObj }) }}
+                                                        {{ format_price(historyItem.getOxidChargeTotal(), { currency: currencyObj }) }}
                                                     </td>
                                                     <td class="edittext">
                                                         {{ historyItem.getStatus() }} ({{ translate({ ident: "OSC_TELECASH_RESPONSECODE", suffix: "COLON" }) }} {{ historyItem.getProcessorResponseCode() }})

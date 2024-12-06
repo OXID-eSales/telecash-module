@@ -40,6 +40,7 @@ $aLang = [
     'OSC_TELECASH_RESPONSECODE'            => 'Response-Code',
     'OSC_TELECASH_DATE'                    => 'Payment-Date',
     'OSC_TELECASH_TYPE'                    => 'Type',
+    'OSC_TELECASH_OID'                     => 'TeleCash Order ID (OID)',
     'OSC_TELECASH_IPG_TRANSACTION_ID'      => 'IPG Transaction ID',
     'OSC_TELECASH_ENDPOINT_TRANSACTION_ID' => 'Endpoint Transaction ID',
     'OSC_TELECASH_TERMINAL_ID'             => 'Terminal ID',
