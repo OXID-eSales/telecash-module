@@ -45,13 +45,23 @@ class TeleCashDateTime
      * @param string $timeZone - e.g. 'Europe/Berlin'
      *
      * @return DateTime
-     *
      * @throws DateMalformedStringException
-     * @throws DateInvalidTimeZoneException
      */
-    public function getDateTime(string $dateTime = '', string $timeZone = 'Europe/Berlin'): DateTime
+    public function getDateTime(string $dateTime = '', ?string $timeZone = null): DateTime
     {
-        return new DateTime($dateTime, new DateTimeZone($timeZone));
+        try {
+            $timeZoneObj = $timeZone ? new DateTimeZone($timeZone) : null;
+        } catch (DateInvalidTimeZoneException) {
+            $timeZoneObj = null;
+        }
+
+        try {
+            $dateTimeObj = new DateTime($dateTime, $timeZoneObj);
+        } catch (DateMalformedStringException) {
+            $dateTimeObj = new DateTime();
+        }
+
+        return $dateTimeObj;
     }
 
     /**
