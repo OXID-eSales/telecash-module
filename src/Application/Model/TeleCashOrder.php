@@ -167,8 +167,15 @@ class TeleCashOrder extends BaseModel implements TeleCashOrderInterface
             'currency'
         );
         if ($this->isLoaded()) {
-            return $this->getFieldStringData(Module::TELECASH_ORDER_EXTENSION_TABLE_CURRENCY);
+            $currency = $this->getFieldStringData(Module::TELECASH_ORDER_EXTENSION_TABLE_CURRENCY);
         }
+        return $currency;
+    }
+
+    /** get the Currency in OXID-Style */
+    public function getOxidCurrency(): string
+    {
+        $currency = $this->getCurrency();
 
         // validate Currency
         if (empty($currency)) {
@@ -182,18 +189,37 @@ class TeleCashOrder extends BaseModel implements TeleCashOrderInterface
         }
     }
 
-    /** get the EndpointTransactionId */
-    public function getChargeTotal(): float
+    /** get the Charge Total */
+    public function getChargeTotal(): string
+    {
+        $chargeTotal = 0.0;
+        if ($this->isLoaded()) {
+            $chargeTotal = $this->getFieldFloatData(Module::TELECASH_ORDER_EXTENSION_TABLE_CHARGETOTAL);
+            return number_format($chargeTotal, 2, '.', '');
+        }
+        return (string) $this->transactionResult->getValue('chargetotal');
+    }
+
+    /** get the Charge Total in OXID Style (as float) */
+    public function getOxidChargeTotal(): float
     {
         if ($this->isLoaded()) {
             return $this->getFieldFloatData(Module::TELECASH_ORDER_EXTENSION_TABLE_CHARGETOTAL);
         }
-
         $chargeTotalString = (string) $this->transactionResult->getValue('chargetotal');
         // bulletproof because is_numeric does not recognize that German commas are numeric
         $chargeTotalString = str_replace(',', '.', $chargeTotalString);
 
         return is_numeric($chargeTotalString) ? (float) $chargeTotalString : 0.0;
+    }
+
+    /**
+     * get IpgTransactionId - This ID is not persisted separately in the DB.
+     * That's why I only get it from the TransactionData
+     */
+    public function getIpgTransactionId(): string
+    {
+        return (string) $this->transactionResult->getValue('ipgTransactionId');
     }
 
     /** get the Status translated in transaction-language */
@@ -242,6 +268,32 @@ class TeleCashOrder extends BaseModel implements TeleCashOrderInterface
     }
 
     /**
+     * Core-Extension - var-types and return value only in doc-block
+     * {@inheritDoc}
+     *
+     * @param string $oxid Object ID(default null)
+     *
+     * @return bool
+     * @throws TeleCashException
+     */
+    public function delete($oxid = null)
+    {
+        $oxid = $oxid ?: $this->getId();
+
+        if ($oxid) {
+            $teleCashOrderHistoryList = $this->getTeleCashOrderHistoryList();
+            if ($teleCashOrderHistoryList) {
+                foreach ($teleCashOrderHistoryList as $teleCashOrderHistory) {
+                    /** @var TeleCashOrderHistory $teleCashOrderHistory */
+                    $teleCashOrderHistory->delete();
+                }
+            }
+        }
+
+        return parent::delete($oxid);
+    }
+
+    /**
      * OXID Core
      *
      * {@inheritDoc}
@@ -263,7 +315,7 @@ class TeleCashOrder extends BaseModel implements TeleCashOrderInterface
             Module::TELECASH_ORDER_EXTENSION_TABLE_CURRENCY => $this->getCurrency(),
             Module::TELECASH_ORDER_EXTENSION_TABLE_TXNTYPE => $this->getTxnType(),
             Module::TELECASH_ORDER_EXTENSION_TABLE_PAYMENTMETHOD => $this->getPaymentMethod(),
-            Module::TELECASH_ORDER_EXTENSION_TABLE_CHARGETOTAL => $this->getChargeTotal(),
+            Module::TELECASH_ORDER_EXTENSION_TABLE_CHARGETOTAL => $this->getOxidChargeTotal(),
         ];
         $this->assign($params);
 

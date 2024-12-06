@@ -133,7 +133,14 @@ class TeleCashOrderHistory extends BaseModel implements TeleCashOrderHistoryInte
     /** get the Currency */
     public function getCurrency(): string
     {
-        $currency = $this->getValue('currency');
+        return $this->getValue('currency');
+    }
+
+    /** get the Currency in OXID-Style */
+    public function getOxidCurrency(): string
+    {
+        $currency = $this->getCurrency();
+
         // validate Currency
         if (empty($currency)) {
             return '';
@@ -146,10 +153,16 @@ class TeleCashOrderHistory extends BaseModel implements TeleCashOrderHistoryInte
         }
     }
 
-    /** get the EndpointTransactionId */
-    public function getChargeTotal(): float
+    /** get the Charge Total */
+    public function getChargeTotal(): string
     {
-        $chargeTotalString = $this->getValue('chargetotal');
+        return $this->getValue('chargetotal');
+    }
+
+    /** get the Charge Total in OXID Style (float) */
+    public function getOxidChargeTotal(): float
+    {
+        $chargeTotalString = $this->getChargeTotal();
         // bulletproof because is_numeric does not recognize that German commas are numeric
         $chargeTotalString = str_replace(',', '.', $chargeTotalString);
         return is_numeric($chargeTotalString) ? (float) $chargeTotalString : 0.0;

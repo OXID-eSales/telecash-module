@@ -123,7 +123,7 @@ class TeleCashOrderTest extends TestCase
 
         $this->assertEquals(
             (float)$this->sampleTransactionData['chargetotal'],
-            $loadedOrder->getChargeTotal(),
+            $loadedOrder->getOxidChargeTotal(),
             'Charge total mismatch'
         );
 
