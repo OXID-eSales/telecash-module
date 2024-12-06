@@ -111,8 +111,8 @@ class OrderTeleCash extends AdminController
         ?TeleCashPayment $teleCashPayment
     ): void {
 
-        $chargeTotal = $teleCashOrder->getChargeTotal();
-        $currency = $teleCashOrder->getCurrency();
+        $chargeTotal = $teleCashOrder->getOxidChargeTotal();
+        $currency = $teleCashOrder->getOxidCurrency();
         $priceChargeTotal = $this->getPriceObj($chargeTotal, $isNettoMode);
         $currencyObj = $this->registryService->getConfig()->getCurrencyObject($currency);
 
@@ -124,6 +124,7 @@ class OrderTeleCash extends AdminController
         $this->addTplParam('paymentMethod', $teleCashOrder->getPaymentMethod());
         $this->addTplParam('status', $teleCashOrder->getStatus());
         $this->addTplParam('txnType', $teleCashOrder->getTxnType());
+        $this->addTplParam('oId', $teleCashOrder->getOid());
         $this->addTplParam('teleCashOrderHistoryList', $teleCashOrderHistoryList);
 
         if ($teleCashPayment) {
