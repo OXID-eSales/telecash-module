@@ -9,6 +9,8 @@ declare(strict_types=1);
 
 namespace OxidSolutionCatalysts\TeleCash\IPG;
 
+use DateInvalidTimeZoneException;
+use DateMalformedStringException;
 use DateTime;
 use InvalidArgumentException;
 use OxidSolutionCatalysts\TeleCash\Core\Service\Logger;
@@ -59,6 +61,11 @@ class TeleCashConnect
      */
     private TeleCashCurrency $teleCashCurrency;
 
+    /**
+     * Helper Class for DateTime Handling
+     */
+    private TeleCashDateTime $teleCashDateTime;
+
     private ?Logger $logger;
 
     public function __construct(
@@ -72,6 +79,7 @@ class TeleCashConnect
         $this->secretKey = $secretKey;
         $this->storeName = $storeName;
         $this->teleCashCurrency = new TeleCashCurrency();
+        $this->teleCashDateTime = new TeleCashDateTime();
         $this->logger = $this->getServiceFromContainer(Logger::class);
     }
 
@@ -143,13 +151,18 @@ class TeleCashConnect
      * Formats a DateTime object to a string, using the telecash-specific format.
      * Make sure that the timezone is set according to the form-value.
      *
-     * @param DateTime $dateTime
+     * @param string $dateTime - e.g. '2024-10-14 18:06:39'
+     * @param string $timeZone - e.g. 'Europe/Berlin'
+     *
      * @return string
      */
-    public function formatDateTime(DateTime $dateTime): string
+    public function formatDateTime(string $dateTime = '', string $timeZone = ''): string
     {
-        $format = 'Y:m:d-H:i:s';
-        return $dateTime->format($format);
+        try {
+            return $this->teleCashDateTime->formatDateTime($dateTime, $timeZone);
+        } catch (DateInvalidTimeZoneException | DateMalformedStringException) {
+            return '';
+        }
     }
 
     /**
