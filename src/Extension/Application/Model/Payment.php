@@ -97,7 +97,7 @@ class Payment extends Payment_parent
      */
     public function isTeleCashPayment(): bool
     {
-        return $this->getTeleCashPayment() !== false;
+        return $this->getTeleCashPayment() !== null;
     }
 
     /**
@@ -121,6 +121,27 @@ class Payment extends Payment_parent
             }
         }
         return $this->teleCashPayment;
+    }
+
+    /**
+     * Core-Extension - var-types and return value only in doc-block
+     * {@inheritDoc}
+     *
+     * @param string $sOxId Object ID(default null)
+     *
+     * @return bool
+     * @throws TeleCashException
+     */
+    public function delete($sOxId = null)
+    {
+        $sOxId = $sOxId ?: $this->getId();
+
+        if ($sOxId && $this->isTeleCashPayment()) {
+            $teleCashPayment = $this->getTeleCashPayment();
+            $teleCashPayment?->delete();
+        }
+
+        return parent::delete($sOxId);
     }
 
     /**
