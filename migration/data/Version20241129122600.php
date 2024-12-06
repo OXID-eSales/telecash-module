@@ -98,7 +98,7 @@ final class Version20241129122600 extends AbstractMigration
                 $oxPaymentMethodColName,
                 Types::STRING,
                 [
-                    'columnDefinition' => 'char(8) collate latin1_general_ci',
+                    'columnDefinition' => 'char(16) collate latin1_general_ci',
                     'comment' => 'Telecash PaymentMethod'
                 ]
             );
