@@ -99,6 +99,10 @@ class PaymentGateway extends PaymentGateway_parent
         $teleCashOrder = $this->getTeleCashOrderModel();
         $teleCashOrder->setOxOrderId($orderId);
         $teleCashOrder->setTransactionResult($transactionResult);
+
+        // mark as paid and set transid
+        $order->teleCashMarkAsPaid();
+        $order->teleCashSetTransId($teleCashOrder->getIpgTransactionId());
         return (bool) $teleCashOrder->save();
     }
 }

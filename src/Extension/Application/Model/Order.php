@@ -9,8 +9,9 @@ declare(strict_types=1);
 
 namespace OxidSolutionCatalysts\TeleCash\Extension\Application\Model;
 
+use Doctrine\DBAL\Exception;
+use OxidEsales\EshopCommunity\Internal\Framework\Database\QueryBuilderFactoryInterface;
 use OxidSolutionCatalysts\TeleCash\Application\Model\TeleCashOrder;
-use OxidSolutionCatalysts\TeleCash\Application\Model\TeleCashOrderHistory;
 use OxidSolutionCatalysts\TeleCash\Exception\TeleCashException;
 use OxidSolutionCatalysts\TeleCash\Traits\DataGetter;
 use OxidSolutionCatalysts\TeleCash\Traits\ModelGetter;
@@ -23,8 +24,6 @@ class Order extends Order_parent
     use ServiceContainer;
 
     protected ?TeleCashOrder $teleCashOrder = null;
-
-    protected ?TeleCashOrderHistory $teleCashOrderHistory = null;
 
     protected ?bool $teleCashOrderIsLoaded = null;
 
@@ -56,7 +55,7 @@ class Order extends Order_parent
      */
     public function isTeleCashOrder(): bool
     {
-        return (bool) $this->getTeleCashOrder();
+        return $this->getTeleCashOrder() !== null;
     }
 
     /**
@@ -72,8 +71,88 @@ class Order extends Order_parent
             $teleCashOrder = $this->getTeleCashOrderModel();
             $teleCashOrder->loadByOrderId($orderId);
             $this->teleCashOrderIsLoaded = $teleCashOrder->isLoaded();
-            $this->teleCashOrder = $teleCashOrder;
+            if ($this->teleCashOrderIsLoaded) {
+                $this->teleCashOrder = $teleCashOrder;
+            }
         }
         return $this->teleCashOrder;
+    }
+
+    /**
+     * Core-Extension - var-types and return value only in doc-block
+     * {@inheritDoc}
+     *
+     * @param string $oxid Object ID(default null)
+     *
+     * @return bool
+     * @throws TeleCashException
+     */
+    public function delete($oxid = null)
+    {
+        $oxid = $oxid ?: $this->getId();
+
+        if ($oxid && $this->isTeleCashOrder()) {
+            $teleCashOrder = $this->getTeleCashOrder();
+            $teleCashOrder?->delete();
+        }
+
+        return parent::delete($oxid);
+    }
+
+    /**
+     * Mark order as paid
+     *
+     * @return void
+     */
+    public function teleCashMarkAsPaid(): void
+    {
+        $date = date('Y-m-d H:i:s');
+        $this->updateDBField('oxpaid', $date);
+    }
+
+    /**
+     * set TeleCash Trans ID
+     *
+     * @param string $transId
+     * @return void
+     */
+    public function teleCashSetTransId(string $transId): void
+    {
+        $this->updateDBField('oxtransid', $transId);
+    }
+
+    /**
+     * set a value to the oxorder database
+     *
+     * @param string $field
+     * @param string $value
+     * @return void
+     */
+    private function updateDBField(string $field, string $value): void
+    {
+        $queryBuilderFactory = $this->getServiceFromContainer(QueryBuilderFactoryInterface::class);
+        if (!$queryBuilderFactory) {
+            return;
+        }
+
+        $queryBuilder = $queryBuilderFactory->create();
+        $oxId = $this->getId();
+        try {
+            // update Database
+            $queryBuilder->update('oxorder')
+                ->set($field, ':value')
+                ->where($queryBuilder->expr()->eq('oxid', ':oxid'))
+                ->setParameters([
+                    'oxid'  => $oxId,
+                    'value' => $value
+                ])->execute();
+
+            // update Object
+            $this->assign([
+                $field => $value
+            ]);
+        } catch (Exception) {
+            // do nothing
+        }
     }
 }
