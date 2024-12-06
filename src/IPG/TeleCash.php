@@ -170,7 +170,6 @@ class TeleCash extends TeleCashBase
         return $recurringPaymentAction->cancel();
     }
 
-
     public function sendEMailNotification(
         string $orderId,
         string $tDate,
@@ -208,9 +207,7 @@ class TeleCash extends TeleCashBase
     public function getInquiryByIPGTransactionId(string $ipgTransactionId): Response\Action\Validation|Response\Error
     {
         $service = $this->getService();
-        $inquiryTransactionAction = new Request\Action\InquiryTransaction($service);
-
-        return $inquiryTransactionAction->getByIPGTransactionId($ipgTransactionId);
+        return (new Request\Action\InquiryTransaction($service))->getByIPGTransactionId($ipgTransactionId);
     }
 
     public function getInquiryByOrderIdAndTDate(
@@ -218,8 +215,6 @@ class TeleCash extends TeleCashBase
         string $tDate
     ): Response\Action\Validation|Response\Error {
         $service = $this->getService();
-        $inquiryTransactionAction = new Request\Action\InquiryTransaction($service);
-
-        return $inquiryTransactionAction->getByOrderIdAndTDate($orderId, $tDate);
+        return (new Request\Action\InquiryTransaction($service))->getByOrderIdAndTDate($orderId, $tDate);
     }
 }

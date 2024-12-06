@@ -2,6 +2,11 @@
 
 namespace OxidSolutionCatalysts\TeleCash\IPG\API\Model;
 
+use DOMDocument;
+use DOMException;
+use DOMNode;
+use OxidSolutionCatalysts\TeleCash\IPG\TeleCashConstants;
+
 class TransactionDetails implements ElementInterface
 {
     /**
@@ -10,7 +15,7 @@ class TransactionDetails implements ElementInterface
     private string|null $namespace;
 
     /**
-     * @var string $comments
+     * @var string|null $comments
      */
     private string|null $comments;
 
@@ -28,27 +33,28 @@ class TransactionDetails implements ElementInterface
      */
     public function __construct(string|null $namespace, string|null $comments, string|null $invoiceNumber = null)
     {
-        $this->namespace     = $namespace ?? 'ns2';
+        $this->namespace     = $namespace ?? TeleCashConstants::A1;
         $this->comments      = $comments;
         $this->invoiceNumber = $invoiceNumber;
     }
 
     /**
-     * @param \DOMDocument $document
+     * @param DOMDocument $document
      *
-     * @return mixed
+     * @return DOMNode
+     * @throws DOMException
      */
-    public function getXML(\DOMDocument $document): mixed
+    public function getXML(DOMDocument $document): DOMNode
     {
         $xml = $document->createElement(sprintf('%s:TransactionDetails', $this->namespace));
 
-        $comments = $document->createElement('ns1:Comments');
+        $comments = $document->createElement(TeleCashConstants::PREF_V1 . 'Comments');
         $comments->textContent = (string)$this->comments;
 
         $xml->appendChild($comments);
 
         if (!empty($this->invoiceNumber)) {
-            $invoiceNumber = $document->createElement('ns1:InvoiceNumber');
+            $invoiceNumber = $document->createElement(TeleCashConstants::PREF_V1 . 'InvoiceNumber');
             $invoiceNumber->textContent = (string)$this->invoiceNumber;
 
             $xml->appendChild($invoiceNumber);

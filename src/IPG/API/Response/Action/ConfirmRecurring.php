@@ -2,7 +2,7 @@
 
 namespace OxidSolutionCatalysts\TeleCash\IPG\API\Response\Action;
 
-use OxidSolutionCatalysts\TeleCash\IPG\API\Service\OrderService;
+use OxidSolutionCatalysts\TeleCash\IPG\TeleCashConstants;
 
 /**
  * Class ConfirmRecurring
@@ -13,7 +13,7 @@ class ConfirmRecurring extends Validation
     private string|null $orderId;
 
     /**
-     * @return string
+     * @return string|null
      */
     public function getOrderId(): string|null
     {
@@ -32,13 +32,13 @@ class ConfirmRecurring extends Validation
         if ($this->wasSuccessful()) {
             $this->orderId = $this->firstElementByTagNSString(
                 $responseDoc,
-                OrderService::NAMESPACE_N3,
+                TeleCashConstants::NAMESPACE_IPGAPI,
                 'OrderId'
             );
         } else {
             $this->errorMessage = $this->firstElementByTagNSString(
                 $responseDoc,
-                OrderService::NAMESPACE_N2,
+                TeleCashConstants::NAMESPACE_A1,
                 'ErrorMessage'
             );
             $this->orderId = null;

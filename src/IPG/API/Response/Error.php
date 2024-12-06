@@ -2,8 +2,11 @@
 
 namespace OxidSolutionCatalysts\TeleCash\IPG\API\Response;
 
+use DOMDocument;
+use Exception;
 use OxidSolutionCatalysts\TeleCash\IPG\API\AbstractResponse;
-use OxidSolutionCatalysts\TeleCash\IPG\API\Service\OrderService;
+use OxidSolutionCatalysts\TeleCash\IPG\TeleCashConstants;
+use RuntimeException;
 
 /**
  * Class Error
@@ -78,17 +81,17 @@ class Error extends AbstractResponse
     }
 
     /**
-     * @param \DOMDocument $document
+     * @param DOMDocument $document
      *
      * @return Error|null
-     * @throws \Exception
+     * @throws Exception
      *
      * @SuppressWarnings(PHPMD.CyclomaticComplexity)
      */
-    public static function createFromSoapFault(\DOMDocument $document): Error|null
+    public static function createFromSoapFault(DOMDocument $document): Error|null
     {
         $response = null;
-        $errorElement = $document->getElementsByTagNameNS(OrderService::NAMESPACE_SOAP, 'Fault');
+        $errorElement = $document->getElementsByTagNameNS(TeleCashConstants::NAMESPACE_SOAP, 'Fault');
 
         if ($errorElement->length > 0) {
             $response = new Error();
@@ -115,11 +118,11 @@ class Error extends AbstractResponse
                     $response->errorType   = self::ERROR_TYPE_CLIENT;
                     $errorDetail = $document->getElementsByTagName('detail');
 
-                    if (strpos($response->errorMessage, ':') !== false) {
+                    if (str_contains($response->errorMessage, ':')) {
                         $response->clientErrorType = substr(
                             $response->errorMessage,
                             0,
-                            strpos($response->errorMessage, ':')
+                            (int) strpos($response->errorMessage, ':')
                         );
                     } else {
                         $response->clientErrorType = $response->errorMessage;
@@ -136,14 +139,14 @@ class Error extends AbstractResponse
                         case self::SOAP_CLIENT_ERROR_PROCESSING:
                             $response->clientErrorDetail = $response->firstElementByTagNSString(
                                 $document,
-                                OrderService::NAMESPACE_N3,
+                                TeleCashConstants::NAMESPACE_IPGAPI,
                                 'ErrorMessage'
                             );
                             ;
                             break;
 
                         default:
-                            throw new \Exception(
+                            throw new RuntimeException(
                                 "Undefined SOAP Client Exception: " .
                                 $response->clientErrorType .
                                 ' (Complete SOAP Fault: ' .
@@ -154,7 +157,7 @@ class Error extends AbstractResponse
                     break;
 
                 default:
-                    throw new \Exception("Undefined SOAP Error: (" . $document->saveXML() . ")");
+                    throw new RuntimeException("Undefined SOAP Error: (" . $document->saveXML() . ")");
             }
         }
 

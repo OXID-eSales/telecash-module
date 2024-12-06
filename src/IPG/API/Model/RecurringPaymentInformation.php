@@ -2,6 +2,11 @@
 
 namespace OxidSolutionCatalysts\TeleCash\IPG\API\Model;
 
+use DOMDocument;
+use DOMException;
+use DOMNode;
+use OxidSolutionCatalysts\TeleCash\IPG\TeleCashConstants;
+
 /**
  * Class RecurringPaymentInformation
  */
@@ -40,34 +45,43 @@ class RecurringPaymentInformation implements ElementInterface
     }
 
     /**
-     * @param \DOMDocument $document
+     * @param DOMDocument $document
      *
-     * @return mixed
+     * @return DOMNode
+     * @throws DOMException
      */
-    public function getXML(\DOMDocument $document): mixed
+    public function getXML(DOMDocument $document): DOMNode
     {
-        $xml = $document->createElement('ns2:RecurringPaymentInformation');
+        $xml = $document->createElement(TeleCashConstants::PREF_A1 . 'RecurringPaymentInformation');
 
         if ($this->startDate !== null) {
-            $startDate              = $document->createElement('ns2:RecurringStartDate');
+            $startDate = $document->createElement(
+                TeleCashConstants::PREF_A1 . 'RecurringStartDate'
+            );
             $startDate->textContent = $this->startDate->format('Ymd');
             $xml->appendChild($startDate);
         }
 
         if ($this->installmentCount !== null) {
-            $installmentCount              = $document->createElement('ns2:InstallmentCount');
+            $installmentCount = $document->createElement(
+                TeleCashConstants::PREF_A1 . 'InstallmentCount'
+            );
             $installmentCount->textContent = (string)$this->installmentCount;
             $xml->appendChild($installmentCount);
         }
 
         if ($this->installmentFrequency !== null) {
-            $installmentFrequency              = $document->createElement('ns2:InstallmentFrequency');
+            $installmentFrequency = $document->createElement(
+                TeleCashConstants::PREF_A1 . 'InstallmentFrequency'
+            );
             $installmentFrequency->textContent = (string)$this->installmentFrequency;
             $xml->appendChild($installmentFrequency);
         }
 
         if ($this->installmentFrequency !== null) {
-            $installmentPeriod              = $document->createElement('ns2:InstallmentPeriod');
+            $installmentPeriod = $document->createElement(
+                TeleCashConstants::PREF_A1 . 'InstallmentPeriod'
+            );
             $installmentPeriod->textContent = (string)$this->installmentPeriod;
             $xml->appendChild($installmentPeriod);
         }

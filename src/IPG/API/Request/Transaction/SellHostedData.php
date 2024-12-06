@@ -2,12 +2,15 @@
 
 namespace OxidSolutionCatalysts\TeleCash\IPG\API\Request\Transaction;
 
+use DOMException;
+use Exception;
 use OxidSolutionCatalysts\TeleCash\IPG\API\Model\Payment;
 use OxidSolutionCatalysts\TeleCash\IPG\API\Model\TransactionDetails;
 use OxidSolutionCatalysts\TeleCash\IPG\API\Request\Transaction;
 use OxidSolutionCatalysts\TeleCash\IPG\API\Response\Error;
 use OxidSolutionCatalysts\TeleCash\IPG\API\Response\Order\Sell;
 use OxidSolutionCatalysts\TeleCash\IPG\API\Service\OrderService;
+use OxidSolutionCatalysts\TeleCash\IPG\TeleCashConstants;
 
 /**
  * Class SellHostedData
@@ -15,16 +18,17 @@ use OxidSolutionCatalysts\TeleCash\IPG\API\Service\OrderService;
 class SellHostedData extends Transaction
 {
     /**
-     * @param OrderService            $service
-     * @param Payment                 $payment
+     * @param OrderService $service
+     * @param Payment $payment
      * @param TransactionDetails|null $transactionDetails
+     * @throws DOMException
      */
     public function __construct(OrderService $service, Payment $payment, TransactionDetails $transactionDetails = null)
     {
         parent::__construct($service);
 
-        $ccTxType = $this->document->createElement('ns1:CreditCardTxType');
-        $ccType   = $this->document->createElement('ns1:Type');
+        $ccTxType = $this->document->createElement(TeleCashConstants::PREF_V1 . 'CreditCardTxType');
+        $ccType   = $this->document->createElement(TeleCashConstants::PREF_V1 . 'Type');
         $ccType->nodeValue = 'sale';
         $ccTxType->appendChild($ccType);
         $paymentData = $payment->getXML($this->document);
@@ -42,7 +46,7 @@ class SellHostedData extends Transaction
 
     /**
      * @return Sell|Error
-     * @throws \Exception
+     * @throws Exception
      */
     public function sell(): Sell|Error
     {

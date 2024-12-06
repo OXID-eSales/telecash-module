@@ -2,6 +2,12 @@
 
 namespace OxidSolutionCatalysts\TeleCash\IPG\API\Model;
 
+use DOMDocument;
+use DOMElement;
+use DOMException;
+use DOMNode;
+use OxidSolutionCatalysts\TeleCash\IPG\TeleCashConstants;
+
 /**
  * Class BillingData
  *
@@ -129,109 +135,186 @@ class BillingData implements ElementInterface
 
     /**
      * @inheritDoc
-     * @todo Consider to reduce the CyclomaticComplexity and NPathComplexity
+     * @throws DOMException
+     * @todo Consider to reduce the CyclomaticComplexity, NPathComplexity, ExcessiveMethodLength
      * @SuppressWarnings(PHPMD.CyclomaticComplexity)
      * @SuppressWarnings(PHPMD.NPathComplexity)
+     * @SuppressWarnings(PHPMD.ExcessiveMethodLength)
      */
-    public function getXML(\DOMDocument $document): mixed
+    public function getXML(DOMDocument $document): DOMNode
     {
-        $xml = $document->createElement('ns1:Billing');
+        $xml = $document->createElement(TeleCashConstants::PREF_V1 . 'Billing');
 
         if (!empty($this->browserIP)) {
             $xml->appendChild(
-                $this->createElement($document, 'ns1:BrowserIP', $this->browserIP)
+                $this->createElement(
+                    $document,
+                    TeleCashConstants::PREF_V1 . 'BrowserIP',
+                    $this->browserIP
+                )
             );
         }
         if (!empty($this->browserScreenHeight)) {
             $xml->appendChild(
-                $this->createElement($document, 'ns1:BrowserScreenHeight', $this->browserScreenHeight)
+                $this->createElement(
+                    $document,
+                    TeleCashConstants::PREF_V1 . 'BrowserScreenHeight',
+                    $this->browserScreenHeight
+                )
             );
         }
         if (!empty($this->browserScreenWidth)) {
             $xml->appendChild(
-                $this->createElement($document, 'ns1:BrowserScreenWidth', $this->browserScreenWidth)
+                $this->createElement(
+                    $document,
+                    TeleCashConstants::PREF_V1 . 'BrowserScreenWidth',
+                    $this->browserScreenWidth
+                )
             );
         }
         if (!empty($this->customerID)) {
             $xml->appendChild(
-                $this->createElement($document, 'ns1:CustomerID', $this->customerID)
+                $this->createElement(
+                    $document,
+                    TeleCashConstants::PREF_V1 . 'CustomerID',
+                    $this->customerID
+                )
             );
         }
         if (!empty($this->name)) {
             $xml->appendChild(
-                $this->createElement($document, 'ns1:Name', $this->name)
+                $this->createElement(
+                    $document,
+                    TeleCashConstants::PREF_V1 . 'Name',
+                    $this->name
+                )
             );
         }
         if (!empty($this->firstName)) {
             $xml->appendChild(
-                $this->createElement($document, 'ns1:Firstname', $this->firstName)
+                $this->createElement(
+                    $document,
+                    TeleCashConstants::PREF_V1 . 'Firstname',
+                    $this->firstName
+                )
             );
         }
         if (!empty($this->middleName)) {
             $xml->appendChild(
-                $this->createElement($document, 'ns1:Middlename', $this->middleName)
+                $this->createElement(
+                    $document,
+                    TeleCashConstants::PREF_V1 . 'Middlename',
+                    $this->middleName
+                )
             );
         }
         if (!empty($this->surName)) {
             $xml->appendChild(
-                $this->createElement($document, 'ns1:Surname', $this->surName)
+                $this->createElement(
+                    $document,
+                    TeleCashConstants::PREF_V1 . 'Surname',
+                    $this->surName
+                )
             );
         }
         if (!empty($this->phone)) {
             $xml->appendChild(
-                $this->createElement($document, 'ns1:Phone', $this->phone)
+                $this->createElement(
+                    $document,
+                    TeleCashConstants::PREF_V1 . 'Phone',
+                    $this->phone
+                )
             );
         }
         if (!empty($this->fax)) {
             $xml->appendChild(
-                $this->createElement($document, 'ns1:Fax', $this->fax)
+                $this->createElement(
+                    $document,
+                    TeleCashConstants::PREF_V1 . 'Fax',
+                    $this->fax
+                )
             );
         }
         if (!empty($this->email)) {
             $xml->appendChild(
-                $this->createElement($document, 'ns1:Email', $this->email)
+                $this->createElement(
+                    $document,
+                    TeleCashConstants::PREF_V1 . 'Email',
+                    $this->email
+                )
             );
         }
         if (!empty($this->address1)) {
             $xml->appendChild(
-                $this->createElement($document, 'ns1:Address1', $this->address1)
+                $this->createElement(
+                    $document,
+                    TeleCashConstants::PREF_V1 . 'Address1',
+                    $this->address1
+                )
             );
         }
         if (!empty($this->address2)) {
             $xml->appendChild(
-                $this->createElement($document, 'ns1:Address2', $this->address2)
+                $this->createElement(
+                    $document,
+                    TeleCashConstants::PREF_V1 . 'Address2',
+                    $this->address2
+                )
             );
         }
         if (!empty($this->city)) {
             $xml->appendChild(
-                $this->createElement($document, 'ns1:City', $this->city)
+                $this->createElement(
+                    $document,
+                    TeleCashConstants::PREF_V1 . 'City',
+                    $this->city
+                )
             );
         }
         if (!empty($this->state)) {
             $xml->appendChild(
-                $this->createElement($document, 'ns1:State', $this->state)
+                $this->createElement(
+                    $document,
+                    TeleCashConstants::PREF_V1 . 'State',
+                    $this->state
+                )
             );
         }
         if (!empty($this->zip)) {
             $xml->appendChild(
-                $this->createElement($document, 'ns1:Zip', $this->zip)
+                $this->createElement(
+                    $document,
+                    TeleCashConstants::PREF_V1 . 'Zip',
+                    $this->zip
+                )
             );
         }
         if (!empty($this->country)) {
             $xml->appendChild(
-                $this->createElement($document, 'ns1:Country', $this->country)
+                $this->createElement(
+                    $document,
+                    TeleCashConstants::PREF_V1 . 'Country',
+                    $this->country
+                )
             );
         }
         if (!empty($this->accountOwnerType)) {
             $xml->appendChild(
-                $this->createElement($document, 'ns1:AccountOwnerType', $this->accountOwnerType)
+                $this->createElement(
+                    $document,
+                    TeleCashConstants::PREF_V1 . 'AccountOwnerType',
+                    $this->accountOwnerType
+                )
             );
         }
 
         return $xml;
     }
 
-    private function createElement(\DOMDocument $document, string $elementName, string|null $elementValue): \DOMElement
+    /**
+     * @throws DOMException
+     */
+    private function createElement(DOMDocument $document, string $elementName, string|null $elementValue): DOMElement
     {
         $item = $document->createElement($elementName);
         $item->textContent = (string)$elementValue;

@@ -2,6 +2,8 @@
 
 namespace OxidSolutionCatalysts\TeleCash\IPG\API\Request\Transaction;
 
+use DOMException;
+use Exception;
 use OxidSolutionCatalysts\TeleCash\IPG\API\Model\BillingData;
 use OxidSolutionCatalysts\TeleCash\IPG\API\Model\DirectDebitData;
 use OxidSolutionCatalysts\TeleCash\IPG\API\Model\Payment;
@@ -10,15 +12,17 @@ use OxidSolutionCatalysts\TeleCash\IPG\API\Request\Transaction;
 use OxidSolutionCatalysts\TeleCash\IPG\API\Response\Error;
 use OxidSolutionCatalysts\TeleCash\IPG\API\Response\Order\Sell as OrderSell;
 use OxidSolutionCatalysts\TeleCash\IPG\API\Service\OrderService;
+use OxidSolutionCatalysts\TeleCash\IPG\TeleCashConstants;
 
 class SellDirectDebit extends Transaction
 {
     /**
-     * @param OrderService            $service
-     * @param DirectDebitData         $ddData
-     * @param Payment                 $payment
-     * @param BillingData|null        $billingData
+     * @param OrderService $service
+     * @param DirectDebitData $ddData
+     * @param Payment $payment
+     * @param BillingData|null $billingData
      * @param TransactionDetails|null $transactionDetails
+     * @throws DOMException
      */
     public function __construct(
         OrderService $service,
@@ -29,8 +33,8 @@ class SellDirectDebit extends Transaction
     ) {
         parent::__construct($service);
 
-        $ddTxType = $this->document->createElement('ns1:DE_DirectDebitTxType');
-        $ddType   = $this->document->createElement('ns1:Type');
+        $ddTxType = $this->document->createElement(TeleCashConstants::PREF_V1 . 'DE_DirectDebitTxType');
+        $ddType   = $this->document->createElement(TeleCashConstants::PREF_V1 . 'Type');
         $ddType->nodeValue = 'sale';
         $ddTxType->appendChild($ddType);
 
@@ -53,7 +57,7 @@ class SellDirectDebit extends Transaction
 
     /**
      * @return OrderSell|Error
-     * @throws \Exception
+     * @throws Exception
      */
     public function sell(): OrderSell|Error
     {

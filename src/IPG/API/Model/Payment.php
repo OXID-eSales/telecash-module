@@ -2,6 +2,11 @@
 
 namespace OxidSolutionCatalysts\TeleCash\IPG\API\Model;
 
+use DOMDocument;
+use DOMException;
+use DOMNode;
+use OxidSolutionCatalysts\TeleCash\IPG\TeleCashConstants;
+
 /**
  * Class Payment
  */
@@ -25,25 +30,26 @@ class Payment implements ElementInterface
     }
 
     /**
-     * @param \DOMDocument $document
+     * @param DOMDocument $document
      *
-     * @return mixed
+     * @return DOMNode
+     * @throws DOMException
      */
-    public function getXML(\DOMDocument $document): mixed
+    public function getXML(DOMDocument $document): DOMNode
     {
-        $xml = $document->createElement('ns1:Payment');
+        $xml = $document->createElement(TeleCashConstants::PREF_V1 . 'Payment');
 
         if (!empty($this->hostedDataId)) {
-            $hostedDataId = $document->createElement('ns1:HostedDataID');
+            $hostedDataId = $document->createElement(TeleCashConstants::PREF_V1 . 'HostedDataID');
             $hostedDataId->textContent = $this->hostedDataId;
 
             $xml->appendChild($hostedDataId);
         }
 
         if (!empty($this->amount)) {
-            $amount                = $document->createElement('ns1:ChargeTotal');
+            $amount                = $document->createElement(TeleCashConstants::PREF_V1 . 'ChargeTotal');
             $amount->textContent   = (string)$this->amount;
-            $currency              = $document->createElement('ns1:Currency');
+            $currency              = $document->createElement(TeleCashConstants::PREF_V1 . 'Currency');
             $currency->textContent = self::CURRENCY_EUR;
 
             $xml->appendChild($amount);

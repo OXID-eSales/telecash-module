@@ -2,8 +2,9 @@
 
 namespace OxidSolutionCatalysts\TeleCash\IPG\API\Response\Action;
 
+use Exception;
 use OxidSolutionCatalysts\TeleCash\IPG\API\AbstractResponse;
-use OxidSolutionCatalysts\TeleCash\IPG\API\Service\OrderService;
+use OxidSolutionCatalysts\TeleCash\IPG\TeleCashConstants;
 
 class TransactionValues extends AbstractResponse
 {
@@ -11,17 +12,17 @@ class TransactionValues extends AbstractResponse
      * @var array<string, mixed> $fieldMap
      */
     protected array $fieldMap = [
-        OrderService::NAMESPACE_N1 => [
+        TeleCashConstants::NAMESPACE_V1 => [
             'Type',
             'CardNumber', 'ExpMonth', 'ExpYear', 'Brand',
             'ChargeTotal', 'Currency',
             'Comments', 'OrderId', 'TDate',
         ],
-        OrderService::NAMESPACE_N2 => [
+        TeleCashConstants::NAMESPACE_A1 => [
             'ReceiptNumber', 'TraceNumber', 'Brand', 'TransactionType', 'TransactionState', 'UserID',
             'SubmissionComponent'
         ],
-        OrderService::NAMESPACE_N3 => [
+        TeleCashConstants::NAMESPACE_IPGAPI => [
             'ApprovalCode', 'AVSResponse', 'Brand', 'Country', 'OrderId', 'IpgTransactionId', 'PaymentType',
             'ProcessorApprovalCode', 'ProcessorReceiptNumber', 'ProcessorCCVResponse', 'ProcessorTraceNumber',
             'ReferencedTDate', 'SchemeTransactionId', 'TDate', 'TDateFormatted', 'TerminalID',
@@ -33,6 +34,9 @@ class TransactionValues extends AbstractResponse
      */
     protected array $valueMap = [];
 
+    /**
+     * @throws Exception
+     */
     public function __construct(\DOMDocument $responseDoc)
     {
         foreach ($this->fieldMap as $namespace => $fields) {

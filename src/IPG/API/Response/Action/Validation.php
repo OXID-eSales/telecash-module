@@ -2,8 +2,11 @@
 
 namespace OxidSolutionCatalysts\TeleCash\IPG\API\Response\Action;
 
+use DOMDocument;
+use Exception;
 use OxidSolutionCatalysts\TeleCash\IPG\API\Response\Action;
-use OxidSolutionCatalysts\TeleCash\IPG\API\Service\OrderService;
+use OxidSolutionCatalysts\TeleCash\IPG\TeleCashConstants;
+use RuntimeException;
 
 /**
  * Class Validation
@@ -11,26 +14,33 @@ use OxidSolutionCatalysts\TeleCash\IPG\API\Service\OrderService;
 class Validation extends Action
 {
     /**
-     * @param \DOMDocument $responseDoc
+     * @param DOMDocument $responseDoc
      *
-     * @throws \Exception
+     * @throws Exception
      */
-    public function __construct(\DOMDocument $responseDoc)
+    public function __construct(DOMDocument $responseDoc)
     {
-        $actionResponse = $responseDoc->getElementsByTagNameNS(OrderService::NAMESPACE_N3, 'IPGApiActionResponse');
-        $success        = $this->firstElementByTagNSString($responseDoc, OrderService::NAMESPACE_N3, 'successfully');
+        $actionResponse = $responseDoc->getElementsByTagNameNS(
+            TeleCashConstants::NAMESPACE_IPGAPI,
+            'IPGApiActionResponse'
+        );
+        $success = $this->firstElementByTagNSString(
+            $responseDoc,
+            TeleCashConstants::NAMESPACE_IPGAPI,
+            'successfully'
+        );
 
         if ($actionResponse->length > 0) {
             $this->wasSuccessful = ($success === 'true');
             if (false === $this->wasSuccessful) {
                 $this->errorMessage = $this->firstElementByTagNSString(
                     $responseDoc,
-                    OrderService::NAMESPACE_N2,
+                    TeleCashConstants::NAMESPACE_A1,
                     'ErrorMessage'
                 );
             }
         } else {
-            throw new \Exception("Validate Call failed " . $responseDoc->saveXML());
+            throw new RuntimeException("Validate Call failed " . $responseDoc->saveXML());
         }
     }
 }

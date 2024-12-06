@@ -2,6 +2,8 @@
 
 namespace OxidSolutionCatalysts\TeleCash\IPG\API\Request\Action;
 
+use DOMException;
+use Exception;
 use OxidSolutionCatalysts\TeleCash\IPG\API\Model\CreditCardData;
 use OxidSolutionCatalysts\TeleCash\IPG\API\Model\Payment;
 use OxidSolutionCatalysts\TeleCash\IPG\API\Model\TransactionDetails;
@@ -9,6 +11,7 @@ use OxidSolutionCatalysts\TeleCash\IPG\API\Request\Action;
 use OxidSolutionCatalysts\TeleCash\IPG\API\Response\Error;
 use OxidSolutionCatalysts\TeleCash\IPG\API\Response\Action\Validation;
 use OxidSolutionCatalysts\TeleCash\IPG\API\Service\OrderService;
+use OxidSolutionCatalysts\TeleCash\IPG\TeleCashConstants;
 
 /**
  * Class Validate
@@ -16,16 +19,21 @@ use OxidSolutionCatalysts\TeleCash\IPG\API\Service\OrderService;
 class Validate extends Action
 {
     /**
-     * @param OrderService   $service
+     * @param OrderService $service
      * @param CreditCardData $creditCardData
-     * @param float          $amount
-     * @param string         $text
+     * @param float $amount
+     * @param string|null $text
+     * @throws DOMException
      */
-    public function __construct(OrderService $service, CreditCardData $creditCardData, $amount = 1.0, $text = null)
-    {
+    public function __construct(
+        OrderService $service,
+        CreditCardData $creditCardData,
+        float $amount = 1.0,
+        ?string $text = null
+    ) {
         parent::__construct($service);
 
-        $xml    = $this->document->createElement('ns2:Validate');
+        $xml    = $this->document->createElement(TeleCashConstants::PREF_A1 . 'Validate');
         $ccData = $creditCardData->getXML($this->document);
         $xml->appendChild($ccData);
 
@@ -36,20 +44,18 @@ class Validate extends Action
         }
 
         if (!empty($text)) {
-            $transactionDetails = new TransactionDetails('ns2', $text);
+            $transactionDetails = new TransactionDetails(TeleCashConstants::A1, $text);
             $transactionDetailsData = $transactionDetails->getXML($this->document);
             $xml->appendChild($transactionDetailsData);
         }
 
-        $item0 = $this->element->getElementsByTagName('ns2:Action')->item(0);
-        if ($item0) {
-            $item0->appendChild($xml);
-        }
+        $item0 = $this->element->getElementsByTagName(TeleCashConstants::PREF_A1 . 'Action')->item(0);
+        $item0?->appendChild($xml);
     }
 
     /**
      * @return Validation|Error
-     * @throws \Exception
+     * @throws Exception
      */
     public function validate(): Validation|Error
     {

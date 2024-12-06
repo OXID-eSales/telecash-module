@@ -2,13 +2,18 @@
 
 namespace OxidSolutionCatalysts\TeleCash\IPG\API\Model;
 
+use DOMDocument;
+use DOMException;
+use DOMNode;
+use OxidSolutionCatalysts\TeleCash\IPG\TeleCashConstants;
+
 /**
  * Class CreditCardItem
  */
 class DirectDebitItem extends DataStorageItem
 {
     /** @var DirectDebitData */
-    protected $directDebitData;
+    protected DirectDebitData $directDebitData;
 
     /**
      * @param DirectDebitData $directDebitData
@@ -28,25 +33,26 @@ class DirectDebitItem extends DataStorageItem
     }
 
     /**
-     * @param \DOMDocument $document
+     * @param DOMDocument $document
      *
-     * @return mixed
+     * @return DOMNode
+     * @throws DOMException
      */
-    public function getXML(\DOMDocument $document): mixed
+    public function getXML(DOMDocument $document): DOMNode
     {
-        $xml = $document->createElement('ns2:DataStorageItem');
+        $xml = $document->createElement(TeleCashConstants::PREF_A1 . 'DataStorageItem');
 
         $ccData = $this->directDebitData->getXML($document);
-        $dataId = $document->createElement('ns2:HostedDataID');
+        $dataId = $document->createElement(TeleCashConstants::PREF_A1 . 'HostedDataID');
         $dataId->textContent = (string)$this->hostedDataId;
 
-        if ($this->function != null) {
-            $function = $document->createElement('ns2:Function');
+        if ($this->function !== null) {
+            $function = $document->createElement(TeleCashConstants::PREF_A1 . 'Function');
             $function->textContent = $this->function;
             $xml->appendChild($function);
         }
-        if ($this->declineHostedDataDuplicates != null) {
-            $declineDuplicates = $document->createElement('ns2:DeclineHostedDataDuplicates');
+        if ($this->declineHostedDataDuplicates !== null) {
+            $declineDuplicates = $document->createElement(TeleCashConstants::PREF_A1 . 'DeclineHostedDataDuplicates');
             $declineDuplicates->textContent = $this->declineHostedDataDuplicates;
             $xml->appendChild($declineDuplicates);
         }
