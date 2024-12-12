@@ -31,7 +31,6 @@ class ModuleSettingsService implements ModuleSettingsServiceInterface
         return $this->getStoreId()
             && $this->getBasicAuthPassword()
             && $this->getClientCertificateInstallationPassword()
-            && $this->getClientCertificatePrivateKeyPassword()
             && $this->moduleFileSettingsService->checkClientCertificateP12FileExists()
             && $this->moduleFileSettingsService->checkClientCertificatePrivateKeyFileExists()
             && $this->moduleFileSettingsService->checkTrustAnchorPEMFileExists();
