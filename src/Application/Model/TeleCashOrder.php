@@ -144,7 +144,7 @@ class TeleCashOrder extends BaseModel implements TeleCashOrderInterface
         );
 
         // validate TxnType
-        if (!in_array($txnType, Module::TELECASH_TRANSACTION_TYPES, true)) {
+        if (!in_array($txnType, Module::TELECASH_POSSIBLE_TRANSACTION_TYPES, true)) {
             $txnType = '';
         }
         return $txnType;
@@ -192,12 +192,14 @@ class TeleCashOrder extends BaseModel implements TeleCashOrderInterface
     /** get the Charge Total */
     public function getChargeTotal(): string
     {
-        $chargeTotal = 0.0;
         if ($this->isLoaded()) {
             $chargeTotal = $this->getFieldFloatData(Module::TELECASH_ORDER_EXTENSION_TABLE_CHARGETOTAL);
             return number_format($chargeTotal, 2, '.', '');
         }
-        return (string) $this->transactionResult->getValue('chargetotal');
+        $chargeTotal = (string) $this->transactionResult->getValue('chargetotal');
+        // Standardize decimal separator to dot
+        $chargeTotal = str_replace(',', '.', $chargeTotal);
+        return is_numeric($chargeTotal) ? number_format((float)$chargeTotal, 2, '.', '') : '0.00';
     }
 
     /** get the Charge Total in OXID Style (as float) */
@@ -211,6 +213,26 @@ class TeleCashOrder extends BaseModel implements TeleCashOrderInterface
         $chargeTotalString = str_replace(',', '.', $chargeTotalString);
 
         return is_numeric($chargeTotalString) ? (float) $chargeTotalString : 0.0;
+    }
+
+    /**
+     * @throws TeleCashException
+     */
+    public function getPossibleCharge(): float
+    {
+        $result = $this->getOxidChargeTotal();
+
+        // collect postAuth from History
+        $teleCashOrderHistoryList = $this->getTeleCashOrderHistoryList();
+        if ($teleCashOrderHistoryList && $teleCashOrderHistoryList->count()) {
+            foreach ($teleCashOrderHistoryList as $teleCashOrderHistoryEntry) {
+                /** @var TeleCashOrderHistory $teleCashOrderHistoryEntry */
+                if ($teleCashOrderHistoryEntry->getTxnType() === Module::TELECASH_TXN_TYPE_POSTAUTH) {
+                    $result -= $teleCashOrderHistoryEntry->getOxidChargeTotal();
+                }
+            }
+        }
+        return $result;
     }
 
     /**
