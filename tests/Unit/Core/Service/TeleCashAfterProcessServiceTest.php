@@ -99,7 +99,7 @@ class TeleCashAfterProcessServiceTest extends TestCase
         // Configure oxNew service to return our order mock
         $this->oxNewServiceMock
             ->method('oxNew')
-            ->willReturnCallback(function($class) use ($orderMock) {
+            ->willReturnCallback(function ($class) use ($orderMock) {
                 if ($class === TeleCashOrder::class) {
                     return $orderMock;
                 }
