@@ -67,5 +67,9 @@ class FrontendTeleCashNotificationEndpoint extends BaseController
          * The notification result contains new informations for the order.
          */
         $notificationResult = $telecashConnect->getTransactionResult();
+
+        $teleCashOrderHistory = $this->getTeleCashOrderHistoryModel();
+        $teleCashOrderHistory->setTransactionResult($notificationResult);
+        $teleCashOrderHistory->save();
     }
 }
