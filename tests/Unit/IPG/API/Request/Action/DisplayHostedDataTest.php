@@ -2,8 +2,11 @@
 
 namespace OxidSolutionCatalysts\TeleCash\IPG\API\Request\Action;
 
+use DOMException;
 use OxidSolutionCatalysts\TeleCash\IPG\API\Model\DataStorageItem;
 use OxidSolutionCatalysts\TeleCash\IPG\API\Service\OrderService;
+use PHPUnit\Framework\MockObject\Exception;
+use PHPUnit\Framework\TestCase;
 
 /**
  * Test class for DisplayHostedData request action
@@ -11,7 +14,7 @@ use OxidSolutionCatalysts\TeleCash\IPG\API\Service\OrderService;
  * This test suite verifies the XML generation functionality for the DisplayHostedData request,
  * which is used to retrieve stored payment data from the TeleCash system.
  */
-class DisplayHostedDataTest extends \PHPUnit\Framework\TestCase
+class DisplayHostedDataTest extends TestCase
 {
     /**
      * Tests the XML generation for the DisplayHostedData request
@@ -22,6 +25,8 @@ class DisplayHostedDataTest extends \PHPUnit\Framework\TestCase
      * 3. The DataStorageItem is correctly included in the request
      *
      * @param DataStorageItem $storageItem The storage item to be included in the request
+     * @throws DOMException
+     * @throws Exception
      * @dataProvider         dataProvider
      */
     public function testXMLGeneration(DataStorageItem $storageItem): void

@@ -2,34 +2,37 @@
 
 namespace OxidSolutionCatalysts\TeleCash\IPG\API\Model;
 
+use DOMDocument;
+use DOMElement;
+use DOMException;
+use DOMNode;
+
 /**
  * Class BillingData
  *
- * @todo Consider to reduce the number of fields, CyclomaticComplexity and NPathComplexity
+ * @todo Consider to reduce the number of fields
  * @SuppressWarnings(PHPMD.TooManyFields)
- * @SuppressWarnings(PHPMD.CyclomaticComplexity)
- * @SuppressWarnings(PHPMD.NPathComplexity)
  */
 class BillingData implements ElementInterface
 {
-    private string|null $browserIP;
-    private string|null $browserScreenHeight;
-    private string|null $browserScreenWidth;
-    private string|null $customerID;
-    private string|null $name;
-    private string|null $firstName;
-    private string|null $middleName;
-    private string|null $surName;
-    private string|null $phone;
-    private string|null $fax;
-    private string|null $email;
-    private string|null $address1;
-    private string|null $address2;
-    private string|null $city;
-    private string|null $state;
-    private string|null $zip;
-    private string|null $country;
-    private string|null $accountOwnerType;
+    private ?string $browserIP = null;
+    private ?string $browserScreenHeight = null;
+    private ?string $browserScreenWidth = null;
+    private ?string $customerID = null;
+    private ?string $name = null;
+    private ?string $firstName = null;
+    private ?string $middleName = null;
+    private ?string $surName = null;
+    private ?string $phone = null;
+    private ?string $fax = null;
+    private ?string $email = null;
+    private ?string $address1 = null;
+    private ?string $address2 = null;
+    private ?string $city = null;
+    private ?string $state = null;
+    private ?string $zip = null;
+    private ?string $country = null;
+    private ?string $accountOwnerType = null;
 
     public function __construct(string $name)
     {
@@ -129,112 +132,42 @@ class BillingData implements ElementInterface
 
     /**
      * @inheritDoc
-     * @todo Consider to reduce the CyclomaticComplexity and NPathComplexity
-     * @SuppressWarnings(PHPMD.CyclomaticComplexity)
-     * @SuppressWarnings(PHPMD.NPathComplexity)
+     * @throws DOMException
      */
-    public function getXML(\DOMDocument $document): mixed
+    public function getXML(DOMDocument $document): DOMNode
     {
-        $xml = $document->createElement('ns1:Billing');
+        // Create root element
+        $billing = $document->createElement('ns1:Billing');
 
-        if (!empty($this->browserIP)) {
-            $xml->appendChild(
-                $this->createElement($document, 'ns1:BrowserIP', $this->browserIP)
-            );
-        }
-        if (!empty($this->browserScreenHeight)) {
-            $xml->appendChild(
-                $this->createElement($document, 'ns1:BrowserScreenHeight', $this->browserScreenHeight)
-            );
-        }
-        if (!empty($this->browserScreenWidth)) {
-            $xml->appendChild(
-                $this->createElement($document, 'ns1:BrowserScreenWidth', $this->browserScreenWidth)
-            );
-        }
-        if (!empty($this->customerID)) {
-            $xml->appendChild(
-                $this->createElement($document, 'ns1:CustomerID', $this->customerID)
-            );
-        }
-        if (!empty($this->name)) {
-            $xml->appendChild(
-                $this->createElement($document, 'ns1:Name', $this->name)
-            );
-        }
-        if (!empty($this->firstName)) {
-            $xml->appendChild(
-                $this->createElement($document, 'ns1:Firstname', $this->firstName)
-            );
-        }
-        if (!empty($this->middleName)) {
-            $xml->appendChild(
-                $this->createElement($document, 'ns1:Middlename', $this->middleName)
-            );
-        }
-        if (!empty($this->surName)) {
-            $xml->appendChild(
-                $this->createElement($document, 'ns1:Surname', $this->surName)
-            );
-        }
-        if (!empty($this->phone)) {
-            $xml->appendChild(
-                $this->createElement($document, 'ns1:Phone', $this->phone)
-            );
-        }
-        if (!empty($this->fax)) {
-            $xml->appendChild(
-                $this->createElement($document, 'ns1:Fax', $this->fax)
-            );
-        }
-        if (!empty($this->email)) {
-            $xml->appendChild(
-                $this->createElement($document, 'ns1:Email', $this->email)
-            );
-        }
-        if (!empty($this->address1)) {
-            $xml->appendChild(
-                $this->createElement($document, 'ns1:Address1', $this->address1)
-            );
-        }
-        if (!empty($this->address2)) {
-            $xml->appendChild(
-                $this->createElement($document, 'ns1:Address2', $this->address2)
-            );
-        }
-        if (!empty($this->city)) {
-            $xml->appendChild(
-                $this->createElement($document, 'ns1:City', $this->city)
-            );
-        }
-        if (!empty($this->state)) {
-            $xml->appendChild(
-                $this->createElement($document, 'ns1:State', $this->state)
-            );
-        }
-        if (!empty($this->zip)) {
-            $xml->appendChild(
-                $this->createElement($document, 'ns1:Zip', $this->zip)
-            );
-        }
-        if (!empty($this->country)) {
-            $xml->appendChild(
-                $this->createElement($document, 'ns1:Country', $this->country)
-            );
-        }
-        if (!empty($this->accountOwnerType)) {
-            $xml->appendChild(
-                $this->createElement($document, 'ns1:AccountOwnerType', $this->accountOwnerType)
-            );
-        }
+        // Helper function to add elements
+        $addElement = function (string $name, ?string $value) use ($document, $billing) {
+            if ($value !== null) {
+                $element = $document->createElement('ns1:' . $name);
+                $element->textContent = $value;
+                $billing->appendChild($element);
+            }
+        };
 
-        return $xml;
-    }
+        // Add elements in order
+        $addElement('BrowserIP', $this->browserIP);
+        $addElement('BrowserScreenHeight', $this->browserScreenHeight);
+        $addElement('BrowserScreenWidth', $this->browserScreenWidth);
+        $addElement('CustomerID', $this->customerID);
+        $addElement('Name', $this->name);
+        $addElement('Firstname', $this->firstName);
+        $addElement('Middlename', $this->middleName);
+        $addElement('Surname', $this->surName);
+        $addElement('Phone', $this->phone);
+        $addElement('Fax', $this->fax);
+        $addElement('Email', $this->email);
+        $addElement('Address1', $this->address1);
+        $addElement('Address2', $this->address2);
+        $addElement('City', $this->city);
+        $addElement('State', $this->state);
+        $addElement('Zip', $this->zip);
+        $addElement('Country', $this->country);
+        $addElement('AccountOwnerType', $this->accountOwnerType);
 
-    private function createElement(\DOMDocument $document, string $elementName, string|null $elementValue): \DOMElement
-    {
-        $item = $document->createElement($elementName);
-        $item->textContent = (string)$elementValue;
-        return $item;
+        return $billing;
     }
 }

@@ -48,9 +48,10 @@ final class Version20241129122600 extends AbstractMigration
             $teleCashOrderTable = $schema->getTable(Module::TELECASH_ORDER_EXTENSION_TABLE);
         }
 
-        if (!$teleCashOrderTable->hasColumn('OXID')) {
+        $oxIdColName = 'OXID';
+        if (!$teleCashOrderTable->hasColumn($oxIdColName)) {
             $teleCashOrderTable->addColumn(
-                'OXID',
+                $oxIdColName,
                 Types::STRING,
                 ['columnDefinition' => 'char(32) collate latin1_general_ci']
             );
@@ -98,7 +99,7 @@ final class Version20241129122600 extends AbstractMigration
                 $oxPaymentMethodColName,
                 Types::STRING,
                 [
-                    'columnDefinition' => 'char(8) collate latin1_general_ci',
+                    'columnDefinition' => 'char(16) collate latin1_general_ci',
                     'comment' => 'Telecash PaymentMethod'
                 ]
             );

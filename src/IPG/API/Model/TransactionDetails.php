@@ -2,23 +2,12 @@
 
 namespace OxidSolutionCatalysts\TeleCash\IPG\API\Model;
 
+use DOMDocument;
+use DOMException;
+use DOMNode;
+
 class TransactionDetails implements ElementInterface
 {
-    /**
-     * @var string|null $namespace
-     */
-    private string|null $namespace;
-
-    /**
-     * @var string $comments
-     */
-    private string|null $comments;
-
-    /**
-     * @var string|null $invoiceNumber
-     */
-    private string|null $invoiceNumber;
-
     /**
      * TransactionDetails constructor.
      *
@@ -26,32 +15,39 @@ class TransactionDetails implements ElementInterface
      * @param string|null $comments
      * @param string|null $invoiceNumber
      */
-    public function __construct(string|null $namespace, string|null $comments, string|null $invoiceNumber = null)
-    {
-        $this->namespace     = $namespace ?? 'ns2';
-        $this->comments      = $comments;
-        $this->invoiceNumber = $invoiceNumber;
+    public function __construct(
+        private readonly ?string $namespace,
+        private readonly ?string $comments,
+        private readonly ?string $invoiceNumber = null
+    ) {
     }
 
     /**
-     * @param \DOMDocument $document
+     * @param DOMDocument $document
      *
-     * @return mixed
+     * @return DOMNode
+     * @throws DOMException
      */
-    public function getXML(\DOMDocument $document): mixed
+    public function getXML(DOMDocument $document): DOMNode
     {
-        $xml = $document->createElement(sprintf('%s:TransactionDetails', $this->namespace));
+        // Create root element with namespace
+        $xml = $document->createElement($this->namespace . ':TransactionDetails');
 
-        $comments = $document->createElement('ns1:Comments');
-        $comments->textContent = (string)$this->comments;
+        // Helper function to create elements
+        $addElement = function (string $name, ?string $value) use ($document, $xml) {
+            if ($value !== null) {
+                $element = $document->createElement('ns1:' . $name);
+                $element->textContent = $value;
+                $xml->appendChild($element);
+            }
+        };
 
-        $xml->appendChild($comments);
+        // Add required Comments element
+        $addElement('Comments', (string)$this->comments);
 
+        // Add optional InvoiceNumber if present
         if (!empty($this->invoiceNumber)) {
-            $invoiceNumber = $document->createElement('ns1:InvoiceNumber');
-            $invoiceNumber->textContent = (string)$this->invoiceNumber;
-
-            $xml->appendChild($invoiceNumber);
+            $addElement('InvoiceNumber', $this->invoiceNumber);
         }
 
         return $xml;

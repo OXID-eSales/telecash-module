@@ -2,70 +2,79 @@
 
 namespace OxidSolutionCatalysts\TeleCash\IPG\API\Service;
 
+use DOMDocument;
+use DOMNode;
+use Exception;
+use OxidSolutionCatalysts\TeleCash\Core\Service\Logger;
 use OxidSolutionCatalysts\TeleCash\IPG\API\AbstractRequest;
 use OxidSolutionCatalysts\TeleCash\IPG\API\Request\ActionRequest;
 use OxidSolutionCatalysts\TeleCash\IPG\API\Request\OrderRequest;
 use OxidSolutionCatalysts\TeleCash\IPG\API\Response\Error;
+use OxidSolutionCatalysts\TeleCash\IPG\TeleCashConstants;
+use RuntimeException;
 
 /**
  * Class OrderService
  */
 class OrderService extends SoapClientCurl
 {
-    public const NAMESPACE_N1   = 'http://ipg-online.com/ipgapi/schemas/v1';
-    public const NAMESPACE_N2   = 'http://ipg-online.com/ipgapi/schemas/a1';
-    public const NAMESPACE_N3   = 'http://ipg-online.com/ipgapi/schemas/ipgapi';
-    public const NAMESPACE_SOAP = 'http://schemas.xmlsoap.org/soap/envelope/';
-
     public const SOAP_ERROR_SERVER = 'SOAP-ENV:Server';
     public const SOAP_ERROR_CLIENT = 'SOAP-ENV:Client';
 
     public const SOAP_CLIENT_ERROR_MERCHANT   = 'MerchantException';
     public const SOAP_CLIENT_ERROR_PROCESSING = 'ProcessingException';
 
-    private bool $debug;
-
     /**
      * @param array<int|string, mixed>  $curlOptions CURL config values
      * @param string $username    API user
      * @param string $password    API pass
-     * @param bool   $debug       Flag, debug mode
+     * @param Logger $logger      Logger
      */
-    public function __construct(array $curlOptions, string $username, string $password, bool $debug = false)
-    {
+    public function __construct(
+        array $curlOptions,
+        string $username,
+        string $password,
+        private readonly Logger $logger
+    ) {
         parent::__construct($curlOptions, $username, $password);
-
-        $this->debug = $debug;
     }
 
     /**
-     * @param \DOMNode $element
+     * @param string $type
+     * @param DOMNode $element
      */
-    public function dumpDOMElement(\DOMNode $element): void
+    public function dumpDOMElement(string $type, DOMNode $element): void
     {
         if ($element->ownerDocument !== null) {
-            var_dump($element->ownerDocument->saveXML($element));
+            $this->logger->log(
+                'debug',
+                'Debug: ' . $type . ': ' . $element->ownerDocument->saveXML($element)
+            );
         }
     }
 
-    public function dumpXML(string $source): void
+    public function handleDebug(string $type, string $source): void
     {
-        $xml = new \DOMDocument();
+        $xml = new DOMDocument();
         $xml->loadXML($source);
         $xml->preserveWhiteSpace = false;
         $xml->formatOutput = true;
-        var_dump($xml->saveXML());
+
+        $this->logger->log(
+            'debug',
+            'Debug: ' . $type . ': ' . $xml->saveXML()
+        );
     }
 
     /**
-     * @param \DOMDocument $responseDoc
+     * @param DOMDocument $responseDoc
      *
      * @return Error|null
-     * @throws \Exception
+     * @throws Exception
      *
      * @SuppressWarnings(PHPMD.StaticAccess)
      */
-    private function checkForSoapFault(\DOMDocument $responseDoc): Error|null
+    private function checkForSoapFault(DOMDocument $responseDoc): Error|null
     {
         return Error::createFromSoapFault($responseDoc);
     }
@@ -73,18 +82,30 @@ class OrderService extends SoapClientCurl
     /**
      * @param AbstractRequest $payload
      *
-     * @return \DOMDocument|Error
+     * @return DOMDocument|Error
      *
-     * @throws \Exception
+     * @throws Exception
      */
-    private function soapCall(AbstractRequest $payload): \DOMDocument|Error
+    private function soapCall(AbstractRequest $payload): DOMDocument|Error
     {
         $request = $payload->getDocument();
 
         $envelope = $request->createElementNS('http://schemas.xmlsoap.org/soap/envelope/', 'SOAP-ENV:Envelope');
-        $envelope->setAttributeNS('http://www.w3.org/2000/xmlns/', 'xmlns:ns1', self::NAMESPACE_N1);
-        $envelope->setAttributeNS('http://www.w3.org/2000/xmlns/', 'xmlns:ns2', self::NAMESPACE_N2);
-        $envelope->setAttributeNS('http://www.w3.org/2000/xmlns/', 'xmlns:ns3', self::NAMESPACE_N3);
+        $envelope->setAttributeNS(
+            'http://www.w3.org/2000/xmlns/',
+            'xmlns:' . TeleCashConstants::V1,
+            TeleCashConstants::NAMESPACE_V1
+        );
+        $envelope->setAttributeNS(
+            'http://www.w3.org/2000/xmlns/',
+            'xmlns:' . TeleCashConstants::A1,
+            TeleCashConstants::NAMESPACE_A1
+        );
+        $envelope->setAttributeNS(
+            'http://www.w3.org/2000/xmlns/',
+            'xmlns:' . TeleCashConstants::IPGAPI,
+            TeleCashConstants::NAMESPACE_IPGAPI
+        );
 
         $body = $request->createElement('SOAP-ENV:Body');
         $body->appendChild($payload->getElement());
@@ -93,41 +114,36 @@ class OrderService extends SoapClientCurl
         $request->appendChild($envelope);
         $xml = $request->saveXML();
 
-        if ($this->debug) {
-            $this->dumpXML((string)$xml);
-        }
-
+        $this->handleDebug('Request', (string)$xml);
         $response = false;
         if ($xml) {
             $response = $this->doRequest($xml);
         }
-
-        if ($this->debug) {
-            $this->dumpXML((string)$response);
-        }
+        $this->handleDebug('Response', (string)$response);
 
         if ($response === false) {
-            throw new \Exception($this->getErrorMessage());
+            throw new RuntimeException($this->getErrorMessage());
         }
 
         if (empty($response)) {
-            throw new \Exception('Empty API response received');
+            throw new RuntimeException('Empty API response received');
         }
 
-        $responseDoc = new \DOMDocument('1.0', 'UTF-8');
+        $responseDoc = new DOMDocument('1.0', 'UTF-8');
         $responseDoc->loadXML($response);
 
         $errorResponse = $this->checkForSoapFault($responseDoc);
 
-        return $errorResponse !== null ? $errorResponse : $responseDoc;
+        return $errorResponse ?? $responseDoc;
     }
 
     /**
      * @param ActionRequest $actionRequest
      *
-     * @return \DOMDocument|Error
+     * @return DOMDocument|Error
+     * @throws Exception
      */
-    public function IPGApiAction(ActionRequest $actionRequest): \DOMDocument|Error
+    public function IPGApiAction(ActionRequest $actionRequest): DOMDocument|Error
     {
         return $this->soapCall($actionRequest);
     }
@@ -136,9 +152,10 @@ class OrderService extends SoapClientCurl
     /**
      * @param OrderRequest $orderRequest
      *
-     * @return \DOMDocument|Error
+     * @return DOMDocument|Error
+     * @throws Exception
      */
-    public function IPGApiOrder(OrderRequest $orderRequest): \DOMDocument|Error
+    public function IPGApiOrder(OrderRequest $orderRequest): DOMDocument|Error
     {
         return $this->soapCall($orderRequest);
     }

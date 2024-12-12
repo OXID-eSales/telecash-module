@@ -2,6 +2,7 @@
 
 namespace OxidSolutionCatalysts\TeleCash\IPG;
 
+use OxidSolutionCatalysts\TeleCash\Core\Service\Logger;
 use OxidSolutionCatalysts\TeleCash\IPG\API\Model;
 use OxidSolutionCatalysts\TeleCash\IPG\API\Request;
 use OxidSolutionCatalysts\TeleCash\IPG\API\Response;
@@ -19,6 +20,7 @@ class TeleCashDirectDebit extends TeleCashBase
      * @param string $clientKey
      * @param string $clientKeyPassPhrase
      * @param string $serverCert
+     * @param Logger $logger
      */
     public function __construct(
         string $serviceUrl,
@@ -27,7 +29,8 @@ class TeleCashDirectDebit extends TeleCashBase
         string $clientCert,
         string $clientKey,
         string $clientKeyPassPhrase,
-        string $serverCert
+        string $serverCert,
+        private readonly Logger $logger
     ) {
         parent::__construct(
             $serviceUrl,
@@ -36,7 +39,8 @@ class TeleCashDirectDebit extends TeleCashBase
             $clientCert,
             $clientKey,
             $clientKeyPassPhrase,
-            $serverCert
+            $serverCert,
+            $this->logger
         );
     }
 

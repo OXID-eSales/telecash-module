@@ -93,10 +93,10 @@ final class Version20241122134700 extends AbstractMigration
             $teleCashOrderHistoryTable->setPrimaryKey(['OXID']);
         }
 
-        if (!$teleCashOrderHistoryTable->hasIndex('UNIQUE_ENTRY')) {
-            $teleCashOrderHistoryTable->addUniqueIndex(
+        if (!$teleCashOrderHistoryTable->hasIndex('INDEX_ENTRY')) {
+            $teleCashOrderHistoryTable->addIndex(
                 [$oxOidColName],
-                'UNIQUE_ENTRY'
+                'INDEX_ENTRY'
             );
         }
     }

@@ -2,8 +2,10 @@
 
 namespace OxidSolutionCatalysts\TeleCash\IPG\API\Response\Order;
 
+use DOMDocument;
+use Exception;
 use OxidSolutionCatalysts\TeleCash\IPG\API\AbstractResponse;
-use OxidSolutionCatalysts\TeleCash\IPG\API\Service\OrderService;
+use OxidSolutionCatalysts\TeleCash\IPG\TeleCashConstants;
 
 /**
  * Class Sell
@@ -193,18 +195,18 @@ class Sell extends AbstractResponse
     /**
      * Checks whether the sell was successful.
      *
-     * @param \DOMDocument $responseDoc
+     * @param DOMDocument $responseDoc
      *
      * @return bool
      */
-    private function checkIfSuccessful(\DOMDocument $responseDoc): bool
+    private function checkIfSuccessful(DOMDocument $responseDoc): bool
     {
         $this->wasSuccessful = false;
 
-        $list = $responseDoc->getElementsByTagNameNS(OrderService::NAMESPACE_N3, 'successfully');
+        $list = $responseDoc->getElementsByTagNameNS(TeleCashConstants::NAMESPACE_IPGAPI, 'successfully');
         if ($list->length > 0) {
             $success = $responseDoc->getElementsByTagNameNS(
-                OrderService::NAMESPACE_N3,
+                TeleCashConstants::NAMESPACE_IPGAPI,
                 'successfully'
             )->item(0);
             if ($success) {
@@ -215,7 +217,7 @@ class Sell extends AbstractResponse
             $this->wasSuccessful = ($success === 'true');
         } else {
             $list = $responseDoc->getElementsByTagNameNS(
-                OrderService::NAMESPACE_N3,
+                TeleCashConstants::NAMESPACE_IPGAPI,
                 'ProcessorResponseMessage'
             );
             if ($list->length > 0) {
@@ -228,7 +230,7 @@ class Sell extends AbstractResponse
 
             if ($this->wasSuccessful === false) {
                 $list = $responseDoc->getElementsByTagNameNS(
-                    OrderService::NAMESPACE_N3,
+                    TeleCashConstants::NAMESPACE_IPGAPI,
                     'TransactionResult'
                 );
                 if ($list->length > 0) {
@@ -245,18 +247,18 @@ class Sell extends AbstractResponse
     }
 
     /**
-     * @param \DOMDocument $responseDoc
+     * @param DOMDocument $responseDoc
      *
-     * @throws \Exception
+     * @throws Exception
      */
-    public function __construct(\DOMDocument $responseDoc)
+    public function __construct(DOMDocument $responseDoc)
     {
         if ($this->checkIfSuccessful($responseDoc)) {
             $this->initSelf($responseDoc);
         } else {
             $this->transactionResult     = Sell::TRANSACTION_RESULT_NOT_SUCCESSFUL;
             $item0 = $responseDoc->getElementsByTagNameNS(
-                OrderService::NAMESPACE_N2,
+                TeleCashConstants::NAMESPACE_A1,
                 'Error'
             )->item(0);
             if ($item0) {
@@ -268,7 +270,7 @@ class Sell extends AbstractResponse
             unset($item0);
 
             $item0 = $responseDoc->getElementsByTagNameNS(
-                OrderService::NAMESPACE_N2,
+                TeleCashConstants::NAMESPACE_A1,
                 'ErrorMessage'
             )->item(0);
             if ($item0) {
@@ -277,88 +279,91 @@ class Sell extends AbstractResponse
         }
     }
 
-    private function initSelf(\DOMDocument $responseDoc): void
+    /**
+     * @throws Exception
+     */
+    private function initSelf(DOMDocument $responseDoc): void
     {
         $this->approvalCode             = $this->firstElementByTagNSString(
             $responseDoc,
-            OrderService::NAMESPACE_N3,
+            TeleCashConstants::NAMESPACE_IPGAPI,
             'ApprovalCode'
         );
         $this->avsResponse              = $this->firstElementByTagNSString(
             $responseDoc,
-            OrderService::NAMESPACE_N3,
+            TeleCashConstants::NAMESPACE_IPGAPI,
             'AVSResponse'
         );
         $this->brand                    = $this->firstElementByTagNSString(
             $responseDoc,
-            OrderService::NAMESPACE_N3,
+            TeleCashConstants::NAMESPACE_IPGAPI,
             'Brand',
             true,
             ''
         );
         $this->orderId                  = $this->firstElementByTagNSString(
             $responseDoc,
-            OrderService::NAMESPACE_N3,
+            TeleCashConstants::NAMESPACE_IPGAPI,
             'OrderId'
         );
         $this->paymentType              = $this->firstElementByTagNSString(
             $responseDoc,
-            OrderService::NAMESPACE_N3,
+            TeleCashConstants::NAMESPACE_IPGAPI,
             'PaymentType'
         );
         $this->processorApprovalCode    = $this->firstElementByTagNSString(
             $responseDoc,
-            OrderService::NAMESPACE_N3,
+            TeleCashConstants::NAMESPACE_IPGAPI,
             'ProcessorApprovalCode'
         );
         $this->processorReceiptNumber   = $this->firstElementByTagNSString(
             $responseDoc,
-            OrderService::NAMESPACE_N3,
+            TeleCashConstants::NAMESPACE_IPGAPI,
             'ProcessorReceiptNumber'
         );
         $this->processorReferenceNumber = $this->firstElementByTagNSString(
             $responseDoc,
-            OrderService::NAMESPACE_N3,
+            TeleCashConstants::NAMESPACE_IPGAPI,
             'ProcessorReferenceNumber'
         );
         $this->processorResponse        = $this->firstElementByTagNSString(
             $responseDoc,
-            OrderService::NAMESPACE_N3,
+            TeleCashConstants::NAMESPACE_IPGAPI,
             'ProcessorResponseMessage'
         );
         $this->processorResponseCode    = $this->firstElementByTagNSString(
             $responseDoc,
-            OrderService::NAMESPACE_N3,
+            TeleCashConstants::NAMESPACE_IPGAPI,
             'ProcessorResponseCode'
         );
         $this->processorTraceNumber     = $this->firstElementByTagNSString(
             $responseDoc,
-            OrderService::NAMESPACE_N3,
+            TeleCashConstants::NAMESPACE_IPGAPI,
             'ProcessorTraceNumber'
         );
         $this->provider                 = $this->firstElementByTagNSString(
             $responseDoc,
-            OrderService::NAMESPACE_N3,
+            TeleCashConstants::NAMESPACE_IPGAPI,
             'CommercialServiceProvider'
         );
         $this->tDate                    = $this->firstElementByTagNSString(
             $responseDoc,
-            OrderService::NAMESPACE_N3,
+            TeleCashConstants::NAMESPACE_IPGAPI,
             'TDate'
         );
         $this->terminalId               = $this->firstElementByTagNSString(
             $responseDoc,
-            OrderService::NAMESPACE_N3,
+            TeleCashConstants::NAMESPACE_IPGAPI,
             'TerminalID'
         );
         $this->transactionTime          = $this->firstElementByTagNSString(
             $responseDoc,
-            OrderService::NAMESPACE_N3,
+            TeleCashConstants::NAMESPACE_IPGAPI,
             'TransactionTime'
         );
         $this->transactionResult        = $this->firstElementByTagNSString(
             $responseDoc,
-            OrderService::NAMESPACE_N3,
+            TeleCashConstants::NAMESPACE_IPGAPI,
             'TransactionResult'
         );
     }

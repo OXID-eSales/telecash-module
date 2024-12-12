@@ -2,6 +2,7 @@
 
 namespace OxidSolutionCatalysts\TeleCash\IPG\API\Request\Action\RecurringPayment;
 
+use DOMException;
 use OxidSolutionCatalysts\TeleCash\IPG\API\Model\Payment;
 use OxidSolutionCatalysts\TeleCash\IPG\API\Model\RecurringPaymentInformation;
 use OxidSolutionCatalysts\TeleCash\IPG\API\Request\Action;
@@ -16,10 +17,11 @@ use OxidSolutionCatalysts\TeleCash\IPG\API\Service\OrderService;
 class Modify extends Action\RecurringPayment
 {
     /**
-     * @param OrderService                $service
-     * @param string                      $orderId
-     * @param Payment                     $payment
-     * @param RecurringPaymentInformation $paymentInformation
+     * @param OrderService $service
+     * @param string $orderId
+     * @param Payment|null $payment
+     * @param RecurringPaymentInformation|null $paymentInformation
+     * @throws DOMException
      */
     public function __construct(
         OrderService $service,
@@ -34,6 +36,7 @@ class Modify extends Action\RecurringPayment
      * Modify a recurring payment
      *
      * @return ConfirmRecurring|Sell|Error
+     * @throws \Exception
      */
     public function modify(): ConfirmRecurring|Sell|Error
     {

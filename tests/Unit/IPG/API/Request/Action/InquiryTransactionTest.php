@@ -2,6 +2,7 @@
 
 namespace OxidSolutionCatalysts\TeleCash\Tests\IPG\API\Request\Action;
 
+use OxidSolutionCatalysts\TeleCash\IPG\TeleCashConstants;
 use PHPUnit\Framework\TestCase;
 use OxidSolutionCatalysts\TeleCash\IPG\API\Request\Action\InquiryTransaction;
 use OxidSolutionCatalysts\TeleCash\IPG\API\Service\OrderService;
@@ -48,7 +49,7 @@ class InquiryTransactionTest extends TestCase
         $this->assertInstanceOf(Validation::class, $result);
 
         // Verify the DOM structure
-        $elements = $this->document->getElementsByTagNameNS(OrderService::NAMESPACE_N3, 'IpgTransactionId');
+        $elements = $this->document->getElementsByTagNameNS(TeleCashConstants::NAMESPACE_IPGAPI, 'IpgTransactionId');
         $this->assertEquals(1, $elements->length);
         $this->assertEquals($storeId, $elements->item(0)->nodeValue);
     }
@@ -88,14 +89,14 @@ class InquiryTransactionTest extends TestCase
 
         // Verify the DOM structure
         $orderIdElements = $this->document->getElementsByTagNameNS(
-            OrderService::NAMESPACE_N1,
+            TeleCashConstants::NAMESPACE_V1,
             'OrderId'
         );
         $this->assertEquals(1, $orderIdElements->length);
         $this->assertEquals($orderId, $orderIdElements->item(0)->nodeValue);
 
         $tDateElements = $this->document->getElementsByTagNameNS(
-            OrderService::NAMESPACE_N1,
+            TeleCashConstants::NAMESPACE_V1,
             'TDate'
         );
         $this->assertEquals(1, $tDateElements->length);
@@ -148,13 +149,13 @@ class InquiryTransactionTest extends TestCase
     {
         // copied from documentation
         return '<SOAP-ENV:Envelope 
-            xmlns:SOAP-ENV="' . OrderService::NAMESPACE_SOAP . '">
+            xmlns:SOAP-ENV="' . TeleCashConstants::NAMESPACE_SOAP . '">
 <SOAP-ENV:Header/>
 <SOAP-ENV:Body>
     <ns3:IPGApiActionResponse
-            xmlns:ns1="' . OrderService::NAMESPACE_N1 . '"
-            xmlns:ns2="' . OrderService::NAMESPACE_N2 . '"
-            xmlns:ns3="' . OrderService::NAMESPACE_N3 . '">
+            xmlns:ns1="' . TeleCashConstants::NAMESPACE_V1 . '"
+            xmlns:ns2="' . TeleCashConstants::NAMESPACE_A1 . '"
+            xmlns:ns3="' . TeleCashConstants::NAMESPACE_IPGAPI . '">
         <ns3:successfully>true</ns3:successfully>
         <ns3:OrderId>ORDER123</ns3:OrderId>
         <ns1:Billing/>
@@ -209,9 +210,9 @@ class InquiryTransactionTest extends TestCase
     private function createUnsuccessfulResponseXML(): string
     {
         return '<SOAP-ENV:Envelope 
-            xmlns:SOAP-ENV="' . OrderService::NAMESPACE_SOAP . '"
-            xmlns:ns2="' . OrderService::NAMESPACE_N2 . '"
-            xmlns:ns3="' . OrderService::NAMESPACE_N3 . '">            
+            xmlns:SOAP-ENV="' . TeleCashConstants::NAMESPACE_SOAP . '"
+            xmlns:ns2="' . TeleCashConstants::NAMESPACE_A1 . '"
+            xmlns:ns3="' . TeleCashConstants::NAMESPACE_IPGAPI . '">            
             <SOAP-ENV:Body>
                 <ns3:IPGApiActionResponse>
                     <ns3:successfully>false</ns3:successfully>
@@ -226,9 +227,9 @@ class InquiryTransactionTest extends TestCase
     private function createFailedResponseXML()
     {
         return '<SOAP-ENV:Envelope 
-            xmlns:SOAP-ENV="' . OrderService::NAMESPACE_SOAP . '"
-            xmlns:ns2="' . OrderService::NAMESPACE_N2 . '"
-            xmlns:ns3="' . OrderService::NAMESPACE_N3 . '">            
+            xmlns:SOAP-ENV="' . TeleCashConstants::NAMESPACE_SOAP . '"
+            xmlns:ns2="' . TeleCashConstants::NAMESPACE_A1 . '"
+            xmlns:ns3="' . TeleCashConstants::NAMESPACE_IPGAPI . '">            
             <SOAP-ENV:Body>
                 <ns3:IPGApiActionResponse>
                     <ns3:successfully>false</ns3:successfully>

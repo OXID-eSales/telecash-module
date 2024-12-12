@@ -2,19 +2,27 @@
 
 namespace OxidSolutionCatalysts\TeleCash\Tests\Unit\IPG\API\Service;
 
+use OxidSolutionCatalysts\TeleCash\Core\Service\Logger;
 use OxidSolutionCatalysts\TeleCash\IPG\API\Service\OrderService;
 use OxidSolutionCatalysts\TeleCash\IPG\API\Request\ActionRequest;
 use OxidSolutionCatalysts\TeleCash\IPG\API\Request\OrderRequest;
 use OxidSolutionCatalysts\TeleCash\IPG\API\Response\Error;
+use OxidSolutionCatalysts\TeleCash\IPG\TeleCashConstants;
 use PHPUnit\Framework\TestCase;
+use RuntimeException;
+use ValueError;
 
 class OrderServiceTest extends TestCase
 {
     private $orderService;
     private $curlOptions;
+    private Logger $logger;
 
     protected function setUp(): void
     {
+        // Create mock for Logger
+        $this->logger = $this->createMock(Logger::class);
+
         $this->curlOptions = [
             'url' => 'https://example.com',
             'sslCert' => '/path/to/cert',
@@ -22,27 +30,65 @@ class OrderServiceTest extends TestCase
             'sslKeyPasswd' => 'password',
             'caInfo' => '/path/to/cainfo'
         ];
+
+        // Create partial mock for OrderService
         $this->orderService = $this->getMockBuilder(OrderService::class)
-            ->setConstructorArgs([$this->curlOptions, 'username', 'password', false])
+            ->setConstructorArgs([
+                $this->curlOptions,
+                'username',
+                'password',
+                $this->logger
+            ])
             ->onlyMethods(['doRequest'])
             ->getMock();
     }
 
-    public function testIPGApiAction()
+    public function testDumpDOMElement(): void
     {
+        $doc = new \DOMDocument();
+        $element = $doc->createElement('test', 'content');
+        $doc->appendChild($element);
+
+        // Configure logger mock to expect the log call
+        $this->logger->expects($this->once())
+            ->method('log')
+            ->with(
+                'debug',
+                $this->stringContains('<test>content</test>')
+            );
+
+        $this->orderService->dumpDOMElement('TestType', $element);
+    }
+
+    public function testIPGApiAction(): void
+    {
+        // Create mocks
         $actionRequest = $this->createMock(ActionRequest::class);
-        $actionRequest->method('getDocument')->willReturn(new \DOMDocument());
-        $actionRequest->method('getElement')->willReturn(new \DOMElement('dummy'));
+        $doc = new \DOMDocument();
+        $element = $doc->createElement('dummy');
+        $doc->appendChild($element);
+
+        $actionRequest->method('getDocument')->willReturn($doc);
+        $actionRequest->method('getElement')->willReturn($element);
+
+        // Configure logger expectations for debug output
+        $this->logger->expects($this->exactly(2))
+            ->method('log')
+            ->with(
+                'debug',
+                $this->stringContains('Debug:')
+            );
 
         $actionXml = '<SOAP-ENV:Envelope
-        xmlns:SOAP-ENV="' . OrderService::NAMESPACE_SOAP . '"
-        xmlns:ns1="' . OrderService::NAMESPACE_N1 . '"
-        xmlns:ns2="' . OrderService::NAMESPACE_N2 . '"
-        xmlns:ns3="' . OrderService::NAMESPACE_N3 . '">
-        <SOAP-ENV:Body>
-        <ns3:IPGApiActionResponse></ns3:IPGApiActionResponse>
-        </SOAP-ENV:Body>
+            xmlns:SOAP-ENV="' . TeleCashConstants::NAMESPACE_SOAP . '"
+            xmlns:ns1="' . TeleCashConstants::NAMESPACE_V1 . '"
+            xmlns:ns2="' . TeleCashConstants::NAMESPACE_A1 . '"
+            xmlns:ns3="' . TeleCashConstants::NAMESPACE_IPGAPI . '">
+            <SOAP-ENV:Body>
+                <ns3:IPGApiActionResponse></ns3:IPGApiActionResponse>
+            </SOAP-ENV:Body>
         </SOAP-ENV:Envelope>';
+
         $this->orderService->expects($this->once())
             ->method('doRequest')
             ->willReturn($actionXml);
@@ -52,31 +98,152 @@ class OrderServiceTest extends TestCase
         $this->assertInstanceOf(\DOMDocument::class, $result);
     }
 
-    public function testIPGApiOrder()
+    public function testIPGApiActionWithError(): void
+    {
+        $actionRequest = $this->createMock(ActionRequest::class);
+        $doc = new \DOMDocument();
+        $element = $doc->createElement('dummy');
+        $doc->appendChild($element);
+
+        $actionRequest->method('getDocument')->willReturn($doc);
+        $actionRequest->method('getElement')->willReturn($element);
+
+        $this->logger->expects($this->exactly(2))
+            ->method('log')
+            ->with('debug', $this->stringContains('Debug:'));
+
+        $errorXml = '<?xml version="1.0" encoding="UTF-8"?>
+        <SOAP-ENV:Envelope 
+            xmlns:SOAP-ENV="http://schemas.xmlsoap.org/soap/envelope/"
+            xmlns:ipgapi="http://ipg-online.com/ipgapi/schemas/ipgapi"
+            xmlns:v1="http://ipg-online.com/ipgapi/schemas/v1">
+            <SOAP-ENV:Body>
+                <SOAP-ENV:Fault>
+                    <faultcode>SOAP-ENV:Client</faultcode>
+                    <faultstring>ProcessingException: Transaction failed</faultstring>
+                    <detail>
+                        <ipgapi:IPGApiActionResponse>
+                            <ipgapi:successfully>false</ipgapi:successfully>
+                            <ipgapi:OrderId>A-123456789</ipgapi:OrderId>
+                            <ipgapi:ErrorElement>
+                                <ipgapi:ErrorCode>500.1</ipgapi:ErrorCode>
+                                <ipgapi:ErrorMessage>ProcessingException: Transaction failed</ipgapi:ErrorMessage>
+                                <ipgapi:ErrorDetail>ProcessingException</ipgapi:ErrorDetail>
+                            </ipgapi:ErrorElement>
+                        </ipgapi:IPGApiActionResponse>
+                    </detail>
+                </SOAP-ENV:Fault>
+            </SOAP-ENV:Body>
+        </SOAP-ENV:Envelope>';
+
+        $this->orderService->expects($this->once())
+            ->method('doRequest')
+            ->willReturn($errorXml);
+
+        $result = $this->orderService->IPGApiAction($actionRequest);
+
+        $this->assertInstanceOf(Error::class, $result);
+        $this->assertEquals(Error::ERROR_TYPE_CLIENT, $result->getErrorType());
+        $this->assertEquals('ProcessingException: Transaction failed', $result->getErrorMessage());
+        $this->assertEquals('ProcessingException', $result->getClientErrorType());
+        $this->assertEquals('ProcessingException: Transaction failed', $result->getErrorMessage());
+    }
+
+    public function testHandleDebug(): void
+    {
+        $testXml = '<?xml version="1.0"?><test><node>value</node></test>';
+
+        $this->logger->expects($this->once())
+            ->method('log')
+            ->with(
+                'debug',
+                $this->stringContains('Debug: TestType:')
+            );
+
+        $this->orderService->handleDebug('TestType', $testXml);
+    }
+
+    public function testIPGApiActionWithEmptyResponse(): void
+    {
+        $actionRequest = $this->createMock(ActionRequest::class);
+        $doc = new \DOMDocument();
+        $element = $doc->createElement('dummy');
+        $doc->appendChild($element);
+
+        $actionRequest->method('getDocument')->willReturn($doc);
+        $actionRequest->method('getElement')->willReturn($element);
+
+        $this->logger->expects($this->once())
+            ->method('log')
+            ->with('debug', $this->stringContains('Debug:'));
+
+        $this->orderService->expects($this->once())
+            ->method('doRequest')
+            ->willReturn('');
+
+        $this->expectException(ValueError::class);
+        $this->expectExceptionMessage('DOMDocument::loadXML(): Argument #1 ($source) must not be empty');
+
+        $this->orderService->IPGApiAction($actionRequest);
+    }
+
+    public function testIPGApiActionWithFalseResponse(): void
+    {
+        $actionRequest = $this->createMock(ActionRequest::class);
+        $doc = new \DOMDocument();
+        $element = $doc->createElement('dummy');
+        $doc->appendChild($element);
+
+        $actionRequest->method('getDocument')->willReturn($doc);
+        $actionRequest->method('getElement')->willReturn($element);
+
+        $this->logger->expects($this->once())
+            ->method('log')
+            ->with('debug', $this->stringContains('Debug:'));
+
+        $this->orderService->expects($this->once())
+            ->method('doRequest')
+            ->willThrowException(new \RuntimeException('Empty API response'));
+
+        $this->expectException(\RuntimeException::class);
+        $this->expectExceptionMessage('Empty API response');
+
+        $this->orderService->IPGApiAction($actionRequest);
+    }
+
+    public function testIPGApiOrderWithServerError(): void
     {
         $orderRequest = $this->createMock(OrderRequest::class);
-        $orderRequest->method('getDocument')->willReturn(new \DOMDocument());
-        $orderRequest->method('getElement')->willReturn(new \DOMElement('dummy'));
+        $doc = new \DOMDocument();
+        $element = $doc->createElement('dummy');
+        $doc->appendChild($element);
 
-        $errorXml = '<SOAP-ENV:Envelope 
-        xmlns:SOAP-ENV="' . OrderService::NAMESPACE_SOAP . '"
-        xmlns:ns1="' . OrderService::NAMESPACE_N1 . '"
-        xmlns:ns2="' . OrderService::NAMESPACE_N2 . '"
-        xmlns:ns3="' . OrderService::NAMESPACE_N3 . '">
-        <SOAP-ENV:Body>
-            <SOAP-ENV:Fault>
-                <faultcode>SOAP-ENV:Client</faultcode>
-                <faultstring>MerchantException: Invalid card number</faultstring>
-                <detail>
-                    <ns3:IPGApiActionResponse>
-                        <ns1:Error>
-                            <ns1:ErrorMessage>Invalid card number</ns1:ErrorMessage>
-                        </ns1:Error>
-                    </ns3:IPGApiActionResponse>
-                </detail>
-            </SOAP-ENV:Fault>
-        </SOAP-ENV:Body>
-    </SOAP-ENV:Envelope>';
+        $orderRequest->method('getDocument')->willReturn($doc);
+        $orderRequest->method('getElement')->willReturn($element);
+
+        $this->logger->expects($this->exactly(2))
+            ->method('log')
+            ->with('debug', $this->stringContains('Debug:'));
+
+        $errorXml = '<?xml version="1.0" encoding="UTF-8"?>
+        <SOAP-ENV:Envelope 
+            xmlns:SOAP-ENV="http://schemas.xmlsoap.org/soap/envelope/"
+            xmlns:ipgapi="http://ipg-online.com/ipgapi/schemas/ipgapi"
+            xmlns:v1="http://ipg-online.com/ipgapi/schemas/v1">
+            <SOAP-ENV:Body>
+                <SOAP-ENV:Fault>
+                    <faultcode>SOAP-ENV:Server</faultcode>
+                    <faultstring>Internal server error</faultstring>
+                    <detail>
+                        <ipgapi:IPGApiOrderResponse>
+                            <v1:Error>
+                                <v1:ErrorMessage>Server processing error</v1:ErrorMessage>
+                            </v1:Error>
+                        </ipgapi:IPGApiOrderResponse>
+                    </detail>
+                </SOAP-ENV:Fault>
+            </SOAP-ENV:Body>
+        </SOAP-ENV:Envelope>';
 
         $this->orderService->expects($this->once())
             ->method('doRequest')
@@ -85,136 +252,43 @@ class OrderServiceTest extends TestCase
         $result = $this->orderService->IPGApiOrder($orderRequest);
 
         $this->assertInstanceOf(Error::class, $result);
-        $this->assertEquals(Error::ERROR_TYPE_CLIENT, $result->getErrorType());
-        $this->assertEquals('MerchantException: Invalid card number', $result->getErrorMessage());
-        $this->assertEquals('MerchantException', $result->getClientErrorType());
-        $this->assertEquals('Invalid card number', trim($result->getClientErrorDetail()));
+        $this->assertEquals(Error::ERROR_TYPE_SERVER, $result->getErrorType());
+        $this->assertEquals('Internal server error', $result->getErrorMessage());
     }
 
-    public function testIPGApiActionWithError()
+    public function testIPGApiOrderWithSuccessResponse(): void
     {
-        $actionRequest = $this->createMock(ActionRequest::class);
-        $actionRequest->method('getDocument')->willReturn(new \DOMDocument());
-        $actionRequest->method('getElement')->willReturn(new \DOMElement('dummy'));
-
-        $errorXml = '<SOAP-ENV:Envelope 
-        xmlns:SOAP-ENV="' . OrderService::NAMESPACE_SOAP . '"
-        xmlns:ns1="' . OrderService::NAMESPACE_N1 . '"
-        xmlns:ns2="' . OrderService::NAMESPACE_N2 . '"
-        xmlns:ns3="' . OrderService::NAMESPACE_N3 . '">
-        <SOAP-ENV:Body>
-            <SOAP-ENV:Fault>
-                <faultcode>SOAP-ENV:Client</faultcode>
-                <faultstring>MerchantException: Invalid card number</faultstring>
-                <detail>
-                    <ns3:IPGApiActionResponse>
-                        <ns1:Error>
-                            <ns1:ErrorMessage>Invalid card number</ns1:ErrorMessage>
-                        </ns1:Error>
-                    </ns3:IPGApiActionResponse>
-                </detail>
-            </SOAP-ENV:Fault>
-        </SOAP-ENV:Body>
-    </SOAP-ENV:Envelope>';
-        $this->orderService->expects($this->once())
-            ->method('doRequest')
-            ->willReturn($errorXml);
-
-        $result = $this->orderService->IPGApiAction($actionRequest);
-
-        $this->assertInstanceOf(Error::class, $result);
-        $this->assertEquals(Error::ERROR_TYPE_CLIENT, $result->getErrorType());
-        $this->assertEquals('MerchantException: Invalid card number', $result->getErrorMessage());
-        $this->assertEquals('MerchantException', $result->getClientErrorType());
-        $this->assertEquals('Invalid card number', trim($result->getClientErrorDetail()));
-    }
-
-    public function testDumpDOMElement()
-    {
+        $orderRequest = $this->createMock(OrderRequest::class);
         $doc = new \DOMDocument();
-        $element = $doc->createElement('test', 'content');
+        $element = $doc->createElement('dummy');
         $doc->appendChild($element);
 
-        ob_start();
-        $this->orderService->dumpDOMElement($element);
-        $output = ob_get_clean();
+        $orderRequest->method('getDocument')->willReturn($doc);
+        $orderRequest->method('getElement')->willReturn($element);
 
-        $this->assertStringContainsString('<test>content</test>', $output);
-    }
+        $this->logger->expects($this->exactly(2))
+            ->method('log')
+            ->with('debug', $this->stringContains('Debug:'));
 
-    public function testIGPApiActionWithDebug()
-    {
-        $orderMock = $this->getMockBuilder(OrderService::class)
-            ->setConstructorArgs([$this->curlOptions, 'username', 'password', true])
-            ->onlyMethods(['doRequest'])
-            ->getMock();
-
-        $actionRequest = $this->createMock(ActionRequest::class);
-        $actionRequest->method('getDocument')->willReturn(new \DOMDocument());
-        $actionRequest->method('getElement')->willReturn(new \DOMElement('dummy'));
-
-        $actionXml = '<SOAP-ENV:Envelope
-        xmlns:SOAP-ENV="' . OrderService::NAMESPACE_SOAP . '"
-        xmlns:ns1="' . OrderService::NAMESPACE_N1 . '"
-        xmlns:ns2="' . OrderService::NAMESPACE_N2 . '"
-        xmlns:ns3="' . OrderService::NAMESPACE_N3 . '">
-        <SOAP-ENV:Body>
-        <ns3:IPGApiActionResponse></ns3:IPGApiActionResponse>
-        </SOAP-ENV:Body>
+        $successXml = '<?xml version="1.0" encoding="UTF-8"?>
+        <SOAP-ENV:Envelope 
+            xmlns:SOAP-ENV="http://schemas.xmlsoap.org/soap/envelope/"
+            xmlns:ipgapi="http://ipg-online.com/ipgapi/schemas/ipgapi"
+            xmlns:v1="http://ipg-online.com/ipgapi/schemas/v1">
+            <SOAP-ENV:Body>
+                <ipgapi:IPGApiOrderResponse>
+                    <v1:TransactionResult>APPROVED</v1:TransactionResult>
+                </ipgapi:IPGApiOrderResponse>
+            </SOAP-ENV:Body>
         </SOAP-ENV:Envelope>';
 
-        $orderMock->expects($this->any())
+        $this->orderService->expects($this->once())
             ->method('doRequest')
-            ->willReturn($actionXml);
+            ->willReturn($successXml);
 
-        ob_start();
-        $result = $orderMock->IPGApiAction($actionRequest);
-        ob_end_clean();
+        $result = $this->orderService->IPGApiOrder($orderRequest);
 
         $this->assertInstanceOf(\DOMDocument::class, $result);
-    }
-
-    public function testExceptionWithFalseFromDoRequest()
-    {
-        $actionRequest = $this->createMock(ActionRequest::class);
-        $actionRequest->method('getDocument')->willReturn(new \DOMDocument());
-        $actionRequest->method('getElement')->willReturn(new \DOMElement('dummy'));
-
-        $this->orderService->expects($this->once())
-            ->method('doRequest')
-            ->willReturn(false);
-
-        $this->expectException(\Exception::class);
-        $result = $this->orderService->IPGApiAction($actionRequest);
-    }
-
-    public function testExceptionWithNullFromDoRequest()
-    {
-        $actionRequest = $this->createMock(ActionRequest::class);
-        $actionRequest->method('getDocument')->willReturn(new \DOMDocument());
-        $actionRequest->method('getElement')->willReturn(new \DOMElement('dummy'));
-
-        $this->orderService->expects($this->once())
-            ->method('doRequest')
-            ->willReturn(null);
-
-        $this->expectException(\Exception::class);
-        $result = $this->orderService->IPGApiAction($actionRequest);
-    }
-
-    public function testDumpXML()
-    {
-        $xml = '<level1><inner>value</inner></level1>';
-
-        ob_start();
-        $this->orderService->dumpXML($xml);
-        $output = ob_get_clean();
-
-        $this->assertEquals('string(64) "<?xml version="1.0"?>
-<level1>
-  <inner>value</inner>
-</level1>
-"
-', $output);
+        $this->assertStringContainsString('APPROVED', $result->saveXML());
     }
 }

@@ -2,6 +2,8 @@
 
 namespace OxidSolutionCatalysts\TeleCash\IPG\API\Request\Action\RecurringPayment;
 
+use DOMException;
+use Exception;
 use OxidSolutionCatalysts\TeleCash\IPG\API\Request\Action;
 use OxidSolutionCatalysts\TeleCash\IPG\API\Response\Action\ConfirmRecurring;
 use OxidSolutionCatalysts\TeleCash\IPG\API\Response\Error;
@@ -15,7 +17,8 @@ class Cancel extends Action\RecurringPayment
 {
     /**
      * @param OrderService $service
-     * @param string       $orderId
+     * @param string $orderId
+     * @throws DOMException
      */
     public function __construct(
         OrderService $service,
@@ -28,6 +31,7 @@ class Cancel extends Action\RecurringPayment
      * Cancel a recurring payment
      *
      * @return ConfirmRecurring|Sell|Error
+     * @throws Exception
      */
     public function cancel(): ConfirmRecurring|Sell|Error
     {

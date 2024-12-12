@@ -2,13 +2,17 @@
 
 namespace OxidSolutionCatalysts\TeleCash\IPG\API\Model;
 
+use DOMDocument;
+use DOMException;
+use DOMNode;
+use OxidSolutionCatalysts\TeleCash\IPG\TeleCashConstants;
+
 /**
  * Class CreditCardItem
  */
 class CreditCardItem extends DataStorageItem
 {
-    /** @var CreditCardData */
-    protected $creditCardData;
+    protected CreditCardData $creditCardData;
 
     /**
      * @param CreditCardData $creditCardData
@@ -18,41 +22,48 @@ class CreditCardItem extends DataStorageItem
      */
     public function __construct(
         CreditCardData $creditCardData,
-        string|null $hostedDataId,
-        string|null $function = null,
-        string|null $declineHostedDataDuplicates = null
+        ?string $hostedDataId,
+        ?string $function = null,
+        ?string $declineHostedDataDuplicates = null
     ) {
         parent::__construct($hostedDataId, $function, $declineHostedDataDuplicates);
-
         $this->creditCardData = $creditCardData;
     }
 
     /**
-     * @param \DOMDocument $document
+     * @param DOMDocument $document
      *
-     * @return mixed
+     * @return DOMNode
+     * @throws DOMException
      */
-    public function getXML(\DOMDocument $document): mixed
+    public function getXML(DOMDocument $document): DOMNode
     {
         $xml = $document->createElement('ns2:DataStorageItem');
 
-        $ccData = $this->creditCardData->getXML($document);
-        $dataId = $document->createElement('ns2:HostedDataID');
-        $dataId->textContent = (string)$this->hostedDataId;
+        // Helper function to create elements
+        $addElement = function (string $name, ?string $value) use ($document, $xml) {
+            if ($value !== null) {
+                $element = $document->createElement('ns2:' . $name);
+                $element->textContent = $value;
+                $xml->appendChild($element);
+            }
+        };
 
-        if ($this->function != null) {
-            $function = $document->createElement('ns2:Function');
-            $function->textContent = $this->function;
-            $xml->appendChild($function);
-        }
-        if ($this->declineHostedDataDuplicates != null) {
-            $declineDuplicates = $document->createElement('ns2:DeclineHostedDataDuplicates');
-            $declineDuplicates->textContent = $this->declineHostedDataDuplicates;
-            $xml->appendChild($declineDuplicates);
+        // Add elements in correct order
+        if ($this->function !== null) {
+            $addElement('Function', $this->function);
         }
 
-        $xml->appendChild($ccData);
-        $xml->appendChild($dataId);
+        if ($this->declineHostedDataDuplicates !== null) {
+            $addElement('DeclineHostedDataDuplicates', $this->declineHostedDataDuplicates);
+        }
+
+        // Set namespace for credit card data and append it
+        $this->creditCardData->setNamespaceShort('ns2');
+        $xml->appendChild($this->creditCardData->getXML($document));
+
+        // Add HostedDataID
+        $addElement('HostedDataID', (string)$this->hostedDataId);
 
         return $xml;
     }

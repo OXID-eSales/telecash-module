@@ -2,7 +2,10 @@
 
 namespace OxidSolutionCatalysts\TeleCash\IPG\API\Request\Action\RecurringPayment;
 
+use DOMException;
 use OxidSolutionCatalysts\TeleCash\IPG\API\Service\OrderService;
+use PHPUnit\Framework\MockObject\Exception;
+use PHPUnit\Framework\TestCase;
 
 /**
  * Test class for RecurringPayment Cancel request action
@@ -10,7 +13,7 @@ use OxidSolutionCatalysts\TeleCash\IPG\API\Service\OrderService;
  * Verifies the XML generation for canceling recurring payments in the TeleCash system.
  * This test ensures proper formatting of the cancellation request XML structure.
  */
-class CancelTest extends \PHPUnit\Framework\TestCase
+class CancelTest extends TestCase
 {
     /**
      * Tests the XML generation for the Cancel request
@@ -22,6 +25,8 @@ class CancelTest extends \PHPUnit\Framework\TestCase
      * 4. The function type is set to 'cancel'
      *
      * @param string $orderId The order ID to be canceled
+     * @throws DOMException
+     * @throws Exception
      * @dataProvider dataProvider
      */
     public function testXMLGeneration(string $orderId): void

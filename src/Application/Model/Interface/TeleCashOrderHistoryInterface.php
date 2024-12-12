@@ -40,8 +40,14 @@ interface TeleCashOrderHistoryInterface
     /** get the Currency */
     public function getCurrency(): string;
 
-    /** get the EndpointTransactionId */
-    public function getChargeTotal(): float;
+    /** get the Currency in OXID-Style */
+    public function getOxidCurrency(): string;
+
+    /** get Charge Total */
+    public function getChargeTotal(): string;
+
+    /** get Charge Total in OXID Style */
+    public function getOxidChargeTotal(): float;
 
     /** get the Status translated in transaction-language */
     public function getStatus(): string;

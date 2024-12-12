@@ -2,21 +2,25 @@
 
 namespace OxidSolutionCatalysts\TeleCash\IPG\API\Request\Transaction;
 
+use DOMException;
+use Exception;
 use OxidSolutionCatalysts\TeleCash\IPG\API\Model\CreditCardData;
 use OxidSolutionCatalysts\TeleCash\IPG\API\Model\Payment;
 use OxidSolutionCatalysts\TeleCash\IPG\API\Model\TransactionDetails;
 use OxidSolutionCatalysts\TeleCash\IPG\API\Request\Transaction;
 use OxidSolutionCatalysts\TeleCash\IPG\API\Response\Error;
-use OxidSolutionCatalysts\TeleCash\IPG\API\Response\Order\Sell as OrderSell;
+use OxidSolutionCatalysts\TeleCash\IPG\API\Response\Order\Sell;
 use OxidSolutionCatalysts\TeleCash\IPG\API\Service\OrderService;
+use OxidSolutionCatalysts\TeleCash\IPG\TeleCashConstants;
 
 class SellCreditCard extends Transaction
 {
     /**
-     * @param OrderService            $service
-     * @param CreditCardData          $ccData
-     * @param Payment                 $payment
+     * @param OrderService $service
+     * @param CreditCardData $ccData
+     * @param Payment $payment
      * @param TransactionDetails|null $transactionDetails
+     * @throws DOMException
      */
     public function __construct(
         OrderService $service,
@@ -26,8 +30,8 @@ class SellCreditCard extends Transaction
     ) {
         parent::__construct($service);
 
-        $ccTxType = $this->document->createElement('ns1:CreditCardTxType');
-        $ccType   = $this->document->createElement('ns1:Type');
+        $ccTxType = $this->document->createElement(TeleCashConstants::PREF_V1 . 'CreditCardTxType');
+        $ccType   = $this->document->createElement(TeleCashConstants::PREF_V1 . 'Type');
         $ccType->nodeValue = 'sale';
         $ccTxType->appendChild($ccType);
 
@@ -46,13 +50,13 @@ class SellCreditCard extends Transaction
     }
 
     /**
-     * @return OrderSell|Error
-     * @throws \Exception
+     * @return Sell|Error
+     * @throws Exception
      */
-    public function sell(): OrderSell|Error
+    public function sell(): Sell|Error
     {
         $response = $this->service->IPGApiOrder($this);
 
-        return $response instanceof Error ? $response : new OrderSell($response);
+        return $response instanceof Error ? $response : new Sell($response);
     }
 }

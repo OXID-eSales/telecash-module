@@ -4,6 +4,7 @@ namespace OxidSolutionCatalysts\TeleCash\Tests\Unit\IPG\API\Response;
 
 use OxidSolutionCatalysts\TeleCash\IPG\API\Response\Error;
 use OxidSolutionCatalysts\TeleCash\IPG\API\Service\OrderService;
+use OxidSolutionCatalysts\TeleCash\IPG\TeleCashConstants;
 use PHPUnit\Framework\TestCase;
 
 class ErrorTest extends TestCase
@@ -11,10 +12,10 @@ class ErrorTest extends TestCase
     public function testCreateFromSoapFaultWithClientError()
     {
         $xml = '<SOAP-ENV:Envelope 
-            xmlns:SOAP-ENV="' . OrderService::NAMESPACE_SOAP . '"
-            xmlns:ns1="' . OrderService::NAMESPACE_N1 . '"
-            xmlns:ns2="' . OrderService::NAMESPACE_N2 . '"
-            xmlns:ns3="' . OrderService::NAMESPACE_N3 . '">
+            xmlns:SOAP-ENV="' . TeleCashConstants::NAMESPACE_SOAP . '"
+            xmlns:ns1="' . TeleCashConstants::NAMESPACE_V1 . '"
+            xmlns:ns2="' . TeleCashConstants::NAMESPACE_A1 . '"
+            xmlns:ns3="' . TeleCashConstants::NAMESPACE_IPGAPI . '">
             <SOAP-ENV:Body>
                 <SOAP-ENV:Fault>
                     <faultcode>SOAP-ENV:Client</faultcode>
@@ -45,7 +46,7 @@ class ErrorTest extends TestCase
     public function testCreateFromSoapFaultWithServerError()
     {
         $xml = '<SOAP-ENV:Envelope 
-            xmlns:SOAP-ENV="' . OrderService::NAMESPACE_SOAP . '">
+            xmlns:SOAP-ENV="' . TeleCashConstants::NAMESPACE_SOAP . '">
             <SOAP-ENV:Body>
                 <SOAP-ENV:Fault>
                     <faultcode>SOAP-ENV:Server</faultcode>
@@ -67,10 +68,10 @@ class ErrorTest extends TestCase
     public function testCreateFromSoapFaultWithProcessingError()
     {
         $xml = '<SOAP-ENV:Envelope 
-            xmlns:SOAP-ENV="' . OrderService::NAMESPACE_SOAP . '"
-            xmlns:ns1="' . OrderService::NAMESPACE_N1 . '"
-            xmlns:ns2="' . OrderService::NAMESPACE_N2 . '"
-            xmlns:ns3="' . OrderService::NAMESPACE_N3 . '">
+            xmlns:SOAP-ENV="' . TeleCashConstants::NAMESPACE_SOAP . '"
+            xmlns:ns1="' . TeleCashConstants::NAMESPACE_V1 . '"
+            xmlns:ns2="' . TeleCashConstants::NAMESPACE_A1 . '"
+            xmlns:ns3="' . TeleCashConstants::NAMESPACE_IPGAPI . '">
             <SOAP-ENV:Body>
                 <SOAP-ENV:Fault>
                     <faultcode>SOAP-ENV:Client</faultcode>
@@ -99,9 +100,9 @@ class ErrorTest extends TestCase
     public function testCreateFromSoapFaultWithNoError()
     {
         $xml = '<SOAP-ENV:Envelope 
-            xmlns:SOAP-ENV="' . OrderService::NAMESPACE_SOAP . '">
+            xmlns:SOAP-ENV="' . TeleCashConstants::NAMESPACE_SOAP . '">
             <SOAP-ENV:Body>
-                <ns3:IPGApiActionResponse xmlns:ns3="' . OrderService::NAMESPACE_N3 . '">
+                <ns3:IPGApiActionResponse xmlns:ns3="' . TeleCashConstants::NAMESPACE_IPGAPI . '">
                     <ns3:successfully>true</ns3:successfully>
                 </ns3:IPGApiActionResponse>
             </SOAP-ENV:Body>
@@ -118,10 +119,10 @@ class ErrorTest extends TestCase
     public function testToString()
     {
         $xml = '<SOAP-ENV:Envelope 
-            xmlns:SOAP-ENV="' . OrderService::NAMESPACE_SOAP . '"
-            xmlns:ns1="' . OrderService::NAMESPACE_N1 . '"
-            xmlns:ns2="' . OrderService::NAMESPACE_N2 . '"
-            xmlns:ns3="' . OrderService::NAMESPACE_N3 . '">
+            xmlns:SOAP-ENV="' . TeleCashConstants::NAMESPACE_SOAP . '"
+            xmlns:ns1="' . TeleCashConstants::NAMESPACE_V1 . '"
+            xmlns:ns2="' . TeleCashConstants::NAMESPACE_A1 . '"
+            xmlns:ns3="' . TeleCashConstants::NAMESPACE_IPGAPI . '">
             <SOAP-ENV:Body>
                 <SOAP-ENV:Fault>
                     <faultcode>SOAP-ENV:Client</faultcode>
@@ -151,10 +152,10 @@ class ErrorTest extends TestCase
     public function testDefaultCase()
     {
         $xml = '<SOAP-ENV:Envelope 
-            xmlns:SOAP-ENV="' . OrderService::NAMESPACE_SOAP . '"
-            xmlns:ns1="' . OrderService::NAMESPACE_N1 . '"
-            xmlns:ns2="' . OrderService::NAMESPACE_N2 . '"
-            xmlns:ns3="' . OrderService::NAMESPACE_N3 . '">
+            xmlns:SOAP-ENV="' . TeleCashConstants::NAMESPACE_SOAP . '"
+            xmlns:ns1="' . TeleCashConstants::NAMESPACE_V1 . '"
+            xmlns:ns2="' . TeleCashConstants::NAMESPACE_A1 . '"
+            xmlns:ns3="' . TeleCashConstants::NAMESPACE_IPGAPI . '">
             <SOAP-ENV:Body>
                 <SOAP-ENV:Fault>
                     <faultcode>SOAP-ENV:Client</faultcode>

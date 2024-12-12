@@ -25,8 +25,20 @@ services:
     class: OxidSolutionCatalysts\TeleCash\Core\Service\TranslateService
     public: true
 
+  OxidSolutionCatalysts\TeleCash\Core\Service\TeleCashAfterProcessServiceInterface:
+    class: OxidSolutionCatalysts\TeleCash\Core\Service\TeleCashAfterProcessService
+    public: true
+
+  OxidSolutionCatalysts\TeleCash\Core\Service\TeleCashAPIServiceInterface:
+    class: OxidSolutionCatalysts\TeleCash\Core\Service\TeleCashAPIService
+    public: true
+
   OxidSolutionCatalysts\TeleCash\Core\Service\TeleCashPaymentValidatorServiceInterface:
     class: OxidSolutionCatalysts\TeleCash\Core\Service\TeleCashPaymentValidatorService
+    public: true
+
+  OxidSolutionCatalysts\TeleCash\Core\Service\ErrorDisplayServiceInterface:
+    class: OxidSolutionCatalysts\TeleCash\Core\Service\ErrorDisplayService
     public: true
 
   OxidSolutionCatalysts\TeleCash\Logger:

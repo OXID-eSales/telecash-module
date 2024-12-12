@@ -2,8 +2,10 @@
 
 namespace OxidSolutionCatalysts\TeleCash\IPG;
 
+use OxidSolutionCatalysts\TeleCash\Core\Service\Logger;
 use OxidSolutionCatalysts\TeleCash\IPG\API\Model\BillingData;
 use OxidSolutionCatalysts\TeleCash\IPG\API\Service\OrderService;
+use Psr\Log\LoggerInterface;
 
 class TeleCashBase
 {
@@ -41,7 +43,8 @@ class TeleCashBase
         string $clientCert,
         string $clientKey,
         string $clientKeyPassPhrase,
-        string $serverCert
+        string $serverCert,
+        private readonly Logger $logger
     ) {
         $this->serviceUrl          = $serviceUrl;
         $this->apiUser             = $apiUser;
@@ -51,17 +54,6 @@ class TeleCashBase
         $this->clientKeyPassPhrase = $clientKeyPassPhrase;
         $this->serverCert          = $serverCert;
     }
-
-    /**
-     * Set debug mode
-     *
-     * @param bool $debug
-     */
-    public function setDebugMode(bool $debug): void
-    {
-        $this->debug = $debug;
-    }
-
 
     /**
      * Set the billing data
@@ -96,11 +88,13 @@ class TeleCashBase
                 'sslKeyPasswd' => $this->clientKeyPassPhrase,
                 'caInfo'       => $this->serverCert
             ];
+
+
             $this->myService = new OrderService(
                 $curlOptions,
                 $this->apiUser,
                 $this->apiPass,
-                $this->debug
+                $this->logger
             );
         }
 

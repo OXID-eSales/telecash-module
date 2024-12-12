@@ -2,18 +2,23 @@
 
 namespace OxidSolutionCatalysts\TeleCash\IPG\API\Request\Action;
 
+use DOMException;
 use OxidSolutionCatalysts\TeleCash\IPG\API\Service\OrderService;
+use PHPUnit\Framework\MockObject\Exception;
+use PHPUnit\Framework\TestCase;
 
-class TriggerEmailNotificationTest extends \PHPUnit\Framework\TestCase
+class TriggerEmailNotificationTest extends TestCase
 {
     /**
-     * @param string|null $orderId
-     * @param string|null $tDate
+     * @param string $orderId
+     * @param string $tDate
      * @param string|null $email
      *
+     * @throws DOMException
+     * @throws Exception
      * @dataProvider dataProvider
      */
-    public function testXMLDataCreation(string $orderId, string $tDate, string|null $email = null)
+    public function testXMLDataCreation(string $orderId, string $tDate, string|null $email = null): void
     {
 
         $orderService = $this->createMock(OrderService::class);

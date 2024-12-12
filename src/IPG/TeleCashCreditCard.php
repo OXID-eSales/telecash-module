@@ -2,9 +2,14 @@
 
 namespace OxidSolutionCatalysts\TeleCash\IPG;
 
+use DOMException;
+use Exception;
+use OxidSolutionCatalysts\TeleCash\Core\Service\Logger;
 use OxidSolutionCatalysts\TeleCash\IPG\API\Model;
 use OxidSolutionCatalysts\TeleCash\IPG\API\Request;
 use OxidSolutionCatalysts\TeleCash\IPG\API\Response;
+use OxidSolutionCatalysts\TeleCash\IPG\API\Response\Action\Validation;
+use OxidSolutionCatalysts\TeleCash\IPG\API\Response\Error;
 use OxidSolutionCatalysts\TeleCash\IPG\API\Service\OrderService;
 
 /**
@@ -25,6 +30,7 @@ class TeleCashCreditCard extends TeleCashBase
      * @param string $clientKey
      * @param string $clientKeyPassPhrase
      * @param string $serverCert
+     * @param Logger $logger
      */
     public function __construct(
         string $serviceUrl,
@@ -33,7 +39,8 @@ class TeleCashCreditCard extends TeleCashBase
         string $clientCert,
         string $clientKey,
         string $clientKeyPassPhrase,
-        string $serverCert
+        string $serverCert,
+        private readonly Logger $logger
     ) {
         parent::__construct(
             $serviceUrl,
@@ -42,7 +49,8 @@ class TeleCashCreditCard extends TeleCashBase
             $clientCert,
             $clientKey,
             $clientKeyPassPhrase,
-            $serverCert
+            $serverCert,
+            $this->logger
         );
     }
 
@@ -51,11 +59,12 @@ class TeleCashCreditCard extends TeleCashBase
      *
      * @param string $ccNumber
      * @param string $ccValid
-     * @param float  $amount
-     * @param string $text
+     * @param float $amount
+     * @param string|null $text
      *
-     * @return Response\Action\Validation|Response\Error
-     * @throws \Exception
+     * @return Validation|Error
+     * @throws DOMException
+     * @throws Exception
      */
     public function validate(
         string $ccNumber,
@@ -68,9 +77,7 @@ class TeleCashCreditCard extends TeleCashBase
         $validMonth     = substr($ccValid, 0, 2);
         $validYear      = substr($ccValid, 3, 4);
         $ccData         = new Model\CreditCardData($ccNumber, $validMonth, $validYear);
-        $validateAction = new Request\Action\Validate($service, $ccData, $amount, $text);
-
-        return $validateAction->validate();
+        return (new Request\Action\Validate($service, $ccData, $amount, $text))->validate();
     }
 
     /**
@@ -81,7 +88,7 @@ class TeleCashCreditCard extends TeleCashBase
      * @param string $hostedDataId
      *
      * @return Response\Action\Confirm|Response\Error
-     * @throws \Exception
+     * @throws Exception
      */
     public function storeHostedData(
         string $ccNumber,
@@ -94,9 +101,7 @@ class TeleCashCreditCard extends TeleCashBase
         $validYear   = substr($ccValid, 3, 4);
         $ccData      = new Model\CreditCardData($ccNumber, $validMonth, $validYear);
         $ccItem      = new Model\CreditCardItem($ccData, $hostedDataId);
-        $storeAction = new Request\Action\StoreHostedData($service, $ccItem);
-
-        return $storeAction->store();
+        return (new Request\Action\StoreHostedData($service, $ccItem))->store();
     }
 
     /**
@@ -105,16 +110,14 @@ class TeleCashCreditCard extends TeleCashBase
      * @param string $hostedDataId
      *
      * @return Response\Action\Display|Response\Error
-     * @throws \Exception
+     * @throws Exception
      */
     public function displayHostedData(string $hostedDataId): Response\Action\Display|Response\Error
     {
         $service = $this->getService();
 
         $storageItem   = new Model\DataStorageItem($hostedDataId);
-        $displayAction = new Request\Action\DisplayHostedData($service, $storageItem);
-
-        return $displayAction->display();
+        return (new Request\Action\DisplayHostedData($service, $storageItem))->display();
     }
 
     /**
@@ -123,16 +126,14 @@ class TeleCashCreditCard extends TeleCashBase
      * @param string $hostedDataId
      *
      * @return Response\Action\Validation|Response\Error
-     * @throws \Exception
+     * @throws Exception
      */
     public function validateHostedData(string $hostedDataId): Response\Action\Validation|Response\Error
     {
         $service = $this->getService();
 
         $payment        = new Model\Payment($hostedDataId);
-        $validateAction = new Request\Action\ValidateHostedData($service, $payment);
-
-        return $validateAction->validate();
+        return (new Request\Action\ValidateHostedData($service, $payment))->validate();
     }
 
     /**
@@ -141,16 +142,14 @@ class TeleCashCreditCard extends TeleCashBase
      * @param string $hostedDataId
      *
      * @return Response\Action\Confirm|Response\Error
-     * @throws \Exception
+     * @throws Exception
      */
     public function deleteHostedData(string $hostedDataId): Response\Action\Confirm|Response\Error
     {
         $service = $this->getService();
 
         $storageItem  = new Model\DataStorageItem($hostedDataId);
-        $deleteAction = new Request\Action\DeleteHostedData($service, $storageItem);
-
-        return $deleteAction->delete();
+        return (new Request\Action\DeleteHostedData($service, $storageItem))->delete();
     }
 
     /**
@@ -162,7 +161,7 @@ class TeleCashCreditCard extends TeleCashBase
      * @param string|null $invoiceNumber
      *
      * @return Response\Order\Sell|Response\Error
-     * @throws \Exception
+     * @throws Exception
      */
     public function sellUsingHostedData(
         string $hostedDataId,
@@ -202,7 +201,7 @@ class TeleCashCreditCard extends TeleCashBase
      * @param string|null $invoiceNumber
      *
      * @return Response\Order\Sell|Response\Error
-     * @throws \Exception
+     * @throws Exception
      */
     public function sell(
         string $ccNumber,

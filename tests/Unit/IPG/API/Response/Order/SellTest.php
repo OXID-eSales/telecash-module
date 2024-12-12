@@ -4,6 +4,7 @@ namespace OxidSolutionCatalysts\TeleCash\Tests\Unit\IPG\API\Response\Order;
 
 use OxidSolutionCatalysts\TeleCash\IPG\API\Response\Order\Sell;
 use OxidSolutionCatalysts\TeleCash\IPG\API\Service\OrderService;
+use OxidSolutionCatalysts\TeleCash\IPG\TeleCashConstants;
 use PHPUnit\Framework\TestCase;
 
 class SellTest extends TestCase
@@ -11,10 +12,10 @@ class SellTest extends TestCase
     private function createSuccessfulResponseXML(): string
     {
         return '<SOAP-ENV:Envelope 
-            xmlns:SOAP-ENV="' . OrderService::NAMESPACE_SOAP . '"
-            xmlns:ns1="' . OrderService::NAMESPACE_N1 . '"
-            xmlns:ns2="' . OrderService::NAMESPACE_N2 . '"
-            xmlns:ns3="' . OrderService::NAMESPACE_N3 . '">
+            xmlns:SOAP-ENV="' . TeleCashConstants::NAMESPACE_SOAP . '"
+            xmlns:ns1="' . TeleCashConstants::NAMESPACE_V1 . '"
+            xmlns:ns2="' . TeleCashConstants::NAMESPACE_A1 . '"
+            xmlns:ns3="' . TeleCashConstants::NAMESPACE_IPGAPI . '">
             <SOAP-ENV:Body>
                 <ns3:IPGApiOrderResponse>
                     <ns3:ApprovalCode>123456</ns3:ApprovalCode>
@@ -42,10 +43,10 @@ class SellTest extends TestCase
     private function createUnsuccessfulResponseXML(): string
     {
         return '<SOAP-ENV:Envelope 
-            xmlns:SOAP-ENV="' . OrderService::NAMESPACE_SOAP . '"
-            xmlns:ns1="' . OrderService::NAMESPACE_N1 . '"
-            xmlns:ns2="' . OrderService::NAMESPACE_N2 . '"
-            xmlns:ns3="' . OrderService::NAMESPACE_N3 . '">
+            xmlns:SOAP-ENV="' . TeleCashConstants::NAMESPACE_SOAP . '"
+            xmlns:ns1="' . TeleCashConstants::NAMESPACE_V1 . '"
+            xmlns:ns2="' . TeleCashConstants::NAMESPACE_A1 . '"
+            xmlns:ns3="' . TeleCashConstants::NAMESPACE_IPGAPI . '">
             <SOAP-ENV:Body>
                 <ns3:IPGApiOrderResponse>
                     <ns2:Error Code="50">
@@ -61,10 +62,10 @@ class SellTest extends TestCase
     private function createFaultyResponseXML(): string
     {
         return '<SOAP-ENV:Envelope 
-            xmlns:SOAP-ENV="' . OrderService::NAMESPACE_SOAP . '"
-            xmlns:ns1="' . OrderService::NAMESPACE_N1 . '"
-            xmlns:ns2="' . OrderService::NAMESPACE_N2 . '"
-            xmlns:ns3="' . OrderService::NAMESPACE_N3 . '">
+            xmlns:SOAP-ENV="' . TeleCashConstants::NAMESPACE_SOAP . '"
+            xmlns:ns1="' . TeleCashConstants::NAMESPACE_V1 . '"
+            xmlns:ns2="' . TeleCashConstants::NAMESPACE_A1 . '"
+            xmlns:ns3="' . TeleCashConstants::NAMESPACE_IPGAPI . '">
             <SOAP-ENV:Body>
                 <ns3:IPGApiOrderResponse>
                     <ns2:Error Code="50">

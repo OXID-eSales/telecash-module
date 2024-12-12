@@ -2,11 +2,14 @@
 
 namespace OxidSolutionCatalysts\TeleCash\IPG\API\Request\Action;
 
+use DOMException;
+use Exception;
 use OxidSolutionCatalysts\TeleCash\IPG\API\Model\Payment;
 use OxidSolutionCatalysts\TeleCash\IPG\API\Request\Action;
 use OxidSolutionCatalysts\TeleCash\IPG\API\Response\Action\Validation;
 use OxidSolutionCatalysts\TeleCash\IPG\API\Response\Error;
 use OxidSolutionCatalysts\TeleCash\IPG\API\Service\OrderService;
+use RuntimeException;
 
 /**
  * Class ValidateHostedData
@@ -15,24 +18,37 @@ class ValidateHostedData extends Action
 {
     /**
      * @param OrderService $service
-     * @param Payment      $payment
+     * @param Payment $payment
+     * @throws DOMException
      */
-    public function __construct(OrderService $service, Payment $payment)
+    public function __construct(OrderService $service, private readonly Payment $payment)
     {
         parent::__construct($service);
 
-        $xml    = $this->document->createElement('ns2:Validate');
-        $ccData = $payment->getXML($this->document);
-        $xml->appendChild($ccData);
-        $item0 = $this->element->getElementsByTagName('ns2:Action')->item(0);
-        if ($item0) {
-            $item0->appendChild($xml);
+        try {
+            // Get Action element from parent
+            $actionElement = $this->element->getElementsByTagName('ns2:Action')->item(0);
+            if (!$actionElement) {
+                throw new RuntimeException('Action element not found');
+            }
+
+            // Create Validate element
+            $validateElement = $this->document->createElement('ns2:Validate');
+
+            // Get and append payment data
+            $paymentData = $this->payment->getXML($this->document);
+            $validateElement->appendChild($paymentData);
+
+            // Append to Action element
+            $actionElement->appendChild($validateElement);
+        } catch (Exception $e) {
+            throw new RuntimeException('Failed to create ValidateHostedData XML: ' . $e->getMessage());
         }
     }
 
     /**
      * @return Validation|Error
-     * @throws \Exception
+     * @throws Exception
      */
     public function validate(): Validation|Error
     {

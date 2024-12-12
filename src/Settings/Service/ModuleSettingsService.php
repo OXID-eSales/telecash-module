@@ -31,7 +31,6 @@ class ModuleSettingsService implements ModuleSettingsServiceInterface
         return $this->getStoreId()
             && $this->getBasicAuthPassword()
             && $this->getClientCertificateInstallationPassword()
-            && $this->getClientCertificatePrivateKeyPassword()
             && $this->moduleFileSettingsService->checkClientCertificateP12FileExists()
             && $this->moduleFileSettingsService->checkClientCertificatePrivateKeyFileExists()
             && $this->moduleFileSettingsService->checkTrustAnchorPEMFileExists();
@@ -78,6 +77,14 @@ class ModuleSettingsService implements ModuleSettingsServiceInterface
     public function getConnectUrl(): string
     {
         return self::CONNECT_URLS[$this->getApiMode()];
+    }
+
+    /**
+     * get the Service URL by API-Mode
+     */
+    public function getServiceUrl(): string
+    {
+        return self::SERVICE_URLS[$this->getApiMode()];
     }
 
     /**

@@ -9,7 +9,6 @@ declare(strict_types=1);
 
 namespace OxidSolutionCatalysts\TeleCash\Application\Model;
 
-use DateTime;
 use Doctrine\DBAL\Exception;
 use OxidEsales\Eshop\Core\Price as oxPrice;
 use OxidEsales\Eshop\Application\Model\Address;
@@ -195,7 +194,7 @@ class TeleCashConnectData implements TeleCashConnectDataInterface
             'txntype'                    => $this->transactionType,
             'chargetotal'                => $oxidBasketTotal,
             'currency'                   => $teleCashCurrency,
-            'txndatetime'                => $this->teleCashConnect->formatDateTime(new DateTime()),
+            'txndatetime'                => $this->teleCashConnect->formatDateTime(),
             'responseFailURL'            => $this->responseFailURL,
             'responseSuccessURL'         => $this->responseSuccessURL,
             'transactionNotificationURL' => $this->transactionNotificationURL,

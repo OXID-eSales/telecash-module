@@ -78,7 +78,7 @@ class TeleCashOrderHistory extends BaseModel implements TeleCashOrderHistoryInte
     {
         $txnType = $this->getValue('txntype');
         // validate TxnType
-        if (!in_array($txnType, Module::TELECASH_TRANSACTION_TYPES, true)) {
+        if (!in_array($txnType, Module::TELECASH_POSSIBLE_TRANSACTION_TYPES, true)) {
             $txnType = '';
         }
         return $txnType;
@@ -135,6 +135,18 @@ class TeleCashOrderHistory extends BaseModel implements TeleCashOrderHistoryInte
     {
         $currency = $this->getValue('currency');
         // validate Currency
+        if (!is_numeric($currency)) {
+            return '';
+        }
+        return $currency;
+    }
+
+    /** get the Currency in OXID-Style */
+    public function getOxidCurrency(): string
+    {
+        $currency = $this->getCurrency();
+
+        // validate Currency
         if (empty($currency)) {
             return '';
         }
@@ -146,13 +158,20 @@ class TeleCashOrderHistory extends BaseModel implements TeleCashOrderHistoryInte
         }
     }
 
-    /** get the EndpointTransactionId */
-    public function getChargeTotal(): float
+    /** get the Charge Total */
+    public function getChargeTotal(): string
     {
-        $chargeTotalString = $this->getValue('chargetotal');
+        $chargeTotal = $this->getValue('chargetotal');
         // bulletproof because is_numeric does not recognize that German commas are numeric
-        $chargeTotalString = str_replace(',', '.', $chargeTotalString);
-        return is_numeric($chargeTotalString) ? (float) $chargeTotalString : 0.0;
+        $chargeTotal = str_replace(',', '.', $chargeTotal);
+        return is_numeric($chargeTotal) ? number_format((float)$chargeTotal, 2, '.', '') : '0.00';
+    }
+
+    /** get the Charge Total in OXID Style (float) */
+    public function getOxidChargeTotal(): float
+    {
+        $chargeTotalString = $this->getChargeTotal();
+        return (float)$chargeTotalString;
     }
 
     /** get the Status translated in transaction-language */

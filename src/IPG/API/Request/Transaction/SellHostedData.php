@@ -2,6 +2,8 @@
 
 namespace OxidSolutionCatalysts\TeleCash\IPG\API\Request\Transaction;
 
+use DOMException;
+use Exception;
 use OxidSolutionCatalysts\TeleCash\IPG\API\Model\Payment;
 use OxidSolutionCatalysts\TeleCash\IPG\API\Model\TransactionDetails;
 use OxidSolutionCatalysts\TeleCash\IPG\API\Request\Transaction;
@@ -15,20 +17,24 @@ use OxidSolutionCatalysts\TeleCash\IPG\API\Service\OrderService;
 class SellHostedData extends Transaction
 {
     /**
-     * @param OrderService            $service
-     * @param Payment                 $payment
+     * @param OrderService $service
+     * @param Payment $payment
      * @param TransactionDetails|null $transactionDetails
+     * @throws DOMException
      */
     public function __construct(OrderService $service, Payment $payment, TransactionDetails $transactionDetails = null)
     {
         parent::__construct($service);
 
+        // Explizit den Namespace-Präfix 'ns1' verwenden
         $ccTxType = $this->document->createElement('ns1:CreditCardTxType');
-        $ccType   = $this->document->createElement('ns1:Type');
+        $ccType = $this->document->createElement('ns1:Type');
         $ccType->nodeValue = 'sale';
         $ccTxType->appendChild($ccType);
+
         $paymentData = $payment->getXML($this->document);
         $transActElem = $this->getTransactionElement();
+
         if ($transActElem) {
             $transActElem->appendChild($ccTxType);
             $transActElem->appendChild($paymentData);
@@ -42,7 +48,7 @@ class SellHostedData extends Transaction
 
     /**
      * @return Sell|Error
-     * @throws \Exception
+     * @throws Exception
      */
     public function sell(): Sell|Error
     {

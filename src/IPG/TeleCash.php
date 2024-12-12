@@ -2,10 +2,12 @@
 
 namespace OxidSolutionCatalysts\TeleCash\IPG;
 
+use DOMException;
+use Exception;
+use OxidSolutionCatalysts\TeleCash\Core\Service\Logger;
 use OxidSolutionCatalysts\TeleCash\IPG\API\Model;
 use OxidSolutionCatalysts\TeleCash\IPG\API\Request;
 use OxidSolutionCatalysts\TeleCash\IPG\API\Response;
-use OxidSolutionCatalysts\TeleCash\IPG\API\Service\OrderService;
 
 /**
  * Class TeleCash
@@ -25,6 +27,7 @@ class TeleCash extends TeleCashBase
      * @param string $clientKey
      * @param string $clientKeyPassPhrase
      * @param string $serverCert
+     * @param Logger $logger
      */
     public function __construct(
         string $serviceUrl,
@@ -33,7 +36,8 @@ class TeleCash extends TeleCashBase
         string $clientCert,
         string $clientKey,
         string $clientKeyPassPhrase,
-        string $serverCert
+        string $serverCert,
+        private readonly Logger $logger
     ) {
         parent::__construct(
             $serviceUrl,
@@ -42,7 +46,8 @@ class TeleCash extends TeleCashBase
             $clientCert,
             $clientKey,
             $clientKeyPassPhrase,
-            $serverCert
+            $serverCert,
+            $this->logger
         );
     }
 
@@ -57,7 +62,7 @@ class TeleCash extends TeleCashBase
      * @param string    $period
      *
      * @return Response\Action\ConfirmRecurring|Response\Order\Sell|Response\Error
-     * @throws \Exception
+     * @throws Exception
      */
     public function installRecurringPayment(
         string $hostedDataId,
@@ -94,7 +99,7 @@ class TeleCash extends TeleCashBase
      * @param float  $amount
      *
      * @return Response\Action\ConfirmRecurring|Response\Order\Sell|Response\Error
-     * @throws \Exception
+     * @throws Exception
      */
     public function installOneTimeRecurringPayment(
         string $hostedDataId,
@@ -122,7 +127,7 @@ class TeleCash extends TeleCashBase
      * @param string         $period
      *
      * @return Response\Action\ConfirmRecurring|Response\Order\Sell|Response\Error
-     * @throws \Exception
+     * @throws Exception
      */
     public function modifyRecurringPayment(
         string $orderId,
@@ -158,7 +163,7 @@ class TeleCash extends TeleCashBase
      * @param string $orderId
      *
      * @return Response\Action\ConfirmRecurring|Response\Order\Sell|Response\Error
-     * @throws \Exception
+     * @throws Exception
      */
     public function cancelRecurringPayment(
         string $orderId
@@ -170,7 +175,10 @@ class TeleCash extends TeleCashBase
         return $recurringPaymentAction->cancel();
     }
 
-
+    /**
+     * @throws DOMException
+     * @throws Exception
+     */
     public function sendEMailNotification(
         string $orderId,
         string $tDate,
@@ -182,6 +190,25 @@ class TeleCash extends TeleCashBase
         return $emailNotificationAction->send();
     }
 
+    /**
+     * @throws DOMException
+     * @throws Exception
+     */
+    public function postAuthOrder(
+        string $orderId,
+        string $currency,
+        string $chargeTotal
+    ): Response\Order\Sell|Response\Error {
+        $service = $this->getService();
+        $postAuthOrder = new Request\Action\PostAuthOrder($service, $orderId, $currency, $chargeTotal);
+
+        return $postAuthOrder->postAuth();
+    }
+
+    /**
+     * @throws DOMException
+     * @throws Exception
+     */
     public function getLastTransactions(
         int $count,
         string|null $orderId = null,
@@ -193,6 +220,10 @@ class TeleCash extends TeleCashBase
         return $lastTransactionsAction->get();
     }
 
+    /**
+     * @throws DOMException
+     * @throws Exception
+     */
     public function getLastOrders(
         int $count,
         string|null $orderId = null,
@@ -205,21 +236,23 @@ class TeleCash extends TeleCashBase
         return $lastTransactionsAction->get();
     }
 
+    /**
+     * @throws DOMException
+     */
     public function getInquiryByIPGTransactionId(string $ipgTransactionId): Response\Action\Validation|Response\Error
     {
         $service = $this->getService();
-        $inquiryTransactionAction = new Request\Action\InquiryTransaction($service);
-
-        return $inquiryTransactionAction->getByIPGTransactionId($ipgTransactionId);
+        return (new Request\Action\InquiryTransaction($service))->getByIPGTransactionId($ipgTransactionId);
     }
 
+    /**
+     * @throws DOMException
+     */
     public function getInquiryByOrderIdAndTDate(
         string $orderId,
         string $tDate
     ): Response\Action\Validation|Response\Error {
         $service = $this->getService();
-        $inquiryTransactionAction = new Request\Action\InquiryTransaction($service);
-
-        return $inquiryTransactionAction->getByOrderIdAndTDate($orderId, $tDate);
+        return (new Request\Action\InquiryTransaction($service))->getByOrderIdAndTDate($orderId, $tDate);
     }
 }

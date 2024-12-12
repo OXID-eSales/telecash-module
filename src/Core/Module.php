@@ -40,7 +40,6 @@ final class Module
     public const TELECASH_PAYMENT_IDENT_CC_AMERICAN = 'cc_american';
     public const TELECASH_PAYMENT_IDENT_CC_VISA = 'cc_visa';
     public const TELECASH_PAYMENT_IDENT_CC_MASTERCARD = 'cc_mastercard';
-
     public const TELECASH_PAYMENT_IDENT_PAYPAL = 'paypal';
     public const TELECASH_PAYMENT_IDENT_SEPA = 'sepa';
 
@@ -91,11 +90,18 @@ final class Module
     ];
 
     public const TELECASH_TXN_TYPE_SALE = 'sale';
-    public const TELECASH_TXN_TYPE_POSTAUTH = 'preauth';
+    public const TELECASH_TXN_TYPE_PREAUTH = 'preauth';
+    public const TELECASH_TXN_TYPE_POSTAUTH = 'postauth';
 
     public const TELECASH_TRANSACTION_TYPES = [
         self::TELECASH_CAPTURE_TYPE_DIRECT     => self::TELECASH_TXN_TYPE_SALE,
-        self::TELECASH_CAPTURE_TYPE_ONDELIVERY => self::TELECASH_TXN_TYPE_POSTAUTH,
-        self::TELECASH_CAPTURE_TYPE_MANUALLY   => self::TELECASH_TXN_TYPE_POSTAUTH
+        self::TELECASH_CAPTURE_TYPE_ONDELIVERY => self::TELECASH_TXN_TYPE_PREAUTH,
+        self::TELECASH_CAPTURE_TYPE_MANUALLY   => self::TELECASH_TXN_TYPE_PREAUTH
+    ];
+
+    public const TELECASH_POSSIBLE_TRANSACTION_TYPES = [
+        self::TELECASH_TXN_TYPE_SALE,
+        self::TELECASH_TXN_TYPE_PREAUTH,
+        self::TELECASH_TXN_TYPE_POSTAUTH
     ];
 }

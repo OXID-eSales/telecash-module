@@ -8,6 +8,8 @@
 declare(strict_types=1);
 
 use OxidEsales\Eshop\Application\Controller\Admin\ModuleConfiguration;
+use OxidEsales\Eshop\Application\Controller\Admin\OrderMain;
+use OxidEsales\Eshop\Application\Controller\Admin\OrderOverview;
 use OxidEsales\Eshop\Application\Controller\Admin\PaymentMain;
 use OxidEsales\Eshop\Application\Controller\OrderController;
 use OxidEsales\Eshop\Application\Controller\PaymentController;
@@ -20,6 +22,8 @@ use OxidEsales\Eshop\Application\Model\PaymentList;
 use OxidEsales\Eshop\Application\Model\State;
 use OxidEsales\Eshop\Application\Model\User;
 use OxidSolutionCatalysts\TeleCash\Extension\Application\Controller\Admin\ModuleConfiguration_parent;
+use OxidSolutionCatalysts\TeleCash\Extension\Application\Controller\Admin\OrderMain_parent;
+use OxidSolutionCatalysts\TeleCash\Extension\Application\Controller\Admin\OrderOverview_parent;
 use OxidSolutionCatalysts\TeleCash\Extension\Application\Controller\Admin\PaymentMain_parent;
 use OxidSolutionCatalysts\TeleCash\Extension\Application\Controller\OrderController_parent;
 use OxidSolutionCatalysts\TeleCash\Extension\Application\Controller\PaymentController_parent;
@@ -42,6 +46,16 @@ class_alias(
 class_alias(
     PaymentMain::class,
     PaymentMain_parent::class
+);
+
+class_alias(
+    OrderMain::class,
+    OrderMain_parent::class
+);
+
+class_alias(
+    OrderOverview::class,
+    OrderOverview_parent::class
 );
 
 // Frontend Controller

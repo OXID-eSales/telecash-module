@@ -2,8 +2,10 @@
 
 namespace OxidSolutionCatalysts\TeleCash\IPG\API\Response\Action;
 
+use DOMDocument;
+use Exception;
 use OxidSolutionCatalysts\TeleCash\IPG\API\Response\Action;
-use OxidSolutionCatalysts\TeleCash\IPG\API\Service\OrderService;
+use OxidSolutionCatalysts\TeleCash\IPG\TeleCashConstants;
 
 /**
  * Class Confirm
@@ -11,15 +13,25 @@ use OxidSolutionCatalysts\TeleCash\IPG\API\Service\OrderService;
 class Confirm extends Action
 {
     /**
-     * @param \DOMDocument $responseDoc
+     * @param DOMDocument $responseDoc
      *
-     * @throws \Exception
+     * @throws Exception
      */
-    public function __construct(\DOMDocument $responseDoc)
+    public function __construct(DOMDocument $responseDoc)
     {
-        $actionResponse = $responseDoc->getElementsByTagNameNS(OrderService::NAMESPACE_N3, 'IPGApiActionResponse');
-        $success        = $this->firstElementByTagNSString($responseDoc, OrderService::NAMESPACE_N3, 'successfully');
-        $error          = $responseDoc->getElementsByTagNameNS(OrderService::NAMESPACE_N2, 'Error');
+        $actionResponse = $responseDoc->getElementsByTagNameNS(
+            TeleCashConstants::NAMESPACE_IPGAPI,
+            'IPGApiActionResponse'
+        );
+        $success = $this->firstElementByTagNSString(
+            $responseDoc,
+            TeleCashConstants::NAMESPACE_IPGAPI,
+            'successfully'
+        );
+        $error = $responseDoc->getElementsByTagNameNS(
+            TeleCashConstants::NAMESPACE_A1,
+            'Error'
+        );
 
         if ($actionResponse->length > 0 && $success === 'true') {
             if ($error->length === 0) {
@@ -27,12 +39,12 @@ class Confirm extends Action
             } else {
                 $this->errorMessage = $this->firstElementByTagNSString(
                     $responseDoc,
-                    OrderService::NAMESPACE_N2,
+                    TeleCashConstants::NAMESPACE_A1,
                     'ErrorMessage'
                 );
             }
         } else {
-            throw new \Exception("Call failed " . $responseDoc->saveXML());
+            throw new Exception("Call failed " . $responseDoc->saveXML());
         }
     }
 }

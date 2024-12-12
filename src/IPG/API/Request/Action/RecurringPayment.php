@@ -2,6 +2,7 @@
 
 namespace OxidSolutionCatalysts\TeleCash\IPG\API\Request\Action;
 
+use Exception;
 use OxidSolutionCatalysts\TeleCash\IPG\API\Model\Payment;
 use OxidSolutionCatalysts\TeleCash\IPG\API\Model\RecurringPaymentInformation;
 use OxidSolutionCatalysts\TeleCash\IPG\API\Request\Action;
@@ -19,60 +20,61 @@ abstract class RecurringPayment extends Action
     public const FUNCTION_MODIFY  = 'modify';
     public const FUNCTION_CANCEL  = 'cancel';
 
-    /** @var string|null $function */
-    private string|null $function;
-    /** @var Payment|null $payment */
-    private Payment|null $payment;
-    /** @var RecurringPaymentInformation|null $paymentInformation */
-    private RecurringPaymentInformation|null $paymentInformation;
-    /** @var string|null orderId */
-    private string|null $orderId;
-
     /**
-     * @param OrderService                $service
-     * @param string|null                 $function
-     * @param Payment|null                $payment
+     * @param OrderService $service
+     * @param string|null $function
+     * @param Payment|null $payment
      * @param RecurringPaymentInformation|null $paymentInformation
-     * @param string|null                 $orderId
+     * @param string|null $orderId
+     * @throws \DOMException
      */
     public function __construct(
         OrderService $service,
-        string|null $function,
-        Payment|null $payment = null,
-        RecurringPaymentInformation|null $paymentInformation = null,
-        string|null $orderId = null
+        private readonly ?string $function,
+        private readonly ?Payment $payment = null,
+        private readonly ?RecurringPaymentInformation $paymentInformation = null,
+        private readonly ?string $orderId = null
     ) {
         parent::__construct($service);
 
-        $this->function           = $function;
-        $this->payment            = $payment;
-        $this->paymentInformation = $paymentInformation;
-        $this->orderId            = $orderId;
+        try {
+            // Get Action element from parent
+            $actionElement = $this->element->getElementsByTagName('ns2:Action')->item(0);
+            if (!$actionElement) {
+                throw new \RuntimeException('Action element not found');
+            }
 
-        $xml                   = $this->document->createElement('ns2:RecurringPayment');
-        $function              = $this->document->createElement('ns2:Function');
-        $function->textContent = (string)$this->function;
-        $xml->appendChild($function);
+            // Create RecurringPayment element
+            $recurringElement = $this->document->createElement('ns2:RecurringPayment');
 
-        if ($this->function === self::FUNCTION_MODIFY || $this->function === self::FUNCTION_CANCEL) {
-            $orderId              = $this->document->createElement('ns2:OrderId');
-            $orderId->textContent = (string)$this->orderId;
-            $xml->appendChild($orderId);
-        }
+            // Add function
+            $functionElement = $this->document->createElement('ns2:Function');
+            $functionElement->textContent = $this->function ?? '';
+            $recurringElement->appendChild($functionElement);
 
-        if ($this->paymentInformation !== null) {
-            $paymentInformation = $this->paymentInformation->getXML($this->document);
-            $xml->appendChild($paymentInformation);
-        }
+            // Add OrderId for modify and cancel
+            if (
+                ($this->function === self::FUNCTION_MODIFY || $this->function === self::FUNCTION_CANCEL)
+                && $this->orderId !== null
+            ) {
+                $orderIdElement = $this->document->createElement('ns2:OrderId');
+                $orderIdElement->textContent = $this->orderId;
+                $recurringElement->appendChild($orderIdElement);
+            }
 
-        if ($this->payment !== null) {
-            $payment = $this->payment->getXML($this->document);
-            $xml->appendChild($payment);
-        }
+            // Add optional payment information
+            if ($this->paymentInformation !== null) {
+                $recurringElement->appendChild($this->paymentInformation->getXML($this->document));
+            }
 
-        $item0 = $this->element->getElementsByTagName('ns2:Action')->item(0);
-        if ($item0) {
-            $item0->appendChild($xml);
+            // Add optional payment
+            if ($this->payment !== null) {
+                $recurringElement->appendChild($this->payment->getXML($this->document));
+            }
+
+            $actionElement->appendChild($recurringElement);
+        } catch (\Exception $e) {
+            throw new \RuntimeException('Failed to create RecurringPayment XML: ' . $e->getMessage());
         }
     }
 
@@ -80,19 +82,15 @@ abstract class RecurringPayment extends Action
      * Execute this action
      *
      * @return ConfirmRecurring|Sell|Error
+     * @throws Exception
      */
     protected function execute(): ConfirmRecurring|Sell|Error
     {
         $response = $this->service->IPGApiAction($this);
-
-        if ($response instanceof Error) {
-            return $response;
-        }
-
-        if ($this->function === self::FUNCTION_INSTALL) {
-            return new Sell($response);
-        }
-
-        return new ConfirmRecurring($response);
+        return match (true) {
+            $response instanceof Error => $response,
+            $this->function === self::FUNCTION_INSTALL => new Sell($response),
+            default => new ConfirmRecurring($response),
+        };
     }
 }

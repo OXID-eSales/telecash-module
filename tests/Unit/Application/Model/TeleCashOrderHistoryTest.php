@@ -148,7 +148,7 @@ class TeleCashOrderHistoryTest extends TestCase
      */
     public function testGetCurrency(): void
     {
-        $this->assertEquals('EUR', $this->orderHistory->getCurrency());
+        $this->assertEquals('978', $this->orderHistory->getCurrency());
 
         // Test invalid currency
         $invalidData = $this->sampleTransactionData;
@@ -158,21 +158,71 @@ class TeleCashOrderHistoryTest extends TestCase
     }
 
     /**
+     * Test currency (in oxid-style) code conversion and validation
+     *
+     * Verifies that:
+     * - Numeric currency codes are correctly converted to ISO codes
+     * - Invalid codes are handled properly (empty string)
+     */
+    public function testGetOxidCurrency(): void
+    {
+        $this->assertEquals('EUR', $this->orderHistory->getOxidCurrency());
+
+        // Test invalid currency
+        $invalidData = $this->sampleTransactionData;
+        $invalidData['currency'] = 'invalid';
+        $this->orderHistory->setTransactionResult($invalidData);
+        $this->assertEquals('', $this->orderHistory->getOxidCurrency());
+    }
+
+    /**
      * Test charge total handling
      *
      * Verifies that:
-     * - Valid amounts are correctly converted to float
-     * - Invalid amounts are handled properly (0.0)
+     * - Valid amounts are correctly formatted with two decimal places
+     * - German decimal separator is properly handled
+     * - Invalid amounts return "0.00"
      */
     public function testGetChargeTotal(): void
     {
-        $this->assertEquals(99.99, $this->orderHistory->getChargeTotal());
+        // Test valid amount
+        $this->assertEquals('99.99', $this->orderHistory->getChargeTotal());
+
+        // Test German decimal separator
+        $germanData = $this->sampleTransactionData;
+        $germanData['chargetotal'] = '99,99';
+        $this->orderHistory->setTransactionResult($germanData);
+        $this->assertEquals('99.99', $this->orderHistory->getChargeTotal());
 
         // Test invalid charge total
         $invalidData = $this->sampleTransactionData;
         $invalidData['chargetotal'] = 'invalid';
         $this->orderHistory->setTransactionResult($invalidData);
-        $this->assertEquals(0.0, $this->orderHistory->getChargeTotal());
+        $this->assertEquals('0.00', $this->orderHistory->getChargeTotal());
+
+        // Test with integer value
+        $integerData = $this->sampleTransactionData;
+        $integerData['chargetotal'] = '100';
+        $this->orderHistory->setTransactionResult($integerData);
+        $this->assertEquals('100.00', $this->orderHistory->getChargeTotal());
+    }
+
+    /**
+     * Test charge total (in oxid style as float) handling
+     *
+     * Verifies that:
+     * - Valid amounts are correctly converted to float
+     * - Invalid amounts are handled properly (0.0)
+     */
+    public function testGetOxidChargeTotal(): void
+    {
+        $this->assertEquals(99.99, $this->orderHistory->getOxidChargeTotal());
+
+        // Test invalid charge total
+        $invalidData = $this->sampleTransactionData;
+        $invalidData['chargetotal'] = 'invalid';
+        $this->orderHistory->setTransactionResult($invalidData);
+        $this->assertEquals(0.0, $this->orderHistory->getOxidChargeTotal());
     }
 
     /**

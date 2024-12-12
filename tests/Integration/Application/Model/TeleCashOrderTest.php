@@ -116,14 +116,14 @@ class TeleCashOrderTest extends TestCase
         );
 
         $this->assertEquals(
-            'EUR',
+            '978',
             $loadedOrder->getCurrency(),
             'Currency mismatch'
         );
 
         $this->assertEquals(
             (float)$this->sampleTransactionData['chargetotal'],
-            $loadedOrder->getChargeTotal(),
+            $loadedOrder->getOxidChargeTotal(),
             'Charge total mismatch'
         );
 

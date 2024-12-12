@@ -57,6 +57,27 @@ trait RequestGetter
     }
 
     /**
+     * return a requested Float
+     *
+     * @param string $key
+     * @param float $default
+     * @return float
+     */
+    public function getFloatRequestData(string $key, float $default = 0.0): float
+    {
+        $request = $this->getRequest();
+        if (!$request instanceof Request) {
+            return 0.0;
+        }
+
+        /** @var string $oxidDefault */
+        $oxidDefault = $default;
+        $value = (string) $request->getRequestParameter($key, $oxidDefault);
+        $value = str_replace(',', '.', $value);
+        return is_numeric($value) ? (float) $value : $default;
+    }
+
+    /**
      * return a requested array
      *
      * @param string $key

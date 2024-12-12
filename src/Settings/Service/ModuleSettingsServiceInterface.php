@@ -37,6 +37,11 @@ interface ModuleSettingsServiceInterface
         self::API_MODE_SANDBOX => 'https://test.ipg-online.com/connect/gateway/processing',
     ];
 
+    public const SERVICE_URLS = [
+        self::API_MODE_LIVE    => 'https://www.ipg-online.com/ipgapi/services',
+        self::API_MODE_SANDBOX => 'https://test.ipg-online.com/ipgapi/services',
+    ];
+
     public const STORE_ID = 'osctelecash_storeid';
 
     public const SHARED_SECRET = 'osctelecash_shared_secret';
@@ -77,6 +82,8 @@ interface ModuleSettingsServiceInterface
     public function saveApiMode(string $value): void;
 
     public function getConnectUrl(): string;
+
+    public function getServiceUrl(): string;
 
     public function getStoreId(): string;
 

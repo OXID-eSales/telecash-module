@@ -4,6 +4,7 @@ namespace OxidSolutionCatalysts\TeleCash\Tests\Unit\IPG\API\Response\Action;
 
 use OxidSolutionCatalysts\TeleCash\IPG\API\Response\Action\Confirm;
 use OxidSolutionCatalysts\TeleCash\IPG\API\Service\OrderService;
+use OxidSolutionCatalysts\TeleCash\IPG\TeleCashConstants;
 use PHPUnit\Framework\TestCase;
 
 class ConfirmTest extends TestCase
@@ -11,10 +12,10 @@ class ConfirmTest extends TestCase
     private function createSuccessfulResponseXML(): string
     {
         return '<SOAP-ENV:Envelope 
-            xmlns:SOAP-ENV="' . OrderService::NAMESPACE_SOAP . '"
-            xmlns:ns1="' . OrderService::NAMESPACE_N1 . '"
-            xmlns:ns2="' . OrderService::NAMESPACE_N2 . '"
-            xmlns:ns3="' . OrderService::NAMESPACE_N3 . '">
+            xmlns:SOAP-ENV="' . TeleCashConstants::NAMESPACE_SOAP . '"
+            xmlns:ns1="' . TeleCashConstants::NAMESPACE_V1 . '"
+            xmlns:ns2="' . TeleCashConstants::NAMESPACE_A1 . '"
+            xmlns:ns3="' . TeleCashConstants::NAMESPACE_IPGAPI . '">
             <SOAP-ENV:Body>
                 <ns3:IPGApiActionResponse>
                     <ns3:successfully>true</ns3:successfully>
@@ -26,10 +27,10 @@ class ConfirmTest extends TestCase
     private function createUnsuccessfulResponseXML(): string
     {
         return '<SOAP-ENV:Envelope 
-            xmlns:SOAP-ENV="' . OrderService::NAMESPACE_SOAP . '"
-            xmlns:ns1="' . OrderService::NAMESPACE_N1 . '"
-            xmlns:ns2="' . OrderService::NAMESPACE_N2 . '"
-            xmlns:ns3="' . OrderService::NAMESPACE_N3 . '">
+            xmlns:SOAP-ENV="' . TeleCashConstants::NAMESPACE_SOAP . '"
+            xmlns:ns1="' . TeleCashConstants::NAMESPACE_V1 . '"
+            xmlns:ns2="' . TeleCashConstants::NAMESPACE_A1 . '"
+            xmlns:ns3="' . TeleCashConstants::NAMESPACE_IPGAPI . '">
             <SOAP-ENV:Body>
                 <ns3:IPGApiActionResponse>
                     <ns3:successfully>true</ns3:successfully>
@@ -44,10 +45,10 @@ class ConfirmTest extends TestCase
     private function createFailedResponseXML(): string
     {
         return '<SOAP-ENV:Envelope 
-            xmlns:SOAP-ENV="' . OrderService::NAMESPACE_SOAP . '"
-            xmlns:ns1="' . OrderService::NAMESPACE_N1 . '"
-            xmlns:ns2="' . OrderService::NAMESPACE_N2 . '"
-            xmlns:ns3="' . OrderService::NAMESPACE_N3 . '">
+            xmlns:SOAP-ENV="' . TeleCashConstants::NAMESPACE_SOAP . '"
+            xmlns:ns1="' . TeleCashConstants::NAMESPACE_V1 . '"
+            xmlns:ns2="' . TeleCashConstants::NAMESPACE_A1 . '"
+            xmlns:ns3="' . TeleCashConstants::NAMESPACE_IPGAPI . '">
             <SOAP-ENV:Body>
                 <ns3:IPGApiActionResponse>
                     <ns3:successfully>false</ns3:successfully>

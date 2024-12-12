@@ -3,7 +3,8 @@
 namespace OxidSolutionCatalysts\TeleCash\IPG\API\Response\Action;
 
 use OxidSolutionCatalysts\TeleCash\IPG\API\Response\Action;
-use OxidSolutionCatalysts\TeleCash\IPG\API\Service\OrderService;
+use OxidSolutionCatalysts\TeleCash\IPG\TeleCashConstants;
+use RuntimeException;
 
 /**
  * Class Display
@@ -60,46 +61,59 @@ class Display extends Action
         $this->ccValid = null;
         $this->hostedDataId = null;
 
-        $actionResponse = $responseDoc->getElementsByTagNameNS(OrderService::NAMESPACE_N3, 'IPGApiActionResponse');
-        $success        = $this->firstElementByTagNSString($responseDoc, OrderService::NAMESPACE_N3, 'successfully');
-        $error          = $responseDoc->getElementsByTagNameNS(OrderService::NAMESPACE_N2, 'Error');
+        $actionResponse = $responseDoc->getElementsByTagNameNS(
+            TeleCashConstants::NAMESPACE_IPGAPI,
+            'IPGApiActionResponse'
+        );
+        $success = $this->firstElementByTagNSString(
+            $responseDoc,
+            TeleCashConstants::NAMESPACE_IPGAPI,
+            'successfully'
+        );
+        $error = $responseDoc->getElementsByTagNameNS(
+            TeleCashConstants::NAMESPACE_A1,
+            'Error'
+        );
 
         if ($actionResponse->length > 0 && $success === 'true') {
             if ($error->length === 0) {
                 $this->wasSuccessful = true;
-                $ccData = $responseDoc->getElementsByTagNameNS(OrderService::NAMESPACE_N2, 'CreditCardData');
+                $ccData = $responseDoc->getElementsByTagNameNS(
+                    TeleCashConstants::NAMESPACE_A1,
+                    'CreditCardData'
+                );
                 if ($ccData->length > 0) {
-                    $this->ccNumber     = $this->firstElementByTagNSString(
+                    $this->ccNumber = $this->firstElementByTagNSString(
                         $responseDoc,
-                        OrderService::NAMESPACE_N1,
+                        TeleCashConstants::NAMESPACE_V1,
                         'CardNumber'
                     );
-                    $expMonth           = $this->firstElementByTagNSString(
+                    $expMonth = $this->firstElementByTagNSString(
                         $responseDoc,
-                        OrderService::NAMESPACE_N1,
+                        TeleCashConstants::NAMESPACE_V1,
                         'ExpMonth'
                     );
-                    $expYear            = $this->firstElementByTagNSString(
+                    $expYear = $this->firstElementByTagNSString(
                         $responseDoc,
-                        OrderService::NAMESPACE_N1,
+                        TeleCashConstants::NAMESPACE_V1,
                         'ExpYear'
                     );
-                    $this->ccValid      = $expMonth . '/' . $expYear;
+                    $this->ccValid = $expMonth . '/' . $expYear;
                     $this->hostedDataId = $this->firstElementByTagNSString(
                         $responseDoc,
-                        OrderService::NAMESPACE_N2,
+                        TeleCashConstants::NAMESPACE_A1,
                         'HostedDataID'
                     );
                 }
             } else {
                 $this->errorMessage = $this->firstElementByTagNSString(
                     $responseDoc,
-                    OrderService::NAMESPACE_N2,
+                    TeleCashConstants::NAMESPACE_A1,
                     'ErrorMessage'
                 );
             }
         } else {
-            throw new \Exception("Display Call failed " . $responseDoc->saveXML());
+            throw new RuntimeException("Display Call failed " . $responseDoc->saveXML());
         }
     }
 }

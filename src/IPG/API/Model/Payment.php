@@ -2,6 +2,10 @@
 
 namespace OxidSolutionCatalysts\TeleCash\IPG\API\Model;
 
+use DOMDocument;
+use DOMException;
+use DOMNode;
+
 /**
  * Class Payment
  */
@@ -9,45 +13,40 @@ class Payment implements ElementInterface
 {
     public const CURRENCY_EUR = "978";
 
-    /** @var string|null $hostedDataId */
-    private string|null $hostedDataId;
-    /** @var float|null $amount */
-    private float|null $amount;
-
-    /**
-     * @param string|null $hostedDataId
-     * @param float|null  $amount
-     */
-    public function __construct(string|null $hostedDataId = null, float|null $amount = null)
-    {
-        $this->hostedDataId = $hostedDataId;
-        $this->amount       = $amount;
+    public function __construct(
+        private readonly ?string $hostedDataId = null,
+        private readonly ?float $amount = null
+    ) {
     }
 
     /**
-     * @param \DOMDocument $document
+     * @param DOMDocument $document
      *
-     * @return mixed
+     * @return DOMNode
+     * @throws DOMException
      */
-    public function getXML(\DOMDocument $document): mixed
+    public function getXML(DOMDocument $document): DOMNode
     {
         $xml = $document->createElement('ns1:Payment');
 
-        if (!empty($this->hostedDataId)) {
-            $hostedDataId = $document->createElement('ns1:HostedDataID');
-            $hostedDataId->textContent = $this->hostedDataId;
+        // Helper function to create elements
+        $addElement = function (string $name, ?string $value) use ($document, $xml) {
+            if ($value !== null) {
+                $element = $document->createElement('ns1:' . $name);
+                $element->textContent = $value;
+                $xml->appendChild($element);
+            }
+        };
 
-            $xml->appendChild($hostedDataId);
+        // Add HostedDataID if provided
+        if (!empty($this->hostedDataId)) {
+            $addElement('HostedDataID', $this->hostedDataId);
         }
 
+        // Add amount and currency if amount is provided
         if (!empty($this->amount)) {
-            $amount                = $document->createElement('ns1:ChargeTotal');
-            $amount->textContent   = (string)$this->amount;
-            $currency              = $document->createElement('ns1:Currency');
-            $currency->textContent = self::CURRENCY_EUR;
-
-            $xml->appendChild($amount);
-            $xml->appendChild($currency);
+            $addElement('ChargeTotal', (string)$this->amount);
+            $addElement('Currency', self::CURRENCY_EUR);
         }
 
         return $xml;

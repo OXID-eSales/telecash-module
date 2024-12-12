@@ -2,13 +2,17 @@
 
 namespace OxidSolutionCatalysts\TeleCash\IPG\API\Model;
 
+use DOMDocument;
+use DOMException;
+use DOMNode;
+use OxidSolutionCatalysts\TeleCash\IPG\TeleCashConstants;
+
 /**
  * Class CreditCardItem
  */
 class DirectDebitItem extends DataStorageItem
 {
-    /** @var DirectDebitData */
-    protected $directDebitData;
+    protected DirectDebitData $directDebitData;
 
     /**
      * @param DirectDebitData $directDebitData
@@ -23,35 +27,38 @@ class DirectDebitItem extends DataStorageItem
         string|null $declineHostedDataDuplicates = null
     ) {
         parent::__construct($hostedDataId, $function, $declineHostedDataDuplicates);
-
         $this->directDebitData = $directDebitData;
     }
 
     /**
-     * @param \DOMDocument $document
+     * @param DOMDocument $document
      *
-     * @return mixed
+     * @return DOMNode
+     * @throws DOMException
      */
-    public function getXML(\DOMDocument $document): mixed
+    public function getXML(DOMDocument $document): DOMNode
     {
         $xml = $document->createElement('ns2:DataStorageItem');
 
-        $ccData = $this->directDebitData->getXML($document);
-        $dataId = $document->createElement('ns2:HostedDataID');
-        $dataId->textContent = (string)$this->hostedDataId;
-
-        if ($this->function != null) {
+        // Add elements in specified order
+        if ($this->function !== null) {
             $function = $document->createElement('ns2:Function');
             $function->textContent = $this->function;
             $xml->appendChild($function);
         }
-        if ($this->declineHostedDataDuplicates != null) {
+
+        if ($this->declineHostedDataDuplicates !== null) {
             $declineDuplicates = $document->createElement('ns2:DeclineHostedDataDuplicates');
             $declineDuplicates->textContent = $this->declineHostedDataDuplicates;
             $xml->appendChild($declineDuplicates);
         }
 
-        $xml->appendChild($ccData);
+        // Add DirectDebitData
+        $xml->appendChild($this->directDebitData->getXML($document));
+
+        // Add HostedDataID
+        $dataId = $document->createElement('ns2:HostedDataID');
+        $dataId->textContent = (string)$this->hostedDataId;
         $xml->appendChild($dataId);
 
         return $xml;

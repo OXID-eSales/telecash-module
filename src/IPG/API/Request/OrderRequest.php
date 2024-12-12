@@ -2,8 +2,11 @@
 
 namespace OxidSolutionCatalysts\TeleCash\IPG\API\Request;
 
+use DOMDocument;
+use DOMException;
 use OxidSolutionCatalysts\TeleCash\IPG\API\AbstractRequest;
 use OxidSolutionCatalysts\TeleCash\IPG\API\Service\OrderService;
+use OxidSolutionCatalysts\TeleCash\IPG\TeleCashConstants;
 
 /**
  * Class OrderRequest
@@ -14,12 +17,13 @@ class OrderRequest extends AbstractRequest
 
     /**
      * @param OrderService $service
+     * @throws DOMException
      */
     public function __construct(OrderService $service)
     {
         $this->service = $service;
-        $this->document = new \DOMDocument('1.0', 'UTF-8');
+        $this->document = new DOMDocument('1.0', 'UTF-8');
 
-        $this->element = $this->document->createElement('ns3:IPGApiOrderRequest');
+        $this->element = $this->document->createElement(TeleCashConstants::PREF_IPGAPI . 'IPGApiOrderRequest');
     }
 }

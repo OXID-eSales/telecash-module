@@ -2,8 +2,11 @@
 
 namespace OxidSolutionCatalysts\TeleCash\IPG\API\Request\Action;
 
+use DOMException;
 use OxidSolutionCatalysts\TeleCash\IPG\API\Model\CreditCardData;
 use OxidSolutionCatalysts\TeleCash\IPG\API\Service\OrderService;
+use PHPUnit\Framework\MockObject\Exception;
+use PHPUnit\Framework\TestCase;
 
 /**
  * Test class for Validate request action
@@ -11,7 +14,7 @@ use OxidSolutionCatalysts\TeleCash\IPG\API\Service\OrderService;
  * Validates the XML generation for credit card validation requests
  * in the TeleCash system, including various amounts and comment scenarios.
  */
-class ValidateTest extends \PHPUnit\Framework\TestCase
+class ValidateTest extends TestCase
 {
     /**
      * Tests the XML generation for the Validate request
@@ -26,6 +29,8 @@ class ValidateTest extends \PHPUnit\Framework\TestCase
      * @param CreditCardData $ccData Credit card data to validate
      * @param float $amount Transaction amount
      * @param string|null $text Optional comment text
+     * @throws DOMException
+     * @throws Exception
      * @dataProvider dataProvider
      */
     public function testXMLGeneration(CreditCardData $ccData, float $amount, ?string $text): void

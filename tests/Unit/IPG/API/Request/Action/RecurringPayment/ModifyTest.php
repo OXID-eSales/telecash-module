@@ -5,6 +5,8 @@ namespace OxidSolutionCatalysts\TeleCash\IPG\API\Request\Action\RecurringPayment
 use OxidSolutionCatalysts\TeleCash\IPG\API\Model\Payment;
 use OxidSolutionCatalysts\TeleCash\IPG\API\Model\RecurringPaymentInformation;
 use OxidSolutionCatalysts\TeleCash\IPG\API\Service\OrderService;
+use PHPUnit\Framework\MockObject\Exception;
+use PHPUnit\Framework\TestCase;
 
 /**
  * Test class for RecurringPayment Modify request action
@@ -12,7 +14,7 @@ use OxidSolutionCatalysts\TeleCash\IPG\API\Service\OrderService;
  * Validates the XML generation for modifying existing recurring payments
  * in the TeleCash system, including updates to payment and scheduling information.
  */
-class ModifyTest extends \PHPUnit\Framework\TestCase
+class ModifyTest extends TestCase
 {
     /**
      * Tests the XML generation for the Modify request
@@ -28,6 +30,7 @@ class ModifyTest extends \PHPUnit\Framework\TestCase
      * @param Payment $payment Updated payment details
      * @param RecurringPaymentInformation $paymentInformation Modified recurring payment configuration
      * @dataProvider dataProvider
+     * @throws Exception
      */
     public function testXMLGeneration(
         string $orderId,

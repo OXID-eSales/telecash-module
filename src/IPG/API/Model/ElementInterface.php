@@ -2,15 +2,17 @@
 
 namespace OxidSolutionCatalysts\TeleCash\IPG\API\Model;
 
+use DOMDocument;
+
 /**
  * Interface ElementInterface
  */
 interface ElementInterface
 {
     /**
-     * @param \DOMDocument $document
+     * @param DOMDocument $document
      *
      * @return mixed
      */
-    public function getXML(\DOMDocument $document): mixed;
+    public function getXML(DOMDocument $document): mixed;
 }

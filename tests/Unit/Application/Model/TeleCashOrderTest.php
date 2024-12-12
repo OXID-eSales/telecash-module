@@ -7,8 +7,10 @@
 
 namespace OxidSolutionCatalysts\TeleCash\Tests\Unit\Application\Model;
 
+use OxidSolutionCatalysts\TeleCash\IPG\TeleCashCurrency;
 use OxidSolutionCatalysts\TeleCash\Tests\Unit\Application\Model\TestClasses\TeleCashOrderTestClass;
 use PHPUnit\Framework\TestCase;
+use InvalidArgumentException;
 
 /**
  * Unit Test Suite for TeleCashOrder
@@ -20,6 +22,7 @@ class TeleCashOrderTest extends TestCase
 {
     private array $sampleTransactionData;
     private TeleCashOrderTestClass $order;
+    private $teleCashCurrencyMock;
 
     /**
      * Set up test environment
@@ -29,8 +32,16 @@ class TeleCashOrderTest extends TestCase
      */
     protected function setUp(): void
     {
+        // Create mock for TeleCashCurrency
+        $this->teleCashCurrencyMock = $this->createMock(TeleCashCurrency::class);
+
         // Initialize test class without database connection
         $this->order = new TeleCashOrderTestClass(null, false);
+
+        // Set mocked currency handler
+        $reflection = new \ReflectionClass($this->order);
+        $property = $reflection->getProperty('teleCashCurrency');
+        $property->setValue($this->order, $this->teleCashCurrencyMock);
 
         // Prepare comprehensive sample transaction data
         $this->sampleTransactionData = [
@@ -43,8 +54,8 @@ class TeleCashOrderTest extends TestCase
             'currency' => '978',  // EUR in numeric format
             'chargetotal' => '99.99',
             'status' => 'APPROVED',
-            'processor_response_code' => '00',  // Note: Leading zero must be preserved
-            'paymentMethod' => 'V'  // VISA code
+            'processor_response_code' => '00',
+            'paymentMethod' => 'V'
         ];
 
         $this->order->setTransactionResult($this->sampleTransactionData);
@@ -95,6 +106,61 @@ class TeleCashOrderTest extends TestCase
     }
 
     /**
+     * Test IpgTransaction ID retrieval
+     *
+     * Verifies the order ID is correctly returned from both
+     * transaction data and database
+     */
+    public function testGetIpgTransactionId(): void
+    {
+        // Test from TransactionResult
+        $this->assertEquals('ipg123', $this->order->getIpgTransactionId());
+    }
+
+    /**
+     * Test currency (in oxid-style) code conversion and validation
+     *
+     * Verifies that:
+     * - Numeric currency codes are correctly converted to ISO codes
+     * - Invalid codes are handled properly (empty string)
+     * - Both data sources work correctly
+     */
+    public function testGetOxidCurrency(): void
+    {
+        // Test 1: Successful case with '978'
+        $this->teleCashCurrencyMock
+            ->expects($this->exactly(3))
+            ->method('getShortnameByCurrencyCode')
+            ->willReturnCallback(function ($code) {
+                if ($code === '978') {
+                    return 'EUR';
+                }
+                if ($code === 'EUR') {
+                    return 'EUR';
+                }
+                if ($code === 'invalid') {
+                    throw new InvalidArgumentException('Invalid currency code');
+                }
+                return '';
+            });
+
+        // Test from TransactionResult with valid currency
+        $this->assertEquals('EUR', $this->order->getOxidCurrency());
+
+        // Test invalid currency
+        $invalidData = $this->sampleTransactionData;
+        $invalidData['currency'] = 'invalid';
+        $this->order->setTransactionResult($invalidData);
+        $this->assertEquals('', $this->order->getOxidCurrency());
+
+        // Test from DB with valid currency
+        $this->order->simulateLoadedFromDb([
+            'currency' => 'EUR'
+        ]);
+        $this->assertEquals('EUR', $this->order->getOxidCurrency());
+    }
+
+    /**
      * Test currency code conversion and validation
      *
      * Verifies that:
@@ -105,19 +171,19 @@ class TeleCashOrderTest extends TestCase
     public function testGetCurrency(): void
     {
         // Test from TransactionResult
-        $this->assertEquals('EUR', $this->order->getCurrency());
+        $this->assertEquals('978', $this->order->getCurrency());
 
         // Test invalid currency
         $invalidData = $this->sampleTransactionData;
         $invalidData['currency'] = 'invalid';
         $this->order->setTransactionResult($invalidData);
-        $this->assertEquals('', $this->order->getCurrency());
+        $this->assertEquals('invalid', $this->order->getCurrency());
 
         // Test from DB
         $this->order->simulateLoadedFromDb([
-            'currency' => 'EUR'
+            'currency' => '978'
         ]);
-        $this->assertEquals('EUR', $this->order->getCurrency());
+        $this->assertEquals('978', $this->order->getCurrency());
     }
 
     /**
@@ -132,25 +198,58 @@ class TeleCashOrderTest extends TestCase
     public function testGetChargeTotal(): void
     {
         // Test from TransactionResult
-        $this->assertEquals(99.99, $this->order->getChargeTotal());
+        $this->assertEquals('99.99', $this->order->getChargeTotal());
 
         // Test German decimal separator
         $germanData = $this->sampleTransactionData;
         $germanData['chargetotal'] = '99,99';
         $this->order->setTransactionResult($germanData);
-        $this->assertEquals(99.99, $this->order->getChargeTotal());
+        $this->assertEquals('99.99', $this->order->getChargeTotal());
 
         // Test invalid charge total
         $invalidData = $this->sampleTransactionData;
         $invalidData['chargetotal'] = 'invalid';
         $this->order->setTransactionResult($invalidData);
-        $this->assertEquals(0.0, $this->order->getChargeTotal());
+        $this->assertEquals('0.00', $this->order->getChargeTotal());
 
         // Test from DB
         $this->order->simulateLoadedFromDb([
             'chargetotal' => 99.99
         ]);
-        $this->assertEquals(99.99, $this->order->getChargeTotal());
+        $this->assertEquals('99.99', $this->order->getChargeTotal());
+    }
+
+    /**
+     * Test charge total (in oxid style as float) handling
+     *
+     * Verifies that:
+     * - Valid amounts are correctly converted to float
+     * - German decimal separator is handled
+     * - Invalid amounts return 0.0
+     * - Both data sources work correctly
+     */
+    public function testGetOxidChargeTotal(): void
+    {
+        // Test from TransactionResult
+        $this->assertEquals(99.99, $this->order->getOxidChargeTotal());
+
+        // Test German decimal separator
+        $germanData = $this->sampleTransactionData;
+        $germanData['chargetotal'] = '99,99';
+        $this->order->setTransactionResult($germanData);
+        $this->assertEquals(99.99, $this->order->getOxidChargeTotal());
+
+        // Test invalid charge total
+        $invalidData = $this->sampleTransactionData;
+        $invalidData['chargetotal'] = 'invalid';
+        $this->order->setTransactionResult($invalidData);
+        $this->assertEquals(0.0, $this->order->getOxidChargeTotal());
+
+        // Test from DB
+        $this->order->simulateLoadedFromDb([
+            'chargetotal' => 99.99
+        ]);
+        $this->assertEquals(99.99, $this->order->getOxidChargeTotal());
     }
 
     /**
