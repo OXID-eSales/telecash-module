@@ -6,6 +6,8 @@
  */
 
 use OxidEsales\Eshop\Application\Controller\Admin\ModuleConfiguration as oxModuleConfiguration;
+use OxidEsales\Eshop\Application\Controller\Admin\OrderMain as oxOrderMain;
+use OxidEsales\Eshop\Application\Controller\Admin\OrderOverview as oxOrderOverview;
 use OxidEsales\Eshop\Application\Controller\Admin\PaymentMain as oxPaymentMain;
 use OxidEsales\Eshop\Application\Controller\OrderController as oxOrderController;
 use OxidEsales\Eshop\Application\Controller\PaymentController as oxPaymentController;
@@ -22,6 +24,8 @@ use OxidSolutionCatalysts\TeleCash\Application\Controller\Admin\OrderTeleCash;
 use OxidSolutionCatalysts\TeleCash\Application\Controller\FrontendTeleCashNotificationEndpoint;
 use OxidSolutionCatalysts\TeleCash\Core\Module;
 use OxidSolutionCatalysts\TeleCash\Extension\Application\Controller\Admin\ModuleConfiguration;
+use OxidSolutionCatalysts\TeleCash\Extension\Application\Controller\Admin\OrderMain;
+use OxidSolutionCatalysts\TeleCash\Extension\Application\Controller\Admin\OrderOverview;
 use OxidSolutionCatalysts\TeleCash\Extension\Application\Controller\Admin\PaymentMain;
 use OxidSolutionCatalysts\TeleCash\Extension\Application\Controller\OrderController;
 use OxidSolutionCatalysts\TeleCash\Extension\Application\Controller\PaymentController;
@@ -76,6 +80,8 @@ $aModule = [
         // Controller Admin
         oxModuleConfiguration::class => ModuleConfiguration::class,
         oxPaymentMain::class         => PaymentMain::class,
+        oxOrderMain::class           => OrderMain::class,
+        oxOrderOverview::class       => OrderOverview::class,
         // Controller Frontend
         oxOrderController::class     => OrderController::class,
         oxPaymentController::class   => PaymentController::class,

@@ -182,6 +182,9 @@ class OrderTeleCash extends AdminController
         }
     }
 
+    /**
+     * @throws TeleCashException
+     */
     private function isChargePossible(?float $amount = null): bool
     {
         $amount = !is_null($amount) ? $amount : $this->getPossibleCharge();
