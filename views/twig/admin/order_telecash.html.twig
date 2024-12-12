@@ -8,17 +8,12 @@
 
 <form name="transfer" id="transfer" action="{{ oViewConf.getSelfLink()|raw }}" method="post">
     {{ oViewConf.getHiddenSid()|raw }}
-    <input type="hidden" name="oxid" value="{{ oxid }}">
-    <input type="hidden" name="cl" value="{{ oViewConf.getTopActiveClassName() }}">
+    <input type="hidden" name="oxid" value="{{ oxid }}" />
+    <input type="hidden" name="cl" value="{{ oViewConf.getTopActiveClassName() }}" />
 </form>
 
-{% if isTeleCashOrder is same as (false) %}
-    <div class="errorbox">
-        {{ translate({ ident: "OSC_TELECASH_NO_TELECASH_ORDER" }) }}
-    </div>
-{% else %}
-    <div class="box">
-        <table id="liste" cellspacing="0" cellpadding="0" border="0"  width="98%">
+{% if isTeleCashOrder is same as (true) %}
+    <table id="liste" cellspacing="10" cellpadding="0" border="0"  width="98%">
             <tbody>
                 <tr>
                     <td valign="top" class="edittext">
@@ -38,7 +33,7 @@
                                             {{ translate({ ident: "OSC_TELECASH_CHARGE_TOTAL" }) }}
                                         </td>
                                         <td class="edittext">
-                                            {{ format_price(priceChargeTotal, { currency: currencyObj }) }}
+                                            {{ format_price(chargeTotalObject, { currency: currencyObject }) }}
                                         </td>
                                     </tr>
                                     <tr>
@@ -71,6 +66,78 @@
                                     {% endblock %}
                                 </tbody>
                             </table>
+                            {% block admin_order_telecash_charge %}
+                                {% if isChargePossible is same as (true) %}
+                                    <br /><br />
+                                    <h3>{{ translate({ ident: "OSC_TELECASH_CHARGE_HEAD" }) }}</h3>
+                                    <p>{{ translate({ ident: "OSC_TELECASH_CHARGE_NOTE" }) }}</p>
+                                    <form name="chargeOrder" id="chargeOrder" action="{{ oViewConf.getSelfLink()|raw }}" method="post">
+                                        {{ oViewConf.getHiddenSid()|raw }}
+                                        <input type="hidden" name="oxid" value="{{ oxid }}" />
+                                        <input type="hidden" name="cl" value="{{ oViewConf.getTopActiveClassName() }}" />
+                                        <input type="hidden" name="fnc" value="doChargeOrder" />
+                                        <label for="chargeAmount">{{ translate({ ident: "OSC_TELECASH_CHARGE_LABEL", args: currencyString, suffix: "COLON" }) }}
+                                            <input
+                                                id="chargeAmount"
+                                                name="chargeAmount"
+                                                type="text"
+                                                pattern="^\d*\.?\d{0,2}$"
+                                                inputmode="decimal"
+                                                value="{{ chargeAmountFloat }}"
+                                                title="{{ translate({ ident: "OSC_TELECASH_CHARGE_TITLE", args: chargeAmountFloat }) }}"
+                                                onblur="formatAmount(this, 0, {{ chargeAmountFloat }})"
+                                                oninput="validateInput(this, 0, {{ chargeAmountFloat }})"
+                                            />
+                                        </label>
+                                        <button
+                                            type="submit"
+                                            aria-label="{{ translate({ ident: "OSC_TELECASH_CHARGE_SUBMIT" }) }}"
+                                            title="{{ translate({ ident: "OSC_TELECASH_CHARGE_SUBMIT_HELP" }) }}"
+                                        >{{ translate({ ident: "OSC_TELECASH_CHARGE_SUBMIT" }) }}
+                                        </button>
+                                    </form>
+                                    <script>
+                                    window.onload = function() {
+                                        const input = document.getElementById('chargeAmount');
+                                        formatAmount(input, 0, {{ chargeAmountFloat }});
+                                    }
+                                    function validateInput(input) {
+                                        // allows only digits and decimal points
+                                        input.value = input.value.replace(/[^\d.]/g, '');
+
+                                        // Prevents multiple decimal points
+                                        let parts = input.value.split('.');
+                                        if (parts.length > 2) {
+                                            input.value = parts[0] + '.' + parts.slice(1).join('');
+                                        }
+
+                                        // Limits decimal places to 2
+                                        if (parts.length > 1) {
+                                            input.value = parts[0] + '.' + parts[1].slice(0, 2);
+                                        }
+                                    }
+
+                                    function formatAmount(input, min, max) {
+                                        if (input.value === '' || input.value === '.') {
+                                            input.value = '0.00';
+                                            return;
+                                        }
+
+                                        let value = parseFloat(input.value);
+
+                                        // Checks Min/Max limits
+                                        if (isNaN(value) || value < min) {
+                                            value = min;
+                                        } else if (value > max) {
+                                            value = max;
+                                        }
+
+                                        // Formatted to 2 decimal places
+                                        input.value = value.toFixed(2);
+                                    }
+                                </script>
+                                {% endif %}
+                            {% endblock %}
                         {% endblock %}
                     </td>
                     <td valign="top" class="edittext" align="left" width="50%">
@@ -119,7 +186,7 @@
                                                         {{ historyItem.getTxnDate() }} {{ translate({ ident: "OSC_TELECASH_OCLOCK" }) }}
                                                     </td>
                                                     <td class="edittext">
-                                                        {{ format_price(historyItem.getOxidChargeTotal(), { currency: currencyObj }) }}
+                                                        {{ format_price(historyItem.getOxidChargeTotal(), { currency: currencyObject }) }}
                                                     </td>
                                                     <td class="edittext">
                                                         {{ historyItem.getStatus() }} ({{ translate({ ident: "OSC_TELECASH_RESPONSECODE", suffix: "COLON" }) }} {{ historyItem.getProcessorResponseCode() }})
@@ -150,7 +217,6 @@
                 </tr>
             </tbody>
         </table>
-    </div>
 {% endif %}
 {% include "bottomnaviitem.html.twig" %}
 
