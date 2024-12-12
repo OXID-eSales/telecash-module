@@ -14,16 +14,17 @@ class DirectDebitItemTest extends TestCase
 
     protected function setUp(): void
     {
+        $this->document = new \DOMDocument();
+
         // Create mock for DirectDebitData
         $this->directDebitData = $this->createMock(DirectDebitData::class);
 
-        // Create real DOM elements for testing
-        $this->mockDocument = new \DOMDocument();
-        $this->mockDirectDebitElement = $this->mockDocument->createElement('ns1:DirectDebitData');
+        // Create test element with correct namespace
+        $this->directDebitElement = $this->document->createElement('ns1:DirectDebitData');
 
-        // Setup DirectDebitData mock to return our test element
+        // Configure mock
         $this->directDebitData->method('getXML')
-            ->willReturn($this->mockDirectDebitElement);
+            ->willReturn($this->directDebitElement);
     }
 
     public function testConstructorAndBasicXMLGeneration(): void
@@ -33,19 +34,22 @@ class DirectDebitItemTest extends TestCase
             'TEST-ID-123'
         );
 
-        $xml = $directDebitItem->getXML($this->mockDocument);
+        $xml = $directDebitItem->getXML($this->document);
 
-        // Check basic structure
         $this->assertEquals('ns2:DataStorageItem', $xml->nodeName);
 
-        // Check HostedDataID
         $hostedDataId = $xml->getElementsByTagName('ns2:HostedDataID')->item(0);
-        $this->assertNotNull($hostedDataId);
+        $this->assertNotNull($hostedDataId, 'HostedDataID element should exist');
         $this->assertEquals('TEST-ID-123', $hostedDataId->textContent);
 
-        // Verify DirectDebitData was called and integrated
-        $this->assertContains($this->mockDirectDebitElement, iterator_to_array($xml->childNodes));
+        // Verify DirectDebitData is included
+        $this->assertContains(
+            $this->directDebitElement,
+            iterator_to_array($xml->childNodes),
+            'DirectDebitData element should be included'
+        );
     }
+
 
     public function testXMLGenerationWithAllOptionalParameters(): void
     {
@@ -56,16 +60,16 @@ class DirectDebitItemTest extends TestCase
             'true'
         );
 
-        $xml = $directDebitItem->getXML($this->mockDocument);
+        $xml = $directDebitItem->getXML($this->document);
 
-        // Check function element
+        // Test Function element
         $function = $xml->getElementsByTagName('ns2:Function')->item(0);
-        $this->assertNotNull($function);
+        $this->assertNotNull($function, 'Function element should exist');
         $this->assertEquals('store', $function->textContent);
 
-        // Check decline duplicates element
+        // Test DeclineHostedDataDuplicates element
         $declineDuplicates = $xml->getElementsByTagName('ns2:DeclineHostedDataDuplicates')->item(0);
-        $this->assertNotNull($declineDuplicates);
+        $this->assertNotNull($declineDuplicates, 'DeclineHostedDataDuplicates element should exist');
         $this->assertEquals('true', $declineDuplicates->textContent);
     }
 
@@ -76,11 +80,17 @@ class DirectDebitItemTest extends TestCase
             'TEST-ID-123'
         );
 
-        $xml = $directDebitItem->getXML($this->mockDocument);
+        $xml = $directDebitItem->getXML($this->document);
 
-        // Optional elements should not exist
-        $this->assertNull($xml->getElementsByTagName('ns2:Function')->item(0));
-        $this->assertNull($xml->getElementsByTagName('ns2:DeclineHostedDataDuplicates')->item(0));
+        // Verify optional elements don't exist
+        $this->assertNull(
+            $xml->getElementsByTagName('ns2:Function')->item(0),
+            'Function element should not exist'
+        );
+        $this->assertNull(
+            $xml->getElementsByTagName('ns2:DeclineHostedDataDuplicates')->item(0),
+            'DeclineHostedDataDuplicates element should not exist'
+        );
     }
 
     public function testElementOrder(): void
@@ -92,25 +102,26 @@ class DirectDebitItemTest extends TestCase
             'true'
         );
 
-        $xml = $directDebitItem->getXML($this->mockDocument);
+        $xml = $directDebitItem->getXML($this->document);
         $children = iterator_to_array($xml->childNodes);
 
-        // Check the order of elements
-        $expectedOrder = ['ns2:Function', 'ns2:DeclineHostedDataDuplicates', 'ns1:DirectDebitData', 'ns2:HostedDataID'];
-        $actualOrder = array_map(fn($node) => $node->nodeName, $children);
+        $expectedOrder = [
+            'ns2:Function',
+            'ns2:DeclineHostedDataDuplicates',
+            'ns1:DirectDebitData',
+            'ns2:HostedDataID'
+        ];
 
-        // Remove any null elements that might not be present
-        $actualOrder = array_filter($actualOrder);
-
-        $this->assertEquals(
-            array_values(array_intersect($expectedOrder, $actualOrder)),
-            array_values($actualOrder)
+        $actualOrder = array_map(
+            fn($node) => $node->nodeName,
+            array_filter($children)
         );
+
+        $this->assertEquals($expectedOrder, $actualOrder, 'Elements should be in correct order');
     }
 
     public function testNullableParameters(): void
     {
-        // Test with null values for optional parameters
         $directDebitItem = new DirectDebitItem(
             $this->directDebitData,
             'TEST-ID-123',
@@ -118,14 +129,28 @@ class DirectDebitItemTest extends TestCase
             null
         );
 
-        $xml = $directDebitItem->getXML($this->mockDocument);
+        $xml = $directDebitItem->getXML($this->document);
 
-        // Verify optional elements are not present
-        $this->assertNull($xml->getElementsByTagName('ns2:Function')->item(0));
-        $this->assertNull($xml->getElementsByTagName('ns2:DeclineHostedDataDuplicates')->item(0));
+        // Required elements should exist
+        $hostedDataId = $xml->getElementsByTagName('ns2:HostedDataID')->item(0);
+        $this->assertNotNull($hostedDataId, 'HostedDataID element should exist');
+        $this->assertEquals('TEST-ID-123', $hostedDataId->textContent);
 
-        // But required elements are still there
-        $this->assertNotNull($xml->getElementsByTagName('ns2:HostedDataID')->item(0));
-        $this->assertContains($this->mockDirectDebitElement, iterator_to_array($xml->childNodes));
+        // DirectDebitData should be included
+        $this->assertContains(
+            $this->directDebitElement,
+            iterator_to_array($xml->childNodes),
+            'DirectDebitData element should be included'
+        );
+
+        // Optional elements should not exist
+        $this->assertNull(
+            $xml->getElementsByTagName('ns2:Function')->item(0),
+            'Function element should not exist'
+        );
+        $this->assertNull(
+            $xml->getElementsByTagName('ns2:DeclineHostedDataDuplicates')->item(0),
+            'DeclineHostedDataDuplicates element should not exist'
+        );
     }
 }

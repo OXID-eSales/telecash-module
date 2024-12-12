@@ -5,6 +5,7 @@ namespace OxidSolutionCatalysts\TeleCash\IPG\API\Service;
 use DOMDocument;
 use DOMNode;
 use Exception;
+use OxidSolutionCatalysts\TeleCash\Core\Service\Logger;
 use OxidSolutionCatalysts\TeleCash\IPG\API\AbstractRequest;
 use OxidSolutionCatalysts\TeleCash\IPG\API\Request\ActionRequest;
 use OxidSolutionCatalysts\TeleCash\IPG\API\Request\OrderRequest;
@@ -23,38 +24,46 @@ class OrderService extends SoapClientCurl
     public const SOAP_CLIENT_ERROR_MERCHANT   = 'MerchantException';
     public const SOAP_CLIENT_ERROR_PROCESSING = 'ProcessingException';
 
-    private bool $debug;
-
     /**
      * @param array<int|string, mixed>  $curlOptions CURL config values
      * @param string $username    API user
      * @param string $password    API pass
-     * @param bool   $debug       Flag, debug mode
+     * @param Logger $logger      Logger
      */
-    public function __construct(array $curlOptions, string $username, string $password, bool $debug = false)
-    {
+    public function __construct(
+        array $curlOptions,
+        string $username,
+        string $password,
+        private readonly Logger $logger
+    ) {
         parent::__construct($curlOptions, $username, $password);
-
-        $this->debug = $debug;
     }
 
     /**
+     * @param string $type
      * @param DOMNode $element
      */
-    public function dumpDOMElement(DOMNode $element): void
+    public function dumpDOMElement(string $type, DOMNode $element): void
     {
         if ($element->ownerDocument !== null) {
-            var_dump($element->ownerDocument->saveXML($element));
+            $this->logger->log(
+                'debug',
+                'Debug: ' . $type . ': ' . $element->ownerDocument->saveXML($element)
+            );
         }
     }
 
-    public function dumpXML(string $source): void
+    public function handleDebug(string $type, string $source): void
     {
         $xml = new DOMDocument();
         $xml->loadXML($source);
         $xml->preserveWhiteSpace = false;
         $xml->formatOutput = true;
-        var_dump($xml->saveXML());
+
+        $this->logger->log(
+            'debug',
+            'Debug: ' . $type . ': ' . $xml->saveXML()
+        );
     }
 
     /**
@@ -105,18 +114,12 @@ class OrderService extends SoapClientCurl
         $request->appendChild($envelope);
         $xml = $request->saveXML();
 
-        if ($this->debug) {
-            $this->dumpXML((string)$xml);
-        }
-
+        $this->handleDebug('Request', (string)$xml);
         $response = false;
         if ($xml) {
             $response = $this->doRequest($xml);
         }
-
-        if ($this->debug) {
-            $this->dumpXML((string)$response);
-        }
+        $this->handleDebug('Response', (string)$response);
 
         if ($response === false) {
             throw new RuntimeException($this->getErrorMessage());

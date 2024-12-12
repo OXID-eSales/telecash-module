@@ -2,8 +2,11 @@
 
 namespace OxidSolutionCatalysts\TeleCash\IPG\API\Request\Action;
 
+use DOMException;
 use OxidSolutionCatalysts\TeleCash\IPG\API\Model\Payment;
 use OxidSolutionCatalysts\TeleCash\IPG\API\Service\OrderService;
+use PHPUnit\Framework\MockObject\Exception;
+use PHPUnit\Framework\TestCase;
 
 /**
  * Test class for ValidateHostedData request action
@@ -11,7 +14,7 @@ use OxidSolutionCatalysts\TeleCash\IPG\API\Service\OrderService;
  * Validates the XML generation for validating stored payment data
  * in the TeleCash system.
  */
-class ValidateHostedDataTest extends \PHPUnit\Framework\TestCase
+class ValidateHostedDataTest extends TestCase
 {
     /**
      * Tests the XML generation for the ValidateHostedData request
@@ -22,6 +25,8 @@ class ValidateHostedDataTest extends \PHPUnit\Framework\TestCase
      * 3. The XML structure meets the required format
      *
      * @param Payment $payment The payment information to validate
+     * @throws DOMException
+     * @throws Exception
      * @dataProvider dataProvider
      */
     public function testXMLGeneration(Payment $payment): void

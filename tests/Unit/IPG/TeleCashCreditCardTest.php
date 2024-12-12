@@ -2,25 +2,26 @@
 
 namespace OxidSolutionCatalysts\TeleCash\Tests\Unit\IPG;
 
+use OxidSolutionCatalysts\TeleCash\Core\Service\Logger;
 use OxidSolutionCatalysts\TeleCash\IPG\API\Service\OrderService;
 use OxidSolutionCatalysts\TeleCash\IPG\API\Response\Action\Validation;
 use OxidSolutionCatalysts\TeleCash\IPG\API\Response\Action\Confirm;
 use OxidSolutionCatalysts\TeleCash\IPG\API\Response\Action\Display;
 use OxidSolutionCatalysts\TeleCash\IPG\API\Response\Order\Sell;
-use OxidSolutionCatalysts\TeleCash\IPG\API\Response\Action\ConfirmRecurring;
-use OxidSolutionCatalysts\TeleCash\IPG\API\Response\Error;
+use OxidSolutionCatalysts\TeleCash\IPG\TeleCashConstants;
 use OxidSolutionCatalysts\TeleCash\IPG\TeleCashCreditCard;
 use PHPUnit\Framework\TestCase;
-use ReflectionClass;
 
 class TeleCashCreditCardTest extends TestCase
 {
-    private $teleCash;
+    private TeleCashCreditCard $teleCash;
     private $orderServiceMock;
+    private $loggerMock;
 
     protected function setUp(): void
     {
         $this->orderServiceMock = $this->createMock(OrderService::class);
+        $this->loggerMock = $this->createMock(Logger::class);
 
         $this->teleCash = new TeleCashCreditCard(
             'https://test.com',
@@ -29,12 +30,12 @@ class TeleCashCreditCardTest extends TestCase
             '/path/to/cert',
             '/path/to/key',
             'passphrase',
-            '/path/to/server/cert'
+            '/path/to/server/cert',
+            $this->loggerMock
         );
 
         $reflection = new \ReflectionClass($this->teleCash);
         $property = $reflection->getProperty('myService');
-        $property->setAccessible(true);
         $property->setValue($this->teleCash, $this->orderServiceMock);
     }
 
@@ -45,20 +46,21 @@ class TeleCashCreditCardTest extends TestCase
         $cardNumber = '';
         if (!empty($withCardNumber)) {
             $cardNumber = '<ns3:DataStorageItem>
-<ns2:CreditCardData>
-<ns1:CardNumber>' . $withCardNumber . '</ns1:CardNumber>
-<ns1:ExpMonth>12</ns1:ExpMonth>
-<ns1:ExpYear>27</ns1:ExpYear>
-</ns2:CreditCardData>
-<ns2:HostedDataID>d56feaaf-2d96-4159-8fd6-887e07fc9052</ns2:HostedDataID>
-</ns3:DataStorageItem>';
+                <ns2:CreditCardData>
+                    <ns1:CardNumber>' . $withCardNumber . '</ns1:CardNumber>
+                    <ns1:ExpMonth>12</ns1:ExpMonth>
+                    <ns1:ExpYear>27</ns1:ExpYear>
+                </ns2:CreditCardData>
+                <ns2:HostedDataID>d56feaaf-2d96-4159-8fd6-887e07fc9052</ns2:HostedDataID>
+            </ns3:DataStorageItem>';
         }
 
-        $xml = '<SOAP-ENV:Envelope 
-            xmlns:SOAP-ENV="' . OrderService::NAMESPACE_SOAP . '"
-            xmlns:ns1="' . OrderService::NAMESPACE_N1 . '"
-            xmlns:ns2="' . OrderService::NAMESPACE_N2 . '"
-            xmlns:ns3="' . OrderService::NAMESPACE_N3 . '">
+        return '<?xml version="1.0" encoding="UTF-8"?>
+        <SOAP-ENV:Envelope 
+            xmlns:SOAP-ENV="' . TeleCashConstants::NAMESPACE_SOAP . '"
+            xmlns:ns1="' . TeleCashConstants::NAMESPACE_V1 . '"
+            xmlns:ns2="' . TeleCashConstants::NAMESPACE_A1 . '"
+            xmlns:ns3="' . TeleCashConstants::NAMESPACE_IPGAPI . '">
             <SOAP-ENV:Body>
                 ' . $cardNumber . '
                 <ns3:' . $responseType . '>
@@ -82,17 +84,15 @@ class TeleCashCreditCardTest extends TestCase
                 </ns3:' . $responseType . '>
             </SOAP-ENV:Body>
         </SOAP-ENV:Envelope>';
-
-        return $xml;
     }
 
     private function createUnsuccessfulResponseXML(): string
     {
         return '<SOAP-ENV:Envelope 
-            xmlns:SOAP-ENV="' . OrderService::NAMESPACE_SOAP . '"
-            xmlns:ns1="' . OrderService::NAMESPACE_N1 . '"
-            xmlns:ns2="' . OrderService::NAMESPACE_N2 . '"
-            xmlns:ns3="' . OrderService::NAMESPACE_N3 . '">
+            xmlns:SOAP-ENV="' . TeleCashConstants::NAMESPACE_SOAP . '"
+            xmlns:ns1="' . TeleCashConstants::NAMESPACE_V1 . '"
+            xmlns:ns2="' . TeleCashConstants::NAMESPACE_A1 . '"
+            xmlns:ns3="' . TeleCashConstants::NAMESPACE_IPGAPI . '">
             <SOAP-ENV:Body>
                 <ns3:IPGApiActionResponse>
                     <ns3:successfully>false</ns3:successfully>
@@ -121,13 +121,7 @@ class TeleCashCreditCardTest extends TestCase
 </SOAP-ENV:Envelope>';
     }
 
-    public function testSetDebugMode()
-    {
-        $this->teleCash->setDebugMode(true);
-        $this->assertTrue(true);
-    }
-
-    public function testValidate()
+    public function testValidate(): void
     {
         $domDocument = new \DOMDocument();
         $domDocument->loadXML($this->createSuccessfulResponseXML());
@@ -142,7 +136,7 @@ class TeleCashCreditCardTest extends TestCase
         $this->assertTrue($result->wasSuccessful());
     }
 
-    public function testStoreHostedData()
+    public function testStoreHostedData(): void
     {
         $domDocument = new \DOMDocument();
         $domDocument->loadXML($this->createSuccessfulResponseXML());
@@ -157,7 +151,7 @@ class TeleCashCreditCardTest extends TestCase
         $this->assertTrue($result->wasSuccessful());
     }
 
-    public function testDisplayHostedData()
+    public function testDisplayHostedData(): void
     {
         $domDocument = new \DOMDocument();
         $domDocument->loadXML($this->createSuccessfulResponseXML('IPGApiActionResponse', '411111******1111'));
@@ -173,11 +167,10 @@ class TeleCashCreditCardTest extends TestCase
         $this->assertEquals('411111******1111', $result->getCCNumber());
     }
 
-
-    public function testValidateHostedData()
+    public function testValidateHostedData(): void
     {
         $domDocument = new \DOMDocument();
-        $domDocument->loadXML($this->createSuccessfulResponseXML('IPGApiActionResponse', '411111******1111'));
+        $domDocument->loadXML($this->createSuccessfulResponseXML());
 
         $this->orderServiceMock->expects($this->once())
             ->method('IPGApiAction')
@@ -189,10 +182,10 @@ class TeleCashCreditCardTest extends TestCase
         $this->assertTrue($result->wasSuccessful());
     }
 
-    public function testDeleteHostedData()
+    public function testDeleteHostedData(): void
     {
         $domDocument = new \DOMDocument();
-        $domDocument->loadXML($this->createSuccessfulResponseXML('IPGApiActionResponse', '411111******1111'));
+        $domDocument->loadXML($this->createSuccessfulResponseXML());
 
         $this->orderServiceMock->expects($this->once())
             ->method('IPGApiAction')
@@ -204,7 +197,8 @@ class TeleCashCreditCardTest extends TestCase
         $this->assertTrue($result->wasSuccessful());
     }
 
-    public function testSellUsingHostedData()
+
+    public function testSellUsingHostedData(): void
     {
         $domDocument = new \DOMDocument();
         $domDocument->loadXML($this->createSuccessfulResponseXML());
@@ -219,7 +213,37 @@ class TeleCashCreditCardTest extends TestCase
         $this->assertTrue($result->wasSuccessful());
     }
 
-    public function testSellUsingHostedDataWithComment()
+    public function testSell(): void
+    {
+        $domDocument = new \DOMDocument();
+        $domDocument->loadXML($this->createSuccessfulResponseXML());
+
+        $this->orderServiceMock->expects($this->once())
+            ->method('IPGApiOrder')
+            ->willReturn($domDocument);
+
+        $result = $this->teleCash->sell('4111111111111111', '12/25', 100.00);
+
+        $this->assertInstanceOf(Sell::class, $result);
+        $this->assertTrue($result->wasSuccessful());
+    }
+
+    public function testSellWithComment(): void
+    {
+        $domDocument = new \DOMDocument();
+        $domDocument->loadXML($this->createSuccessfulResponseXML());
+
+        $this->orderServiceMock->expects($this->once())
+            ->method('IPGApiOrder')
+            ->willReturn($domDocument);
+
+        $result = $this->teleCash->sell('4111111111111111', '12/25', 100.00, 'Test Comment');
+
+        $this->assertInstanceOf(Sell::class, $result);
+        $this->assertTrue($result->wasSuccessful());
+    }
+
+    public function testSellUsingHostedDataWithComment(): void
     {
         $domDocument = new \DOMDocument();
         $domDocument->loadXML($this->createSuccessfulResponseXML());
@@ -238,22 +262,7 @@ class TeleCashCreditCardTest extends TestCase
         $this->assertTrue($result->wasSuccessful());
     }
 
-    public function testSellWithComment()
-    {
-        $domDocument = new \DOMDocument();
-        $domDocument->loadXML($this->createSuccessfulResponseXML());
-
-        $this->orderServiceMock->expects($this->once())
-            ->method('IPGApiOrder')
-            ->willReturn($domDocument);
-
-        $result = $this->teleCash->sell('cc_numer', 'cc_valid', 100.00, 'comment', 'hosted_data_id');
-
-        $this->assertInstanceOf(Sell::class, $result);
-        $this->assertTrue($result->wasSuccessful());
-    }
-
-    public function testSellWithoutComment()
+    public function testSellWithoutComment(): void
     {
         $domDocument = new \DOMDocument();
         $domDocument->loadXML($this->createSuccessfulResponseXML());

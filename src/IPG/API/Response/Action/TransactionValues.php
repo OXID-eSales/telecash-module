@@ -50,7 +50,5 @@ class TransactionValues extends AbstractResponse
                 $this->valueMap[ $namespace ][ $field ] = $fieldValue;
             }
         }
-
-        print_r($this->valueMap);
     }
 }

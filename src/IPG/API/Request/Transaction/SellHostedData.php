@@ -10,7 +10,6 @@ use OxidSolutionCatalysts\TeleCash\IPG\API\Request\Transaction;
 use OxidSolutionCatalysts\TeleCash\IPG\API\Response\Error;
 use OxidSolutionCatalysts\TeleCash\IPG\API\Response\Order\Sell;
 use OxidSolutionCatalysts\TeleCash\IPG\API\Service\OrderService;
-use OxidSolutionCatalysts\TeleCash\IPG\TeleCashConstants;
 
 /**
  * Class SellHostedData
@@ -27,12 +26,15 @@ class SellHostedData extends Transaction
     {
         parent::__construct($service);
 
-        $ccTxType = $this->document->createElement(TeleCashConstants::PREF_V1 . 'CreditCardTxType');
-        $ccType   = $this->document->createElement(TeleCashConstants::PREF_V1 . 'Type');
+        // Explizit den Namespace-Präfix 'ns1' verwenden
+        $ccTxType = $this->document->createElement('ns1:CreditCardTxType');
+        $ccType = $this->document->createElement('ns1:Type');
         $ccType->nodeValue = 'sale';
         $ccTxType->appendChild($ccType);
+
         $paymentData = $payment->getXML($this->document);
         $transActElem = $this->getTransactionElement();
+
         if ($transActElem) {
             $transActElem->appendChild($ccTxType);
             $transActElem->appendChild($paymentData);

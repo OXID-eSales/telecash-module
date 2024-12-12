@@ -11,7 +11,7 @@ use OxidSolutionCatalysts\TeleCash\IPG\API\Request\Action;
 use OxidSolutionCatalysts\TeleCash\IPG\API\Response\Error;
 use OxidSolutionCatalysts\TeleCash\IPG\API\Response\Action\Validation;
 use OxidSolutionCatalysts\TeleCash\IPG\API\Service\OrderService;
-use OxidSolutionCatalysts\TeleCash\IPG\TeleCashConstants;
+use RuntimeException;
 
 /**
  * Class Validate
@@ -27,30 +27,46 @@ class Validate extends Action
      */
     public function __construct(
         OrderService $service,
-        CreditCardData $creditCardData,
-        float $amount = 1.0,
-        ?string $text = null
+        private readonly CreditCardData $creditCardData,
+        private readonly float $amount = 1.0,
+        private readonly ?string $text = null
     ) {
         parent::__construct($service);
 
-        $xml    = $this->document->createElement(TeleCashConstants::PREF_A1 . 'Validate');
-        $ccData = $creditCardData->getXML($this->document);
-        $xml->appendChild($ccData);
+        try {
+            // Get Action element from parent
+            $actionElement = $this->element->getElementsByTagName('ns2:Action')->item(0);
+            if (!$actionElement) {
+                throw new RuntimeException('Action element not found');
+            }
 
-        if ($amount > 1.0) {
-            $payment     = new Payment(null, $amount);
-            $paymentData = $payment->getXML($this->document);
-            $xml->appendChild($paymentData);
+            // Create Validate element
+            $validateElement = $this->document->createElement('ns2:Validate');
+
+            // Set namespace and get credit card data
+            $this->creditCardData->setNamespaceShort('ns2');
+            $ccData = $this->creditCardData->getXML($this->document);
+            $validateElement->appendChild($ccData);
+
+            // Add payment data if amount > 1.0
+            if ($this->amount > 1.0) {
+                $payment = new Payment(null, $this->amount);
+                $paymentData = $payment->getXML($this->document);
+                $validateElement->appendChild($paymentData);
+            }
+
+            // Add transaction details if text is provided
+            if (!empty($this->text)) {
+                $transactionDetails = new TransactionDetails('ns2', $this->text);
+                $transactionDetailsData = $transactionDetails->getXML($this->document);
+                $validateElement->appendChild($transactionDetailsData);
+            }
+
+            // Append to Action element
+            $actionElement->appendChild($validateElement);
+        } catch (Exception $e) {
+            throw new RuntimeException('Failed to create Validate XML: ' . $e->getMessage());
         }
-
-        if (!empty($text)) {
-            $transactionDetails = new TransactionDetails(TeleCashConstants::A1, $text);
-            $transactionDetailsData = $transactionDetails->getXML($this->document);
-            $xml->appendChild($transactionDetailsData);
-        }
-
-        $item0 = $this->element->getElementsByTagName(TeleCashConstants::PREF_A1 . 'Action')->item(0);
-        $item0?->appendChild($xml);
     }
 
     /**

@@ -9,7 +9,7 @@ use OxidSolutionCatalysts\TeleCash\IPG\API\Request\Action;
 use OxidSolutionCatalysts\TeleCash\IPG\API\Response\Action\Validation;
 use OxidSolutionCatalysts\TeleCash\IPG\API\Response\Error;
 use OxidSolutionCatalysts\TeleCash\IPG\API\Service\OrderService;
-use OxidSolutionCatalysts\TeleCash\IPG\TeleCashConstants;
+use RuntimeException;
 
 /**
  * Class ValidateHostedData
@@ -21,15 +21,29 @@ class ValidateHostedData extends Action
      * @param Payment $payment
      * @throws DOMException
      */
-    public function __construct(OrderService $service, Payment $payment)
+    public function __construct(OrderService $service, private readonly Payment $payment)
     {
         parent::__construct($service);
 
-        $xml    = $this->document->createElement(TeleCashConstants::PREF_A1 . 'Validate');
-        $ccData = $payment->getXML($this->document);
-        $xml->appendChild($ccData);
-        $item0 = $this->element->getElementsByTagName(TeleCashConstants::PREF_A1 . 'Action')->item(0);
-        $item0?->appendChild($xml);
+        try {
+            // Get Action element from parent
+            $actionElement = $this->element->getElementsByTagName('ns2:Action')->item(0);
+            if (!$actionElement) {
+                throw new RuntimeException('Action element not found');
+            }
+
+            // Create Validate element
+            $validateElement = $this->document->createElement('ns2:Validate');
+
+            // Get and append payment data
+            $paymentData = $this->payment->getXML($this->document);
+            $validateElement->appendChild($paymentData);
+
+            // Append to Action element
+            $actionElement->appendChild($validateElement);
+        } catch (Exception $e) {
+            throw new RuntimeException('Failed to create ValidateHostedData XML: ' . $e->getMessage());
+        }
     }
 
     /**

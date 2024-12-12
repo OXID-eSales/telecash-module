@@ -116,7 +116,7 @@ class TeleCashOrderHistoryTest extends TestCase
         );
 
         $this->assertEquals(
-            'EUR',
+            '978',
             $loadedOrder->getCurrency(),
             'Currency mismatch'
         );

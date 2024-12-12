@@ -11,7 +11,6 @@ namespace OxidSolutionCatalysts\TeleCash\IPG;
 
 use DateInvalidTimeZoneException;
 use DateMalformedStringException;
-use DateTime;
 use InvalidArgumentException;
 use OxidSolutionCatalysts\TeleCash\Core\Service\Logger;
 use OxidSolutionCatalysts\TeleCash\IPG\Model\BillingAddress;

@@ -2,6 +2,9 @@
 
 namespace OxidSolutionCatalysts\TeleCash\Tests\Unit\IPG\API\Model;
 
+use DateTime;
+use DOMDocument;
+use DOMException;
 use OxidSolutionCatalysts\TeleCash\IPG\API\Model\RecurringPaymentInformation;
 use PHPUnit\Framework\TestCase;
 
@@ -12,48 +15,81 @@ use PHPUnit\Framework\TestCase;
  */
 class RecurringPaymentInformationTest extends TestCase
 {
+    private DOMDocument $document;
+
+    protected function setUp(): void
+    {
+        $this->document = new DOMDocument('1.0', 'UTF-8');
+    }
+
     /**
-     * @param \DateTime|null $startDate
-     * @param int|null       $installmentCount
-     * @param int|null       $installmentFrequency
-     * @param string|null    $installmentPeriod
+     * @param DateTime|null $startDate
+     * @param int|null $installmentCount
+     * @param int|null $installmentFrequency
+     * @param string|null $installmentPeriod
      *
      * @dataProvider dataProvider
+     * @throws DOMException
      */
     public function testXMLGeneration(
-        \DateTime|null $startDate,
-        int|null $installmentCount,
-        int|null $installmentFrequency,
-        string|null $installmentPeriod
-    ) {
-        $ccData   = new RecurringPaymentInformation(
+        ?DateTime $startDate,
+        ?int $installmentCount,
+        ?int $installmentFrequency,
+        ?string $installmentPeriod
+    ): void {
+        $recurringInfo = new RecurringPaymentInformation(
             $startDate,
             $installmentCount,
             $installmentFrequency,
             $installmentPeriod
         );
-        $document = new \DOMDocument('1.0', 'UTF-8');
-        $xml      = $ccData->getXML($document);
-        $document->appendChild($xml);
 
-        $elementInfo = $document->getElementsByTagName('ns2:RecurringPaymentInformation');
-        $this->assertEquals(1, $elementInfo->length, 'Expected element RecurringPaymentInformation not found');
+        $xml = $recurringInfo->getXML($this->document);
+        $this->document->appendChild($xml);
 
+        // Test root element
+        $elementInfo = $this->document->getElementsByTagName('ns2:RecurringPaymentInformation');
+        $this->assertEquals(
+            1,
+            $elementInfo->length,
+            'Expected element RecurringPaymentInformation not found'
+        );
+
+        // Get all child elements
         $children = [];
-        /** @var \DOMNode $child */
         foreach ($elementInfo->item(0)->childNodes as $child) {
-            $children[$child->nodeName] = $child->nodeValue;
+            $children[$child->nodeName] = $child->textContent;
         }
 
-        $this->assertArrayHasKey('ns2:RecurringStartDate', $children, 'Expected element RecurringStartDate not found');
-        $this->assertEquals($startDate->format('Ymd'), $children['ns2:RecurringStartDate'], 'Start date did not match');
+        // Test start date (always required)
+        $this->assertArrayHasKey(
+            'ns2:RecurringStartDate',
+            $children,
+            'Expected element RecurringStartDate not found'
+        );
+        $this->assertEquals(
+            $startDate->format('Ymd'),
+            $children['ns2:RecurringStartDate'],
+            'Start date did not match'
+        );
 
+        // Test optional elements
         if ($installmentCount !== null) {
-            $this->assertArrayHasKey('ns2:InstallmentCount', $children, 'Expected element InstallmentCount not found');
+            $this->assertArrayHasKey(
+                'ns2:InstallmentCount',
+                $children,
+                'Expected element InstallmentCount not found'
+            );
             $this->assertEquals(
-                $installmentCount,
+                (string)$installmentCount,
                 $children['ns2:InstallmentCount'],
                 'Installment count did not match'
+            );
+        } else {
+            $this->assertArrayNotHasKey(
+                'ns2:InstallmentCount',
+                $children,
+                'Unexpected element InstallmentCount was found'
             );
         }
 
@@ -64,9 +100,15 @@ class RecurringPaymentInformationTest extends TestCase
                 'Expected element InstallmentFrequency not found'
             );
             $this->assertEquals(
-                $installmentFrequency,
+                (string)$installmentFrequency,
                 $children['ns2:InstallmentFrequency'],
                 'Installment frequency did not match'
+            );
+        } else {
+            $this->assertArrayNotHasKey(
+                'ns2:InstallmentFrequency',
+                $children,
+                'Unexpected element InstallmentFrequency was found'
             );
         }
 
@@ -81,6 +123,12 @@ class RecurringPaymentInformationTest extends TestCase
                 $children['ns2:InstallmentPeriod'],
                 'Installment period did not match'
             );
+        } else {
+            $this->assertArrayNotHasKey(
+                'ns2:InstallmentPeriod',
+                $children,
+                'Unexpected element InstallmentPeriod was found'
+            );
         }
     }
 
@@ -92,10 +140,10 @@ class RecurringPaymentInformationTest extends TestCase
     public static function dataProvider(): array
     {
         return [
-            [new \DateTime(), null, null, null],
-            [new \DateTime(), 1, null, null],
-            [new \DateTime(), 1, 1, null],
-            [new \DateTime(), 1, 1, 'month']
+            [new DateTime(), null, null, null],
+            [new DateTime(), 1, null, null],
+            [new DateTime(), 1, 1, null],
+            [new DateTime(), 1, 1, 'month']
         ];
     }
 }

@@ -2,27 +2,38 @@
 
 namespace OxidSolutionCatalysts\TeleCash\Tests\Unit\IPG\API\Model;
 
+use DOMDocument;
+use DOMException;
 use OxidSolutionCatalysts\TeleCash\IPG\API\Model\BillingData;
+use OxidSolutionCatalysts\TeleCash\IPG\TeleCashConstants;
 use PHPUnit\Framework\TestCase;
 
 class BillingDataTest extends TestCase
 {
     private BillingData $billingData;
+    private DOMDocument $document;
 
     protected function setUp(): void
     {
         $this->billingData = new BillingData('Test Name');
+        $this->document = new DOMDocument();
     }
 
+    /**
+     * @throws DOMException
+     */
     public function testConstructorSetsName(): void
     {
-        $document = new \DOMDocument();
-        $xml = $this->billingData->getXML($document);
+        $xml = $this->billingData->getXML($this->document);
+        $nameElements = $xml->getElementsByTagName('ns1:Name');
 
-        $nameElement = $xml->getElementsByTagName('ns1:Name')->item(0);
-        $this->assertEquals('Test Name', $nameElement->textContent);
+        $this->assertCount(1, $nameElements);
+        $this->assertEquals('Test Name', $nameElements->item(0)->textContent);
     }
 
+    /**
+     * @throws DOMException
+     */
     public function testAllSettersAndXMLGeneration(): void
     {
         $this->billingData
@@ -44,51 +55,46 @@ class BillingDataTest extends TestCase
             ->setCountry('DE')
             ->setAccountOwnerType('Personal');
 
-        $document = new \DOMDocument();
-        $xml = $this->billingData->getXML($document);
+        $xml = $this->billingData->getXML($this->document);
 
-        // Test all XML elements
         $expectedElements = [
-            'ns1:BrowserIP' => '192.168.1.1',
-            'ns1:BrowserScreenHeight' => '1080',
-            'ns1:BrowserScreenWidth' => '1920',
-            'ns1:Name' => 'Test Name',
-            'ns1:CustomerID' => 'CUST123',
-            'ns1:Firstname' => 'John',
-            'ns1:Middlename' => 'Michael',
-            'ns1:Surname' => 'Doe',
-            'ns1:Phone' => '+1234567890',
-            'ns1:Fax' => '+0987654321',
-            'ns1:Email' => 'john.doe@example.com',
-            'ns1:Address1' => 'Street 123',
-            'ns1:Address2' => 'Apt 4B',
-            'ns1:City' => 'Berlin',
-            'ns1:State' => 'Berlin',
-            'ns1:Zip' => '10115',
-            'ns1:Country' => 'DE',
-            'ns1:AccountOwnerType' => 'Personal'
+            'BrowserIP' => '192.168.1.1',
+            'BrowserScreenHeight' => '1080',
+            'BrowserScreenWidth' => '1920',
+            'Name' => 'Test Name',
+            'CustomerID' => 'CUST123',
+            'Firstname' => 'John',
+            'Middlename' => 'Michael',
+            'Surname' => 'Doe',
+            'Phone' => '+1234567890',
+            'Fax' => '+0987654321',
+            'Email' => 'john.doe@example.com',
+            'Address1' => 'Street 123',
+            'Address2' => 'Apt 4B',
+            'City' => 'Berlin',
+            'State' => 'Berlin',
+            'Zip' => '10115',
+            'Country' => 'DE',
+            'AccountOwnerType' => 'Personal'
         ];
 
         foreach ($expectedElements as $elementName => $expectedValue) {
-            $element = $xml->getElementsByTagName($elementName)->item(0);
+            $element = $xml->getElementsByTagName('ns1:' . $elementName)->item(0);
             $this->assertNotNull($element, "Element $elementName should exist");
-            $this->assertEquals(
-                $expectedValue,
-                $element->textContent,
-                "Element $elementName should have correct value"
-            );
+            $this->assertEquals($expectedValue, $element->textContent);
         }
     }
 
+    /**
+     * @throws DOMException
+     */
     public function testOptionalFieldsAreNotIncludedWhenEmpty(): void
     {
-        // Only set a few fields
         $this->billingData
             ->setFirstName('John')
             ->setEmail('john@example.com');
 
-        $document = new \DOMDocument();
-        $xml = $this->billingData->getXML($document);
+        $xml = $this->billingData->getXML($this->document);
 
         // These elements should exist
         $this->assertNotNull($xml->getElementsByTagName('ns1:Name')->item(0));
@@ -105,7 +111,6 @@ class BillingDataTest extends TestCase
     public function testFluentInterface(): void
     {
         $returnValue = $this->billingData->setEmail('test@example.com');
-
         $this->assertInstanceOf(BillingData::class, $returnValue);
         $this->assertSame($this->billingData, $returnValue);
     }

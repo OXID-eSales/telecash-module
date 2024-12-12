@@ -7,25 +7,34 @@
 
 namespace OxidSolutionCatalysts\TeleCash\Tests\Unit\IPG;
 
+use DOMDocument;
+use DOMException;
+use OxidSolutionCatalysts\TeleCash\Core\Service\Logger;
 use OxidSolutionCatalysts\TeleCash\IPG\TeleCash;
 use OxidSolutionCatalysts\TeleCash\IPG\API\Service\OrderService;
 use OxidSolutionCatalysts\TeleCash\IPG\API\Response\Action\Validation;
-use OxidSolutionCatalysts\TeleCash\IPG\API\Response\Action\Confirm;
-use OxidSolutionCatalysts\TeleCash\IPG\API\Response\Action\Display;
-use OxidSolutionCatalysts\TeleCash\IPG\API\Response\Order\Sell;
 use OxidSolutionCatalysts\TeleCash\IPG\API\Response\Action\ConfirmRecurring;
+use OxidSolutionCatalysts\TeleCash\IPG\API\Response\Order\Sell;
 use OxidSolutionCatalysts\TeleCash\IPG\API\Response\Error;
+use OxidSolutionCatalysts\TeleCash\IPG\TeleCashConstants;
+use PHPUnit\Framework\MockObject\Exception;
 use PHPUnit\Framework\TestCase;
 use ReflectionClass;
+use ReflectionException;
 
 class TeleCashTest extends TestCase
 {
-    private $teleCash;
+    private TeleCash $teleCash;
     private $orderServiceMock;
+    private $loggerMock;
 
+    /**
+     * @throws Exception
+     */
     protected function setUp(): void
     {
         $this->orderServiceMock = $this->createMock(OrderService::class);
+        $this->loggerMock = $this->createMock(Logger::class);
 
         $this->teleCash = new TeleCash(
             'https://test.com',
@@ -34,38 +43,24 @@ class TeleCashTest extends TestCase
             '/path/to/cert',
             '/path/to/key',
             'passphrase',
-            '/path/to/server/cert'
+            '/path/to/server/cert',
+            $this->loggerMock
         );
 
-        $reflection = new \ReflectionClass($this->teleCash);
+        $reflection = new ReflectionClass($this->teleCash);
         $property = $reflection->getProperty('myService');
-        $property->setAccessible(true);
         $property->setValue($this->teleCash, $this->orderServiceMock);
     }
 
-    private function createSuccessfulResponseXML(
-        string $responseType = 'IPGApiActionResponse',
-        string $withCardNumber = ''
-    ): string {
-        $cardNumber = '';
-        if (!empty($withCardNumber)) {
-            $cardNumber = '<ns3:DataStorageItem>
-<ns2:CreditCardData>
-<ns1:CardNumber>' . $withCardNumber . '</ns1:CardNumber>
-<ns1:ExpMonth>12</ns1:ExpMonth>
-<ns1:ExpYear>27</ns1:ExpYear>
-</ns2:CreditCardData>
-<ns2:HostedDataID>d56feaaf-2d96-4159-8fd6-887e07fc9052</ns2:HostedDataID>
-</ns3:DataStorageItem>';
-        }
-
-        $xml = '<SOAP-ENV:Envelope 
-            xmlns:SOAP-ENV="' . OrderService::NAMESPACE_SOAP . '"
-            xmlns:ns1="' . OrderService::NAMESPACE_N1 . '"
-            xmlns:ns2="' . OrderService::NAMESPACE_N2 . '"
-            xmlns:ns3="' . OrderService::NAMESPACE_N3 . '">
+    private function createSuccessfulResponseXML(string $responseType = 'IPGApiActionResponse'): string
+    {
+        return '<?xml version="1.0" encoding="UTF-8"?>
+        <SOAP-ENV:Envelope 
+            xmlns:SOAP-ENV="' . TeleCashConstants::NAMESPACE_SOAP . '"
+            xmlns:ns1="' . TeleCashConstants::NAMESPACE_V1 . '"
+            xmlns:ns2="' . TeleCashConstants::NAMESPACE_A1 . '"
+            xmlns:ns3="' . TeleCashConstants::NAMESPACE_IPGAPI . '">
             <SOAP-ENV:Body>
-                ' . $cardNumber . '
                 <ns3:' . $responseType . '>
                     <ns3:ApprovalCode>123456</ns3:ApprovalCode>
                     <ns3:AVSResponse>X</ns3:AVSResponse>                    
@@ -87,17 +82,15 @@ class TeleCashTest extends TestCase
                 </ns3:' . $responseType . '>
             </SOAP-ENV:Body>
         </SOAP-ENV:Envelope>';
-
-        return $xml;
     }
 
     private function createUnsuccessfulResponseXML(): string
     {
         return '<SOAP-ENV:Envelope 
-            xmlns:SOAP-ENV="' . OrderService::NAMESPACE_SOAP . '"
-            xmlns:ns1="' . OrderService::NAMESPACE_N1 . '"
-            xmlns:ns2="' . OrderService::NAMESPACE_N2 . '"
-            xmlns:ns3="' . OrderService::NAMESPACE_N3 . '">
+            xmlns:SOAP-ENV="' . TeleCashConstants::NAMESPACE_SOAP . '"
+            xmlns:ns1="' . TeleCashConstants::NAMESPACE_V1 . '"
+            xmlns:ns2="' . TeleCashConstants::NAMESPACE_A1 . '"
+            xmlns:ns3="' . TeleCashConstants::NAMESPACE_IPGAPI . '">
             <SOAP-ENV:Body>
                 <ns3:IPGApiActionResponse>
                     <ns3:successfully>false</ns3:successfully>
@@ -110,25 +103,12 @@ class TeleCashTest extends TestCase
         </SOAP-ENV:Envelope>';
     }
 
-    private function createSoapFault()
+    /**
+     * @throws \Exception
+     */
+    public function testInstallRecurringPayment(): void
     {
-        return '<SOAP-ENV:Envelope
-   xmlns:SOAP-ENV = "http://schemas.xmlsoap.org/soap/envelope/"
-   xmlns:xsi = "http://www.w3.org/1999/XMLSchema-instance"
-   xmlns:xsd = "http://www.w3.org/1999/XMLSchema">
-
-   <SOAP-ENV:Body>
-      <SOAP-ENV:Fault>
-         <faultcode xsi:type="xsd:string">SOAP-ENV:Client</faultcode>
-         <faultstring xsi:type="xsd:string">Some error mesage</faultstring>
-      </SOAP-ENV:Fault>
-   </SOAP-ENV:Body>
-</SOAP-ENV:Envelope>';
-    }
-
-    public function testInstallRecurringPayment()
-    {
-        $domDocument = new \DOMDocument();
+        $domDocument = new DOMDocument();
         $domDocument->loadXML($this->createSuccessfulResponseXML());
 
         $this->orderServiceMock->expects($this->once())
@@ -148,9 +128,12 @@ class TeleCashTest extends TestCase
         $this->assertTrue($result->wasSuccessful());
     }
 
-    public function testInstallOneTimeRecurringPayment()
+    /**
+     * @throws \Exception
+     */
+    public function testInstallOneTimeRecurringPayment(): void
     {
-        $domDocument = new \DOMDocument();
+        $domDocument = new DOMDocument();
         $domDocument->loadXML($this->createSuccessfulResponseXML());
 
         $this->orderServiceMock->expects($this->once())
@@ -166,9 +149,12 @@ class TeleCashTest extends TestCase
         $this->assertTrue($result->wasSuccessful());
     }
 
-    public function testModifyRecurringPayment()
+    /**
+     * @throws \Exception
+     */
+    public function testModifyRecurringPayment(): void
     {
-        $domDocument = new \DOMDocument();
+        $domDocument = new DOMDocument();
         $domDocument->loadXML($this->createSuccessfulResponseXML());
 
         $this->orderServiceMock->expects($this->once())
@@ -189,7 +175,11 @@ class TeleCashTest extends TestCase
         $this->assertTrue($result->wasSuccessful());
     }
 
-    public function testRecurringPaymentWithError()
+    /**
+     * @throws Exception
+     * @throws \Exception
+     */
+    public function testRecurringPaymentWithError(): void
     {
         $mockError = $this->createMock(Error::class);
 
@@ -210,51 +200,60 @@ class TeleCashTest extends TestCase
         $this->assertInstanceOf(Error::class, $result);
     }
 
-    public function testCancelRecurringPayment()
+    /**
+     * @throws \Exception
+     */
+    public function testCancelRecurringPayment(): void
     {
-        $domDocument = new \DOMDocument();
+        $domDocument = new DOMDocument();
         $domDocument->loadXML($this->createSuccessfulResponseXML());
 
         $this->orderServiceMock->expects($this->once())
             ->method('IPGApiAction')
             ->willReturn($domDocument);
 
-        $result = $this->teleCash->cancelRecurringPayment(
-            'order_id'
-        );
+        $result = $this->teleCash->cancelRecurringPayment('order_id');
 
         $this->assertInstanceOf(ConfirmRecurring::class, $result);
         $this->assertTrue($result->wasSuccessful());
     }
 
-    public function testGetService()
+
+    /**
+     * @throws ReflectionException
+     */
+    public function testGetService(): void
     {
         $reflection = new ReflectionClass(TeleCash::class);
         $method = $reflection->getMethod('getService');
-        $method->setAccessible(true);
 
         $result = $method->invoke($this->teleCash);
 
         $this->assertInstanceOf(OrderService::class, $result);
     }
 
-    public function testGetServiceWithNull()
+
+    /**
+     * @throws ReflectionException
+     */
+    public function testGetServiceWithNull(): void
     {
         $reflection = new ReflectionClass(TeleCash::class);
         $attribute = $reflection->getProperty('myService');
-        $attribute->setAccessible(true);
         $attribute->setValue($this->teleCash, null);
 
         $method = $reflection->getMethod('getService');
-        $method->setAccessible(true);
 
         $result = $method->invoke($this->teleCash);
         $this->assertInstanceOf(OrderService::class, $result);
     }
 
-    public function testSendEMailNotification()
+    /**
+     * @throws DOMException
+     */
+    public function testSendEMailNotification(): void
     {
-        $domDocument = new \DOMDocument();
+        $domDocument = new DOMDocument();
         $domDocument->loadXML($this->createSuccessfulResponseXML());
 
         $this->orderServiceMock->expects($this->once())
@@ -262,13 +261,17 @@ class TeleCashTest extends TestCase
             ->willReturn($domDocument);
 
         $result = $this->teleCash->sendEMailNotification('order_id', '', null);
+
         $this->assertInstanceOf(Validation::class, $result);
         $this->assertTrue($result->wasSuccessful());
     }
 
-    public function testGetLastTransactions()
+    /**
+     * @throws DOMException
+     */
+    public function testGetLastTransactions(): void
     {
-        $domDocument = new \DOMDocument();
+        $domDocument = new DOMDocument();
         $domDocument->loadXML($this->createSuccessfulResponseXML());
 
         $this->orderServiceMock->expects($this->once())
@@ -280,9 +283,12 @@ class TeleCashTest extends TestCase
         $this->assertInstanceOf(Validation::class, $result);
     }
 
-    public function testGetLastOrders()
+    /**
+     * @throws DOMException
+     */
+    public function testGetLastOrders(): void
     {
-        $domDocument = new \DOMDocument();
+        $domDocument = new DOMDocument();
         $domDocument->loadXML($this->createSuccessfulResponseXML());
 
         $this->orderServiceMock->expects($this->once())
@@ -294,9 +300,12 @@ class TeleCashTest extends TestCase
         $this->assertInstanceOf(Validation::class, $result);
     }
 
-    public function testGetInquiryByTransactionId()
+    /**
+     * @throws DOMException
+     */
+    public function testGetInquiryByTransactionId(): void
     {
-        $domDocument = new \DOMDocument();
+        $domDocument = new DOMDocument();
         $domDocument->loadXML($this->createSuccessfulResponseXML());
 
         $this->orderServiceMock->expects($this->once())
@@ -308,9 +317,12 @@ class TeleCashTest extends TestCase
         $this->assertInstanceOf(Validation::class, $result);
     }
 
-    public function testGetInquiryByOrderIdAndTDate()
+    /**
+     * @throws DOMException
+     */
+    public function testGetInquiryByOrderIdAndTDate(): void
     {
-        $domDocument = new \DOMDocument();
+        $domDocument = new DOMDocument();
         $domDocument->loadXML($this->createSuccessfulResponseXML());
 
         $this->orderServiceMock->expects($this->once())

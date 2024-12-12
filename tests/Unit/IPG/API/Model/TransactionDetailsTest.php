@@ -3,6 +3,7 @@
 namespace OxidSolutionCatalysts\TeleCash\Tests\Unit\IPG\API\Model;
 
 use DOMDocument;
+use DOMException;
 use DOMNode;
 use OxidSolutionCatalysts\TeleCash\IPG\API\Model\TransactionDetails;
 use PHPUnit\Framework\TestCase;
@@ -14,36 +15,70 @@ use PHPUnit\Framework\TestCase;
  */
 class TransactionDetailsTest extends TestCase
 {
+    private DOMDocument $document;
+
+    protected function setUp(): void
+    {
+        $this->document = new DOMDocument('1.0', 'UTF-8');
+    }
+
     /**
      * @param string|null $comments
      * @param string|null $invoiceNumber
      *
      * @dataProvider dataProvider
+     * @throws DOMException
      */
-    public function testXMLGeneration(string|null $comments, string|null $invoiceNumber): void
+    public function testXMLGeneration(?string $comments, ?string $invoiceNumber): void
     {
-        $ccData   = new TransactionDetails('ns2', $comments, $invoiceNumber);
-        $document = new DOMDocument('1.0', 'UTF-8');
-        $xml      = $ccData->getXML($document);
-        $document->appendChild($xml);
+        $transactionDetails = new TransactionDetails('ns2', $comments, $invoiceNumber);
+        $xml = $transactionDetails->getXML($this->document);
+        $this->document->appendChild($xml);
 
-        $elementPayment = $document->getElementsByTagName('ns2:TransactionDetails');
-        $this->assertEquals(1, $elementPayment->length, 'Expected element TransactionDetails not found');
+        // Test root element
+        $elementDetails = $this->document->getElementsByTagName('ns2:TransactionDetails');
+        $this->assertEquals(
+            1,
+            $elementDetails->length,
+            'Expected element TransactionDetails not found'
+        );
 
+        // Get all child elements
         $children = [];
-        /** @var DOMNode $child */
-        foreach ($elementPayment->item(0)->childNodes as $child) {
-            $children[$child->nodeName] = $child->nodeValue;
+        foreach ($elementDetails->item(0)->childNodes as $child) {
+            $children[$child->nodeName] = $child->textContent;
         }
 
-        $this->assertArrayHasKey('ns1:Comments', $children, 'Expected element Comments not found');
-        $this->assertEquals($comments, $children['ns1:Comments'], 'Comments data id did not match');
+        // Test required Comments element
+        $this->assertArrayHasKey(
+            'ns1:Comments',
+            $children,
+            'Expected element Comments not found'
+        );
+        $this->assertEquals(
+            $comments,
+            $children['ns1:Comments'],
+            'Comments did not match'
+        );
 
+        // Test optional InvoiceNumber element
         if ($invoiceNumber !== null) {
-            $this->assertArrayHasKey('ns1:InvoiceNumber', $children, 'Expected element InvoiceNumber not found');
-            $this->assertEquals($invoiceNumber, $children['ns1:InvoiceNumber'], 'InvoiceNumber did not match');
+            $this->assertArrayHasKey(
+                'ns1:InvoiceNumber',
+                $children,
+                'Expected element InvoiceNumber not found'
+            );
+            $this->assertEquals(
+                $invoiceNumber,
+                $children['ns1:InvoiceNumber'],
+                'InvoiceNumber did not match'
+            );
         } else {
-            $this->assertArrayNotHasKey('ns1:InvoiceNumber', $children, 'Unexpected element InvoiceNumber was found');
+            $this->assertArrayNotHasKey(
+                'ns1:InvoiceNumber',
+                $children,
+                'Unexpected element InvoiceNumber was found'
+            );
         }
     }
 

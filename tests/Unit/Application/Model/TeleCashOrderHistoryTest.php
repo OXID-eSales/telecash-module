@@ -179,18 +179,32 @@ class TeleCashOrderHistoryTest extends TestCase
      * Test charge total handling
      *
      * Verifies that:
-     * - Valid amounts are correctly converted to float
-     * - Invalid amounts are handled properly (0.0)
+     * - Valid amounts are correctly formatted with two decimal places
+     * - German decimal separator is properly handled
+     * - Invalid amounts return "0.00"
      */
     public function testGetChargeTotal(): void
     {
+        // Test valid amount
+        $this->assertEquals('99.99', $this->orderHistory->getChargeTotal());
+
+        // Test German decimal separator
+        $germanData = $this->sampleTransactionData;
+        $germanData['chargetotal'] = '99,99';
+        $this->orderHistory->setTransactionResult($germanData);
         $this->assertEquals('99.99', $this->orderHistory->getChargeTotal());
 
         // Test invalid charge total
         $invalidData = $this->sampleTransactionData;
         $invalidData['chargetotal'] = 'invalid';
         $this->orderHistory->setTransactionResult($invalidData);
-        $this->assertEquals('0.0', $this->orderHistory->getChargeTotal());
+        $this->assertEquals('0.00', $this->orderHistory->getChargeTotal());
+
+        // Test with integer value
+        $integerData = $this->sampleTransactionData;
+        $integerData['chargetotal'] = '100';
+        $this->orderHistory->setTransactionResult($integerData);
+        $this->assertEquals('100.00', $this->orderHistory->getChargeTotal());
     }
 
     /**

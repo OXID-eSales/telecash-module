@@ -5,7 +5,6 @@ namespace OxidSolutionCatalysts\TeleCash\IPG\API\Model;
 use DOMDocument;
 use DOMException;
 use DOMNode;
-use OxidSolutionCatalysts\TeleCash\IPG\TeleCashConstants;
 
 /**
  * Class Payment
@@ -14,19 +13,10 @@ class Payment implements ElementInterface
 {
     public const CURRENCY_EUR = "978";
 
-    /** @var string|null $hostedDataId */
-    private string|null $hostedDataId;
-    /** @var float|null $amount */
-    private float|null $amount;
-
-    /**
-     * @param string|null $hostedDataId
-     * @param float|null  $amount
-     */
-    public function __construct(string|null $hostedDataId = null, float|null $amount = null)
-    {
-        $this->hostedDataId = $hostedDataId;
-        $this->amount       = $amount;
+    public function __construct(
+        private readonly ?string $hostedDataId = null,
+        private readonly ?float $amount = null
+    ) {
     }
 
     /**
@@ -37,23 +27,26 @@ class Payment implements ElementInterface
      */
     public function getXML(DOMDocument $document): DOMNode
     {
-        $xml = $document->createElement(TeleCashConstants::PREF_V1 . 'Payment');
+        $xml = $document->createElement('ns1:Payment');
 
+        // Helper function to create elements
+        $addElement = function (string $name, ?string $value) use ($document, $xml) {
+            if ($value !== null) {
+                $element = $document->createElement('ns1:' . $name);
+                $element->textContent = $value;
+                $xml->appendChild($element);
+            }
+        };
+
+        // Add HostedDataID if provided
         if (!empty($this->hostedDataId)) {
-            $hostedDataId = $document->createElement(TeleCashConstants::PREF_V1 . 'HostedDataID');
-            $hostedDataId->textContent = $this->hostedDataId;
-
-            $xml->appendChild($hostedDataId);
+            $addElement('HostedDataID', $this->hostedDataId);
         }
 
+        // Add amount and currency if amount is provided
         if (!empty($this->amount)) {
-            $amount                = $document->createElement(TeleCashConstants::PREF_V1 . 'ChargeTotal');
-            $amount->textContent   = (string)$this->amount;
-            $currency              = $document->createElement(TeleCashConstants::PREF_V1 . 'Currency');
-            $currency->textContent = self::CURRENCY_EUR;
-
-            $xml->appendChild($amount);
-            $xml->appendChild($currency);
+            $addElement('ChargeTotal', (string)$this->amount);
+            $addElement('Currency', self::CURRENCY_EUR);
         }
 
         return $xml;

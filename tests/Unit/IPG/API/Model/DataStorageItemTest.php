@@ -2,6 +2,7 @@
 
 namespace OxidSolutionCatalysts\TeleCash\Tests\Unit\IPG\API\Model;
 
+use DOMDocument;
 use OxidSolutionCatalysts\TeleCash\IPG\API\Model\DataStorageItem;
 use PHPUnit\Framework\TestCase;
 
@@ -12,38 +13,68 @@ use PHPUnit\Framework\TestCase;
  */
 class DataStorageItemTest extends TestCase
 {
+    private DOMDocument $document;
+
+    protected function setUp(): void
+    {
+        $this->document = new DOMDocument('1.0', 'UTF-8');
+    }
+
     /**
      * @param string|null $hostedDataId
      * @param string|null $function
      * @param string|null $declineHostedDataDuplicates
      *
      * @dataProvider dataProvider
+     * @throws \DOMException
      */
     public function testXMLGeneration(
-        string|null $hostedDataId,
-        string|null $function,
-        string|null $declineHostedDataDuplicates
-    ) {
-        $item     = new DataStorageItem($hostedDataId, $function, $declineHostedDataDuplicates);
-        $document = new \DOMDocument('1.0', 'UTF-8');
-        $xml      = $item->getXML($document);
-        $document->appendChild($xml);
+        ?string $hostedDataId,
+        ?string $function,
+        ?string $declineHostedDataDuplicates
+    ): void {
+        $item = new DataStorageItem($hostedDataId, $function, $declineHostedDataDuplicates);
+        $xml = $item->getXML($this->document);
+        $this->document->appendChild($xml);
 
-        $elementDSItem = $document->getElementsByTagName('ns2:DataStorageItem');
-        $this->assertEquals(1, $elementDSItem->length, 'Expected element DataStorageItem not found');
+        // Test root element
+        $elementDSItem = $this->document->getElementsByTagName('ns2:DataStorageItem');
+        $this->assertEquals(
+            1,
+            $elementDSItem->length,
+            'Expected element DataStorageItem not found'
+        );
 
+        // Get all child elements
         $children = [];
-        /** @var \DOMNode $child */
         foreach ($elementDSItem->item(0)->childNodes as $child) {
-            $children[$child->nodeName] = $child->nodeValue;
+            $children[$child->nodeName] = $child->textContent;
         }
 
-        $this->assertArrayHasKey('ns2:HostedDataID', $children, 'Expected element HostedDataId not found');
-        $this->assertEquals($hostedDataId, $children['ns2:HostedDataID'], 'Hosted data id did not match');
+        // Test required elements
+        $this->assertArrayHasKey(
+            'ns2:HostedDataID',
+            $children,
+            'Expected element HostedDataId not found'
+        );
+        $this->assertEquals(
+            $hostedDataId,
+            $children['ns2:HostedDataID'],
+            'Hosted data id did not match'
+        );
 
+        // Test optional elements
         if ($function !== null) {
-            $this->assertArrayHasKey('ns2:Function', $children, 'Expected element Function not found');
-            $this->assertEquals($function, $children['ns2:Function'], 'Function did not match');
+            $this->assertArrayHasKey(
+                'ns2:Function',
+                $children,
+                'Expected element Function not found'
+            );
+            $this->assertEquals(
+                $function,
+                $children['ns2:Function'],
+                'Function did not match'
+            );
         }
 
         if ($declineHostedDataDuplicates !== null) {

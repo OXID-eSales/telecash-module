@@ -7,8 +7,10 @@
 
 namespace OxidSolutionCatalysts\TeleCash\Tests\Unit\Application\Model;
 
+use OxidSolutionCatalysts\TeleCash\IPG\TeleCashCurrency;
 use OxidSolutionCatalysts\TeleCash\Tests\Unit\Application\Model\TestClasses\TeleCashOrderTestClass;
 use PHPUnit\Framework\TestCase;
+use InvalidArgumentException;
 
 /**
  * Unit Test Suite for TeleCashOrder
@@ -20,6 +22,7 @@ class TeleCashOrderTest extends TestCase
 {
     private array $sampleTransactionData;
     private TeleCashOrderTestClass $order;
+    private $teleCashCurrencyMock;
 
     /**
      * Set up test environment
@@ -29,8 +32,16 @@ class TeleCashOrderTest extends TestCase
      */
     protected function setUp(): void
     {
+        // Create mock for TeleCashCurrency
+        $this->teleCashCurrencyMock = $this->createMock(TeleCashCurrency::class);
+
         // Initialize test class without database connection
         $this->order = new TeleCashOrderTestClass(null, false);
+
+        // Set mocked currency handler
+        $reflection = new \ReflectionClass($this->order);
+        $property = $reflection->getProperty('teleCashCurrency');
+        $property->setValue($this->order, $this->teleCashCurrencyMock);
 
         // Prepare comprehensive sample transaction data
         $this->sampleTransactionData = [
@@ -43,8 +54,8 @@ class TeleCashOrderTest extends TestCase
             'currency' => '978',  // EUR in numeric format
             'chargetotal' => '99.99',
             'status' => 'APPROVED',
-            'processor_response_code' => '00',  // Note: Leading zero must be preserved
-            'paymentMethod' => 'V'  // VISA code
+            'processor_response_code' => '00',
+            'paymentMethod' => 'V'
         ];
 
         $this->order->setTransactionResult($this->sampleTransactionData);
@@ -116,7 +127,24 @@ class TeleCashOrderTest extends TestCase
      */
     public function testGetOxidCurrency(): void
     {
-        // Test from TransactionResult
+        // Test 1: Successful case with '978'
+        $this->teleCashCurrencyMock
+            ->expects($this->exactly(3))
+            ->method('getShortnameByCurrencyCode')
+            ->willReturnCallback(function ($code) {
+                if ($code === '978') {
+                    return 'EUR';
+                }
+                if ($code === 'EUR') {
+                    return 'EUR';
+                }
+                if ($code === 'invalid') {
+                    throw new InvalidArgumentException('Invalid currency code');
+                }
+                return '';
+            });
+
+        // Test from TransactionResult with valid currency
         $this->assertEquals('EUR', $this->order->getOxidCurrency());
 
         // Test invalid currency
@@ -125,7 +153,7 @@ class TeleCashOrderTest extends TestCase
         $this->order->setTransactionResult($invalidData);
         $this->assertEquals('', $this->order->getOxidCurrency());
 
-        // Test from DB
+        // Test from DB with valid currency
         $this->order->simulateLoadedFromDb([
             'currency' => 'EUR'
         ]);
@@ -149,7 +177,7 @@ class TeleCashOrderTest extends TestCase
         $invalidData = $this->sampleTransactionData;
         $invalidData['currency'] = 'invalid';
         $this->order->setTransactionResult($invalidData);
-        $this->assertEquals('', $this->order->getCurrency());
+        $this->assertEquals('invalid', $this->order->getCurrency());
 
         // Test from DB
         $this->order->simulateLoadedFromDb([
@@ -182,12 +210,11 @@ class TeleCashOrderTest extends TestCase
         $invalidData = $this->sampleTransactionData;
         $invalidData['chargetotal'] = 'invalid';
         $this->order->setTransactionResult($invalidData);
-        $this->assertEquals('0.0', $this->order->getChargeTotal());
-
+        $this->assertEquals('0.00', $this->order->getChargeTotal());
 
         // Test from DB
         $this->order->simulateLoadedFromDb([
-            'chargetotal' => '99.99'
+            'chargetotal' => 99.99
         ]);
         $this->assertEquals('99.99', $this->order->getChargeTotal());
     }

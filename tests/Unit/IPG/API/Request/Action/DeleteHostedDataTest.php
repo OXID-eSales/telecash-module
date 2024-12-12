@@ -2,8 +2,10 @@
 
 namespace OxidSolutionCatalysts\TeleCash\IPG\API\Request\Action;
 
+use DOMException;
 use OxidSolutionCatalysts\TeleCash\IPG\API\Model\DataStorageItem;
 use OxidSolutionCatalysts\TeleCash\IPG\API\Service\OrderService;
+use PHPUnit\Framework\TestCase;
 
 /**
  * Test class for DeleteHostedData request action
@@ -11,8 +13,15 @@ use OxidSolutionCatalysts\TeleCash\IPG\API\Service\OrderService;
  * This test verifies the XML generation for the DeleteHostedData request,
  * which is used to remove stored payment data from the TeleCash system.
  */
-class DeleteHostedDataTest extends \PHPUnit\Framework\TestCase
+class DeleteHostedDataTest extends TestCase
 {
+    private OrderService $orderService;
+
+    protected function setUp(): void
+    {
+        $this->orderService = $this->createMock(OrderService::class);
+    }
+
     /**
      * Tests the XML generation for the DeleteHostedData request
      *
@@ -22,50 +31,49 @@ class DeleteHostedDataTest extends \PHPUnit\Framework\TestCase
      * 3. The DataStorageItem is properly included
      *
      * @param DataStorageItem $storageItem The storage item to be included in the request
+     * @throws DOMException
      * @dataProvider dataProvider
      */
-    public function testXMLGeneration(DataStorageItem $storageItem)
+    public function testXMLGeneration(DataStorageItem $storageItem): void
     {
-        // Create a mock for the OrderService
-        // In this case, we don't need to define any behavior as the service
-        // is only used for XML document initialization
-        $orderService = $this->createMock(OrderService::class);
+        // Create delete request
+        $delete = new DeleteHostedData($this->orderService, $storageItem);
 
-        // Create the DeleteHostedData request object with our mocked service
-        $delete = new DeleteHostedData($orderService, $storageItem);
-
-        // Get the XML document and append our request element
+        // Get the document from the class instance
         $document = $delete->getDocument();
-        $document->appendChild($delete->getElement());
+        $element = $delete->getElement();
 
-        // Verify the presence of the StoreHostedData element
-        $elementStore = $document->getElementsByTagName('ns2:StoreHostedData');
-        $this->assertEquals(
-            1,
-            $elementStore->length,
-            'The XML should contain exactly one StoreHostedData element'
-        );
+        // For debugging
+        // error_log($document->saveXML());
 
-        // Extract all child elements for verification
-        $children = [];
-        /** @var \DOMNode $child */
-        foreach ($elementStore->item(0)->childNodes as $child) {
-            $children[$child->nodeName] = $child->nodeValue;
-        }
+        // Verify XML structure step by step
+        $actionElements = $element->getElementsByTagName('ns2:Action');
+        $this->assertCount(1, $actionElements, 'Should have one Action element');
 
-        // Verify the presence of the DataStorageItem element
-        $this->assertArrayHasKey(
-            'ns2:DataStorageItem',
-            $children,
-            'The StoreHostedData element should contain a DataStorageItem element'
-        );
-        // Note: Detailed testing of DataStorageItem is handled in DataStorageItemTest
+        $actionElement = $actionElements->item(0);
+        $this->assertNotNull($actionElement, 'Action element should not be null');
+
+        $storeElements = $actionElement->getElementsByTagName('ns2:StoreHostedData');
+        $this->assertCount(1, $storeElements, 'Should have one StoreHostedData element');
+
+        $storageElements = $storeElements->item(0)->getElementsByTagName('ns2:DataStorageItem');
+        $this->assertCount(1, $storageElements, 'Should have one DataStorageItem element');
+
+        // Verify function is "delete"
+        $functionElements = $storageElements->item(0)->getElementsByTagName('ns2:Function');
+        $this->assertCount(1, $functionElements, 'Should have one Function element');
+        $this->assertEquals('delete', $functionElements->item(0)->textContent);
+
+        // Verify hosted data ID
+        $idElements = $storageElements->item(0)->getElementsByTagName('ns2:HostedDataID');
+        $this->assertCount(1, $idElements, 'Should have one HostedDataID element');
+        $this->assertEquals('abc-def', $idElements->item(0)->textContent);
     }
 
     /**
      * Provides test data for XML generation tests
      *
-     * Currently provides:
+     * Currently, provides:
      * - A basic DataStorageItem with ID 'abc-def'
      *
      * @return array Array of test cases containing DataStorageItem objects

@@ -14,23 +14,17 @@ class DirectDebitData implements ElementInterface
 {
     private string $namespaceShort = TeleCashConstants::A1;
 
-    /** @var string|null $bankCode */
-    private string|null $bankCode;
-
-    /** @var string|null $accountNumber */
-    private string|null $accountNumber;
-
-    /** @var string|null $iBAN */
-    private string|null $iBAN;
-
+    private ?string $bankCode;
+    private ?string $accountNumber;
+    private ?string $iBAN;
 
     public function __construct(
-        string|null $iBan,
-        string|null $bankCode,
-        string|null $accountNumber
+        ?string $iBan,
+        ?string $bankCode,
+        ?string $accountNumber
     ) {
-        $this->iBAN          = $iBan;
-        $this->bankCode      = $bankCode;
+        $this->iBAN = $iBan;
+        $this->bankCode = $bankCode;
         $this->accountNumber = $accountNumber;
     }
 
@@ -45,29 +39,31 @@ class DirectDebitData implements ElementInterface
      */
     public function getXML(DOMDocument $document): DOMNode
     {
+        // Create root element with current namespace
         $xml = $document->createElement($this->namespaceShort . ':DE_DirectDebitData');
 
-        if (!empty($this->bankCode) && !empty($this->accountNumber)) {
-            $bankCode              = $document->createElement(TeleCashConstants::PREF_V1 . 'BankCode');
-            $bankCode->textContent = (string)$this->bankCode;
-            $xml->appendChild($bankCode);
+        // Helper function to create elements
+        $addElement = function (string $name, ?string $value) use ($document, $xml) {
+            if ($value !== null) {
+                $element = $document->createElement('ns1:' . $name);
+                $element->textContent = $value;
+                $xml->appendChild($element);
+                return $element;
+            }
+            return null;
+        };
 
-            $accountNumber = $document->createElement(TeleCashConstants::PREF_V1 . 'AccountNumber');
-            $accountNumber->textContent = (string)$this->accountNumber;
-            $xml->appendChild($accountNumber);
+        // Add bank data elements based on provided information
+        if (!empty($this->bankCode) && !empty($this->accountNumber)) {
+            $addElement('BankCode', $this->bankCode);
+            $addElement('AccountNumber', $this->accountNumber);
         } elseif (!empty($this->iBAN)) {
-            $iBan = $document->createElement(TeleCashConstants::PREF_V1 . 'IBAN');
-            $iBan->textContent = (string)$this->iBAN;
-            $xml->appendChild($iBan);
+            $addElement('IBAN', $this->iBAN);
         }
 
-        $mandateReference = $document->createElement(TeleCashConstants::PREF_V1 . 'MandateReference');
-        $mandateReference->textContent = 'MandateReference';
-        $xml->appendChild($mandateReference);
-
-        $mandateType = $document->createElement(TeleCashConstants::PREF_V1 . 'MandateType');
-        $mandateType->textContent = 'SINGLE';
-        $xml->appendChild($mandateType);
+        // Add required elements
+        $addElement('MandateReference', 'MandateReference');
+        $addElement('MandateType', 'SINGLE');
 
         return $xml;
     }

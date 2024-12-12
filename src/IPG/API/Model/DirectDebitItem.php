@@ -12,7 +12,6 @@ use OxidSolutionCatalysts\TeleCash\IPG\TeleCashConstants;
  */
 class DirectDebitItem extends DataStorageItem
 {
-    /** @var DirectDebitData */
     protected DirectDebitData $directDebitData;
 
     /**
@@ -28,7 +27,6 @@ class DirectDebitItem extends DataStorageItem
         string|null $declineHostedDataDuplicates = null
     ) {
         parent::__construct($hostedDataId, $function, $declineHostedDataDuplicates);
-
         $this->directDebitData = $directDebitData;
     }
 
@@ -40,24 +38,27 @@ class DirectDebitItem extends DataStorageItem
      */
     public function getXML(DOMDocument $document): DOMNode
     {
-        $xml = $document->createElement(TeleCashConstants::PREF_A1 . 'DataStorageItem');
+        $xml = $document->createElement('ns2:DataStorageItem');
 
-        $ccData = $this->directDebitData->getXML($document);
-        $dataId = $document->createElement(TeleCashConstants::PREF_A1 . 'HostedDataID');
-        $dataId->textContent = (string)$this->hostedDataId;
-
+        // Add elements in specified order
         if ($this->function !== null) {
-            $function = $document->createElement(TeleCashConstants::PREF_A1 . 'Function');
+            $function = $document->createElement('ns2:Function');
             $function->textContent = $this->function;
             $xml->appendChild($function);
         }
+
         if ($this->declineHostedDataDuplicates !== null) {
-            $declineDuplicates = $document->createElement(TeleCashConstants::PREF_A1 . 'DeclineHostedDataDuplicates');
+            $declineDuplicates = $document->createElement('ns2:DeclineHostedDataDuplicates');
             $declineDuplicates->textContent = $this->declineHostedDataDuplicates;
             $xml->appendChild($declineDuplicates);
         }
 
-        $xml->appendChild($ccData);
+        // Add DirectDebitData
+        $xml->appendChild($this->directDebitData->getXML($document));
+
+        // Add HostedDataID
+        $dataId = $document->createElement('ns2:HostedDataID');
+        $dataId->textContent = (string)$this->hostedDataId;
         $xml->appendChild($dataId);
 
         return $xml;
