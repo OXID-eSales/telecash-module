@@ -1,0 +1,92 @@
+id: osc_telecash
+moduleSource: vendor/oxid-solution-catalysts/telecash-module
+version: 1.0.0-rc.1
+activated: true
+title:
+  de: 'Zahlungs-Module für Zahlungsdienstleisters Telecash'
+  en: 'Payment-Module for Payment-Provider Telecash'
+description:
+  de: 'Dieses Modul ermöglicht die Integration des Zahlungsdienstleisters Telecash.'
+  en: 'This module provides the integration of the payment provider Telecash.'
+lang: ''
+thumbnail: pictures/logo.png
+author: 'OXID eSales AG'
+url: ''
+email: ''
+classExtensions:
+  OxidEsales\Eshop\Application\Controller\Admin\ModuleConfiguration: OxidSolutionCatalysts\TeleCash\Extension\Application\Controller\Admin\ModuleConfiguration
+  OxidEsales\Eshop\Application\Controller\Admin\PaymentMain: OxidSolutionCatalysts\TeleCash\Extension\Application\Controller\Admin\PaymentMain
+  OxidEsales\Eshop\Application\Controller\Admin\OrderMain: OxidSolutionCatalysts\TeleCash\Extension\Application\Controller\Admin\OrderMain
+  OxidEsales\Eshop\Application\Controller\Admin\OrderOverview: OxidSolutionCatalysts\TeleCash\Extension\Application\Controller\Admin\OrderOverview
+  OxidEsales\Eshop\Application\Controller\OrderController: OxidSolutionCatalysts\TeleCash\Extension\Application\Controller\OrderController
+  OxidEsales\Eshop\Application\Controller\PaymentController: OxidSolutionCatalysts\TeleCash\Extension\Application\Controller\PaymentController
+  OxidEsales\Eshop\Application\Model\Address: OxidSolutionCatalysts\TeleCash\Extension\Application\Model\Address
+  OxidEsales\Eshop\Application\Model\Country: OxidSolutionCatalysts\TeleCash\Extension\Application\Model\Country
+  OxidEsales\Eshop\Application\Model\Order: OxidSolutionCatalysts\TeleCash\Extension\Application\Model\Order
+  OxidEsales\Eshop\Application\Model\Payment: OxidSolutionCatalysts\TeleCash\Extension\Application\Model\Payment
+  OxidEsales\Eshop\Application\Model\PaymentGateway: OxidSolutionCatalysts\TeleCash\Extension\Application\Model\PaymentGateway
+  OxidEsales\Eshop\Application\Model\PaymentList: OxidSolutionCatalysts\TeleCash\Extension\Application\Model\PaymentList
+  OxidEsales\Eshop\Application\Model\User: OxidSolutionCatalysts\TeleCash\Extension\Application\Model\User
+  OxidEsales\Eshop\Application\Model\State: OxidSolutionCatalysts\TeleCash\Extension\Application\Model\State
+controllers:
+  AdminTeleCashJsonEndpoint: OxidSolutionCatalysts\TeleCash\Application\Controller\Admin\AdminTeleCashJsonEndpoint
+  OrderTeleCash: OxidSolutionCatalysts\TeleCash\Application\Controller\Admin\OrderTeleCash
+  FrontendTeleCashNotificationEndpoint: OxidSolutionCatalysts\TeleCash\Application\Controller\FrontendTeleCashNotificationEndpoint
+events:
+  onActivate: '\OxidSolutionCatalysts\TeleCash\Core\ModuleEvents::onActivate'
+  onDeactivate: '\OxidSolutionCatalysts\TeleCash\Core\ModuleEvents::onDeactivate'
+moduleSettings:
+  osctelecash_apimode:
+    group: osctelecash_api
+    type: select
+    value: sandbox
+    constraints:
+      - sandbox
+      - live
+  osctelecash_storeid:
+    group: osctelecash_api
+    type: str
+    value: '12022224803'
+  osctelecash_shared_secret:
+    group: osctelecash_api_frontend
+    type: str
+    value: g^Fj5@S9Cu
+  osctelecash_userid:
+    group: osctelecash_api_backend
+    type: str
+    value: WS12022224803._.1
+  osctelecash_basicauthpassword:
+    group: osctelecash_api_backend
+    type: str
+    value: GH9=/YN2My
+  osctelecash_certificateinstallationpassword:
+    group: osctelecash_api_backend
+    type: str
+    value: Je6Q|q$6YH
+  osctelecash_clientcertificateprivatekeypassword:
+    group: osctelecash_api_backend
+    type: str
+    value: ''
+  osctelecash_languages:
+    group: osctelecash_language
+    type: aarr
+    value:
+      de: de_DE
+      en: en_US
+  osctelecash_loglevel:
+    group: osctelecash_debug
+    type: select
+    value: debug
+    constraints:
+      - error
+      - info
+      - debug
+  osctelecash_clientcertificatep12file:
+    type: str
+    value: ws12022224803._.1.p12
+  osctelecash_clientcertificateprivatekeyfile:
+    type: str
+    value: ws12022224803._.1.key
+  osctelecash_trustanchorpemfile:
+    type: str
+    value: tlstrust.pem

@@ -94,6 +94,42 @@ NOTE: From OXID eShop 7.0.x on database reset needs to be done with this command
 $ bin/oe-console oe:database:reset --db-host=mysql --db-port=3306 --db-name=example --db-user=root --db-password=root --force
 ```
 
+### Cypress e2e Tests
+
+* add cypress.yaml to your docker-compose.yaml:
+```yaml
+  cypress:
+    image: cypress/included:latest
+    working_dir: /var/www/extensions/telecash/tests/e2e
+    volumes:
+      - ./source/extensions/telecash:/var/www/extensions/telecash:cached
+      - /tmp/.X11-unix:/tmp/.X11-unix
+    environment:
+      - CYPRESS_baseUrl=https://oxidshop.local
+    ports:
+      - "5920:5900" # VNC port
+    command: cypress open
+    depends_on:
+      apache:
+        condition: service_started
+      php:
+        condition: service_started
+    entrypoint: [ "npx", "cypress", "run", "--config-file", "/var/www/vendor/oxid-solution-catalysts/telecash-module/tests/e2e/cypress.config.js" ]
+
+```
+Then run
+```bash
+  docker compose up cypress
+```
+
+### Cypress e2e Tests to run from shell script on GHA
+
+Run shell script from the host, from the same . where docker-compose.yml is located on the host or on the github with the following command:
+
+```bash
+  ./source/vendor/oxid-solution-catalysts/telecash-module/.github/oxid-esales/cypress.sh
+```
+
 ### Contact us
 
 * In case of issues / bugs, use "Issues" section on github, to report the problem.

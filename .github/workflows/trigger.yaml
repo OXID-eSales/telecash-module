@@ -9,7 +9,7 @@ on:
 
 jobs:
   osc_telecash_php82_mysql_80:
-    uses: oxid-eSales/github-actions/.github/workflows/universal_workflow_light.yaml@v4
+    uses: ./.github/workflows/universal_workflow_light.yaml
     with:
       testplan: '~/defaults/7.1.x.yaml,~/defaults/php8.1_mysql8.0_only.yaml,~/telecash_module.yaml'
       runs_on: '"ubuntu-latest"'

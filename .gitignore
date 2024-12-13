@@ -8,3 +8,5 @@ composer.lock
 tests/.phpunit.result.cache
 tests/.phpunit.cache
 tests/reports/
+/tests/e2e/_backups/
+/tests/e2e/cypress/_generated/
