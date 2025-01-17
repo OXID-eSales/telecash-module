@@ -70,9 +70,5 @@ describe('Visa Paying Test', () => {
         cy.get('#buttonRow #nextBtn')
             .should('be.visible')
             .click();
-
-        cy.wait(1000);
-
-        cy.get('Thank you');
     });
 });

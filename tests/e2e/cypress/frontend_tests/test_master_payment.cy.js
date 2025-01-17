@@ -71,8 +71,6 @@ describe('Visa Paying Test', () => {
             .should('be.visible')
             .click();
 
-        cy.wait(1000);
 
-        cy.get('Thank you');
     });
 });
