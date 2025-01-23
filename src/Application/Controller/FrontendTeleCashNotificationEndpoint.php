@@ -57,9 +57,11 @@ class FrontendTeleCashNotificationEndpoint extends BaseController
     {
         $telecashConnect = $this->getTeleCashConnect();
         $telecashConnect->setResponseData($_POST);
-        if (!$telecashConnect->isValidResponse()) {
+        if (!$telecashConnect->isValidNotification()) {
             /** Throw an Error is too hard, but Ok for the moment, Show an Error is better */
             throw (new TeleCashException())->noValidTransactionResult();
+
+            // this will log out the user SILENTLY, eg. he will not receive any hints what went wrong
         }
 
         /** TODO follow up the work ...
