@@ -7,6 +7,7 @@
 
 declare(strict_types=1);
 
+use OxidEsales\Eshop\Application\Component\CurrencyComponent;
 use OxidEsales\Eshop\Application\Controller\Admin\ModuleConfiguration;
 use OxidEsales\Eshop\Application\Controller\Admin\OrderMain;
 use OxidEsales\Eshop\Application\Controller\Admin\OrderOverview;
@@ -21,6 +22,7 @@ use OxidEsales\Eshop\Application\Model\PaymentGateway;
 use OxidEsales\Eshop\Application\Model\PaymentList;
 use OxidEsales\Eshop\Application\Model\State;
 use OxidEsales\Eshop\Application\Model\User;
+use OxidSolutionCatalysts\TeleCash\Extension\Application\Component\CurrencyComponent_parent;
 use OxidSolutionCatalysts\TeleCash\Extension\Application\Controller\Admin\ModuleConfiguration_parent;
 use OxidSolutionCatalysts\TeleCash\Extension\Application\Controller\Admin\OrderMain_parent;
 use OxidSolutionCatalysts\TeleCash\Extension\Application\Controller\Admin\OrderOverview_parent;
@@ -56,6 +58,13 @@ class_alias(
 class_alias(
     OrderOverview::class,
     OrderOverview_parent::class
+);
+
+// Components
+
+class_alias(
+    CurrencyComponent::class,
+    CurrencyComponent_parent::class
 );
 
 // Frontend Controller

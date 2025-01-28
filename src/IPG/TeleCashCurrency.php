@@ -10,12 +10,16 @@ declare(strict_types=1);
 namespace OxidSolutionCatalysts\TeleCash\IPG;
 
 use InvalidArgumentException;
+use OxidSolutionCatalysts\TeleCash\Core\Service\RegistryService;
+use OxidSolutionCatalysts\TeleCash\Traits\ServiceContainer;
 
 /**
  * Class for handling TeleCash Currency
  */
 class TeleCashCurrency
 {
+    use ServiceContainer;
+
     /**
      * Currency mapping from ISO 4217 alpha codes to numeric codes
      *
@@ -73,7 +77,7 @@ class TeleCashCurrency
     }
 
     /**
-     * Returns the numeric currency code for the given ISO 4217 alpha code
+     * Returns the ISO 4217 alpha code for the given numeric currency code
      *
      * @param string $currencyCode Numeric currency code
      * @return string ISO 4217 alpha code (e.g. 'EUR', 'USD')
@@ -88,5 +92,35 @@ class TeleCashCurrency
             );
         }
         return $currencyMap[$currencyCode];
+    }
+
+    /**
+     * Returns the OXID-ID for the given numeric currency code
+     *
+     * @param string $currencyCode Numeric currency code
+     * @return int
+     * @throws InvalidArgumentException If currency code is not found
+     */
+    public function getOxidCurrencyIdByCurrencyCode(string $currencyCode = '978'): int
+    {
+        // defaults
+        $oxidCurrencies = [];
+        $shopCurrency = 0;
+
+        $registryService = $this->getServiceFromContainer(RegistryService::class);
+        if ($registryService instanceof RegistryService) {
+            $config = $registryService->getConfig();
+            $oxidCurrencies = $config->getCurrencyArray();
+            $shopCurrency = (int) $config->getShopCurrency();
+        }
+        $currencyId = null;
+        $currencyShortName = $this->getShortnameByCurrencyCode($currencyCode);
+
+        foreach ($oxidCurrencies as $oxidCurrency) {
+            if (strtolower($oxidCurrency->name) === strtolower($currencyShortName)) {
+                $currencyId = (int) $oxidCurrency->id;
+            }
+        }
+        return !is_null($currencyId) ? $currencyId : $shopCurrency;
     }
 }

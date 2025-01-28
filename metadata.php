@@ -5,6 +5,7 @@
  * See LICENSE file for license details.
  */
 
+use OxidEsales\Eshop\Application\Component\CurrencyComponent as oxCurrencyComponent;
 use OxidEsales\Eshop\Application\Controller\Admin\ModuleConfiguration as oxModuleConfiguration;
 use OxidEsales\Eshop\Application\Controller\Admin\OrderMain as oxOrderMain;
 use OxidEsales\Eshop\Application\Controller\Admin\OrderOverview as oxOrderOverview;
@@ -22,6 +23,7 @@ use OxidEsales\Eshop\Application\Model\User as oxUser;
 use OxidSolutionCatalysts\TeleCash\Application\Controller\Admin\AdminTeleCashJsonEndpoint;
 use OxidSolutionCatalysts\TeleCash\Application\Controller\Admin\OrderTeleCash;
 use OxidSolutionCatalysts\TeleCash\Core\Module;
+use OxidSolutionCatalysts\TeleCash\Extension\Application\Component\CurrencyComponent;
 use OxidSolutionCatalysts\TeleCash\Extension\Application\Controller\Admin\ModuleConfiguration;
 use OxidSolutionCatalysts\TeleCash\Extension\Application\Controller\Admin\OrderMain;
 use OxidSolutionCatalysts\TeleCash\Extension\Application\Controller\Admin\OrderOverview;
@@ -81,6 +83,8 @@ $aModule = [
         // Controller Frontend
         oxOrderController::class     => OrderController::class,
         oxPaymentController::class   => PaymentController::class,
+        // Components
+        oxCurrencyComponent::class   => CurrencyComponent::class,
         // Models
         oxAddress::class             => Address::class,
         oxCountry::class             => Country::class,
