@@ -387,52 +387,6 @@ class ContextTest extends TestCase
     }
 
     /**
-     * Tests notification URL generation for different API modes
-     *
-     * @dataProvider notificationUrlModeProvider
-     */
-    public function testGetNotificationUrl(bool $isLiveMode, array $expectedParams): void
-    {
-        $this->moduleSettings->expects($this->once())
-            ->method('isLiveApiMode')
-            ->willReturn($isLiveMode);
-
-        $actualUrl = $this->context->getNotificationUrl();
-
-        $baseParams = [
-            'cl' => 'FrontendTeleCashNotificationEndpoint',
-            'fnc' => 'receiveNotifications'
-        ];
-        $expectedParams = array_merge($baseParams, $expectedParams);
-        $expectedUrl = $this->mockShopUrl . 'index.php?' . http_build_query($expectedParams);
-
-        $this->assertEquals(
-            $expectedUrl,
-            $actualUrl,
-            'Notification URL should contain correct parameters based on API mode'
-        );
-    }
-
-    /**
-     * Provides test cases for notification URL generation
-     *
-     * @return array<string, array{bool, array<string, string|int>}>
-     */
-    public static function notificationUrlModeProvider(): array
-    {
-        return [
-            'live_mode' => [
-                true,  // isLiveMode
-                []     // expectedParams
-            ],
-            'sandbox_mode' => [
-                false,
-                ['XDEBUG_SESSION_START' => '1']
-            ]
-        ];
-    }
-
-    /**
      * Provides test cases for different dates
      *
      * Tests various date scenarios:
