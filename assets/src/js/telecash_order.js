@@ -28,10 +28,14 @@ class TeleCashFormHandler {
      * Removes inline onclick handler and replaces it with our custom handler
      */
     setupEventListeners() {
-        const submitButton = document.querySelector('button[onclick*="orderConfirmAgbBottom"]');
-        if (submitButton) {
-            submitButton.removeAttribute('onclick');
-            submitButton.addEventListener('click', (e) => this.handleSubmit(e));
+        const submitButton = document.getElementById('checkoutOrderNextStepSide');
+        const teleCashForm = document.getElementById('teleCashConnectForm');
+
+        if (submitButton && teleCashForm) {
+            submitButton.addEventListener('click', (e) => {
+                e.preventDefault();
+                this.handleSubmit(teleCashForm);
+            });
         }
     }
 
@@ -89,22 +93,26 @@ class TeleCashFormHandler {
     }
 
     /**
-     * Handle the form submission
+     * Handle the submit action
      *
      * Validates all checkboxes and submits the TeleCash form if validation passes
      *
-     * @param {Event} event - The submit event
+     * @param {HTMLFormElement} teleCashForm - The TeleCash form element to be submitted
+     * @returns {void}
      */
-    handleSubmit(event) {
-        event.preventDefault();
-
+    handleSubmit(teleCashForm) {
         if (!this.validateAllCheckboxes()) {
             this.focusFirstInvalidCheckbox();
             return;
         }
 
-        const teleCashForm = document.getElementById('teleCashConnectForm');
         if (teleCashForm) {
+            // Disable all buttons
+            document.querySelectorAll('button').forEach(button => {
+                button.disabled = true;
+            });
+
+            // Submit the TeleCash form
             teleCashForm.submit();
         } else {
             console.error('TeleCash form not found');
