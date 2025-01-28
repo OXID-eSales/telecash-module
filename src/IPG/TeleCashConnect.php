@@ -322,8 +322,9 @@ class TeleCashConnect
         }
 
         $toCheck = ['chargetotal', 'currency', 'txndatetime', 'storename', 'approval_code'];
+        $hash = $data['notification_hash'] ?? '';
 
-        return $this->calculateAndCompareHashes($data, $toCheck, $data['notification_hash']);
+        return $this->calculateAndCompareHashes($data, $toCheck, $hash);
     }
     /**
      * Validates the response hash from the Telecash server. The hash is calculated from the response data and the
@@ -341,8 +342,9 @@ class TeleCashConnect
         }
 
         $toCheck = ['approval_code', 'chargetotal', 'currency', 'txndatetime', 'storename'];
+        $hash = $data['response_hash'] ?? '';
 
-        return $this->calculateAndCompareHashes($data, $toCheck, $data['response_hash']);
+        return $this->calculateAndCompareHashes($data, $toCheck, $hash);
     }
 
     /**
@@ -463,7 +465,13 @@ class TeleCashConnect
             }
         }
 
-        $hashAlgo = $this->getHashAlgorithm($this->getHashMethodFromTeleCashData($data));
+        try {
+            $hashMethod = $this->getHashMethodFromTeleCashData($data);
+        } catch (InvalidArgumentException) {
+            return false;
+        }
+
+        $hashAlgo = $this->getHashAlgorithm($hashMethod);
         $secretKey = $this->getSecretKey();
         $hash = $this->calculateHashFromData(
             $checkData,
