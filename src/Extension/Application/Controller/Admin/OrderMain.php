@@ -17,6 +17,26 @@ class OrderMain extends OrderMain_parent
     use AdminSendOrder;
 
     /**
+     * Constructor for OrderMain.
+     *
+     * Initializes a new instance of the OrderMain class. This constructor can be used
+     * in both production and test environments due to its flexible parameter configuration.
+     *
+     * @param bool $initParent Whether to initialize the parent BaseModel.
+     *                          Set to false in test environment to avoid
+     *                          OXID framework dependencies. Default is true.
+     */
+    public function __construct(
+        bool $initParent = true
+    ) {
+        if ($initParent) {
+            parent::__construct();
+        }
+
+        $this->setContainer($this->getContainer());
+    }
+
+    /**
      * Core-Extension - var-types and return value only in doc-block
      * {@inheritDoc}
      *
