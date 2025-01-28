@@ -111,7 +111,6 @@ class OrderController extends OrderController_parent
         //Urls
         $failUrl = $context ? $context->getFailUrl() : '';
         $successUrl = $context ? $context->getSuccessUrl($basket, $this->getDeliveryAddressMD5()) : '';
-        $notificationUrl = $context ? $context->getNotificationUrl() : '';
 
         $transactionType = $teleCashPayment->getTeleCashTransactionType();
         $paymentMethod = $teleCashPayment->getTeleCashPaymentMethod();
@@ -120,7 +119,6 @@ class OrderController extends OrderController_parent
         $teleCashConnectData->setOxidLanguage($language);
         $teleCashConnectData->setFailUrl($failUrl);
         $teleCashConnectData->setSuccessUrl($successUrl);
-        $teleCashConnectData->setNotificationUrl($notificationUrl);
         $teleCashConnectData->setTransactionType($transactionType);
         $teleCashConnectData->setPaymentMethod($paymentMethod);
 

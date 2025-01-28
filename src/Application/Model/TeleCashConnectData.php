@@ -40,17 +40,17 @@ class TeleCashConnectData implements TeleCashConnectDataInterface
 
     protected ?Basket $basket = null;
 
-    protected string $oxidLanguage;
+    protected string $oxidLanguage = '';
 
-    protected string $transactionType;
+    protected string $transactionType = '';
 
-    protected string $paymentMethod;
+    protected string $paymentMethod = '';
 
-    protected string $responseFailURL;
+    protected string $responseFailURL = '';
 
-    protected string $responseSuccessURL;
+    protected string $responseSuccessURL = '';
 
-    protected string $transactionNotificationURL;
+    protected string $transactionNotificationURL = '';
 
     /**
      * Constructor for TeleCashConnectData

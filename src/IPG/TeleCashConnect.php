@@ -305,9 +305,31 @@ class TeleCashConnect
     }
 
     /**
+     * Validates the notification hash from the Telecash server. The hash is calculated from the response data and the
+     * secret key, and must match the hash sent by the Telecash server.
+     * Feed the $_POST array to this method, either from a success or a failed response.
+     *
+     * Basically the same as isValidResponse(), but for notifications.
+     * Main difference is a different order of fields for the hash calculation.
+     *
+     * @param array<string, string> $data Response data to validate
+     * @return bool True if notification is valid, false otherwise
+     */
+    public function isValidNotification(array $data = []): bool
+    {
+        if (empty($data) && !empty($this->responseData)) {
+            $data = $this->responseData;
+        }
+
+        $toCheck = ['chargetotal', 'currency', 'txndatetime', 'storename', 'approval_code'];
+
+        return $this->calculateAndCompareHashes($data, $toCheck, $data['notification_hash']);
+    }
+    /**
      * Validates the response hash from the Telecash server. The hash is calculated from the response data and the
      * secret key, and must match the hash sent by the Telecash server.
      * Feed the $_POST array to this method, either from a success or a failed response.
+     * Only valid for direct responses from Telecash, not for notifications (see "isValidNotification")!
      *
      * @param array<string, string> $data Response data to validate
      * @return bool True if response is valid, false otherwise
@@ -318,28 +340,9 @@ class TeleCashConnect
             $data = $this->responseData;
         }
 
-        $checkData = [];
         $toCheck = ['approval_code', 'chargetotal', 'currency', 'txndatetime', 'storename'];
 
-        foreach ($toCheck as $field) {
-            if (array_key_exists($field, $data)) {
-                $checkData[$field] = $data[$field];
-            }
-        }
-
-        if (!isset($checkData['storename'])) {
-            $checkData['storename'] = $this->storeName;
-        }
-
-        $hashAlgo = $this->getHashAlgorithm($this->getHashMethodFromTeleCashData($data));
-        $secretKey = $this->getSecretKey();
-        $hash = $this->calculateHashFromData(
-            $checkData,
-            $hashAlgo,
-            $secretKey
-        );
-
-        return $hash === $data['response_hash'];
+        return $this->calculateAndCompareHashes($data, $toCheck, $data['response_hash']);
     }
 
     /**
@@ -436,5 +439,42 @@ class TeleCashConnect
                 true
             )
         );
+    }
+
+    /**
+     * Calculate a hash based on a list of fieldnames in `$toCheck` and response `$data` and compare it to given
+     * `$compareHash`.
+     *
+     * @param array<string, string> $data The data where data is taken from
+     * @param array<string> $toCheck The fields to check (must be set in `$data`)
+     * @param string $compareHash The hash to compare to the calculated hash
+     * @return bool True if the hashes match, false otherwise
+     */
+    private function calculateAndCompareHashes(array $data, array $toCheck, string $compareHash)
+    {
+        if (!isset($data['storename'])) {
+            $data['storename'] = $this->storeName;
+        }
+
+        $checkData = [];
+        foreach ($toCheck as $field) {
+            if (array_key_exists($field, $data)) {
+                $checkData[$field] = $data[$field];
+            }
+        }
+
+        $hashAlgo = $this->getHashAlgorithm($this->getHashMethodFromTeleCashData($data));
+        $secretKey = $this->getSecretKey();
+        $hash = $this->calculateHashFromData(
+            $checkData,
+            $hashAlgo,
+            $secretKey
+        );
+        $this->logger?->log(
+            'debug',
+            'Debug: calculateAndCompareHashes: calculated "' . $hash . '" vs. "' . $compareHash . '"'
+        );
+
+        return $hash === $compareHash;
     }
 }

@@ -139,19 +139,6 @@ class Context
     }
 
     /**
-     * Get Notification-URL for TeleCash-Connect
-     */
-    public function getNotificationUrl(): string
-    {
-        $parameter = [
-            "cl"  => "FrontendTeleCashNotificationEndpoint",
-            "fnc" => "receiveNotifications",
-        ];
-
-        return $this->prepareUrl($parameter);
-    }
-
-    /**
      * Helper for Url-Methods
      * @param array<string, int|string> $parameter
      * @return string
