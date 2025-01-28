@@ -28,8 +28,7 @@ class OrderOverview extends OrderOverview_parent
      */
     public function __construct(
         bool $initParent = true
-    )
-    {
+    ) {
         if ($initParent) {
             parent::__construct();
         }
