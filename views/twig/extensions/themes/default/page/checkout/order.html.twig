@@ -11,9 +11,7 @@
 
 {% block checkout_order_next_step_side %}
     {% if isTeleCashPayment %}
-        <button id="checkoutOrderNextStepSide" type="button" class="btn btn-highlight btn-lg w-100">
-            {{ translate({ ident: "SUBMIT_ORDER" }) }}
-        </button>
+        {% include "@osc_telecash/templates/checkoutordernextstepside.html.twig" %}
     {% else %}
         {{ parent() }}
     {% endif %}
