@@ -6,33 +6,39 @@ use OxidEsales\Eshop\Core\Config;
 use OxidSolutionCatalysts\TeleCash\IPG\TeleCashCurrency;
 use PHPUnit\Framework\TestCase;
 use OxidSolutionCatalysts\TeleCash\Core\Service\RegistryService;
-use OxidEsales\EshopCommunity\Internal\Container\ContainerFactory;
-use OxidEsales\EshopCommunity\Internal\Framework\Module\Configuration\Bridge\ShopConfigurationDaoBridgeInterface;
 use stdClass;
+use Psr\Container\ContainerInterface;
 
-class TeleCashCurrencyIntegrationTest extends TestCase
+class TeleCashCurrencyTest extends TestCase
 {
     private TeleCashCurrency $currency;
-    private $container;
     private $registryServiceMock;
+    private $containerMock;
 
     protected function setUp(): void
     {
         parent::setUp();
 
-        $this->container = ContainerFactory::getInstance()->getContainer();
-
         // Create mock for RegistryService
         $this->registryServiceMock = $this->createMock(RegistryService::class);
+
+        // Create a more specific container mock
+        $this->containerMock = $this->createMock(ContainerInterface::class);
+        $this->containerMock->method('has')
+            ->with(RegistryService::class)
+            ->willReturn(true);
+        $this->containerMock->method('get')
+            ->with(RegistryService::class)
+            ->willReturn($this->registryServiceMock);
 
         // Create instance of TeleCashCurrency
         $this->currency = new TeleCashCurrency();
 
-        // Set container in TeleCashCurrency using reflection
+        // Inject the container mock
         $reflection = new \ReflectionClass($this->currency);
         $containerProperty = $reflection->getProperty('container');
         $containerProperty->setAccessible(true);
-        $containerProperty->setValue($this->currency, $this->container);
+        $containerProperty->setValue($this->currency, $this->containerMock);
     }
 
     /**
@@ -44,18 +50,49 @@ class TeleCashCurrencyIntegrationTest extends TestCase
         string $expectedCurrencyName,
         int $expectedId
     ): void {
-        // Create a test currency array
-        $testCurrency = new stdClass();
-        $testCurrency->id = $expectedId;
-        $testCurrency->name = $expectedCurrencyName;
-        $testCurrency->rate = "1.00";
-        $testCurrency->dec = "2";
-        $testCurrency->sign = $expectedCurrencyName;
+        // Create all test currencies
+        $currencies = [];
+
+        // EUR
+        $eurCurrency = new stdClass();
+        $eurCurrency->id = 0;
+        $eurCurrency->name = 'EUR';
+        $eurCurrency->rate = "1.00";
+        $eurCurrency->dec = "2";
+        $eurCurrency->sign = 'EUR';
+        $currencies[] = $eurCurrency;
+
+        // USD
+        $usdCurrency = new stdClass();
+        $usdCurrency->id = 1;
+        $usdCurrency->name = 'USD';
+        $usdCurrency->rate = "1.08";
+        $usdCurrency->dec = "2";
+        $usdCurrency->sign = 'USD';
+        $currencies[] = $usdCurrency;
+
+        // GBP
+        $gbpCurrency = new stdClass();
+        $gbpCurrency->id = 2;
+        $gbpCurrency->name = 'GBP';
+        $gbpCurrency->rate = "0.86";
+        $gbpCurrency->dec = "2";
+        $gbpCurrency->sign = 'GBP';
+        $currencies[] = $gbpCurrency;
+
+        // CHF
+        $chfCurrency = new stdClass();
+        $chfCurrency->id = 3;
+        $chfCurrency->name = 'CHF';
+        $chfCurrency->rate = "0.96";
+        $chfCurrency->dec = "2";
+        $chfCurrency->sign = 'CHF';
+        $currencies[] = $chfCurrency;
 
         // Create config mock
         $configMock = $this->createMock(Config::class);
         $configMock->method('getCurrencyArray')
-            ->willReturn([$testCurrency]);
+            ->willReturn($currencies);
         $configMock->method('getShopCurrency')
             ->willReturn(0);
 
@@ -64,12 +101,7 @@ class TeleCashCurrencyIntegrationTest extends TestCase
             ->method('getConfig')
             ->willReturn($configMock);
 
-        // Register RegistryService mock in the container
-        $this->container->set(RegistryService::class, $this->registryServiceMock);
-
-        // Test the method
         $result = $this->currency->getOxidCurrencyIdByCurrencyCode($currencyCode);
-
         $this->assertEquals($expectedId, $result);
     }
 
@@ -91,9 +123,6 @@ class TeleCashCurrencyIntegrationTest extends TestCase
         $this->registryServiceMock
             ->method('getConfig')
             ->willReturn($configMock);
-
-        // Register RegistryService mock in the container
-        $this->container->set(RegistryService::class, $this->registryServiceMock);
 
         $result = $this->currency->getOxidCurrencyIdByCurrencyCode('999');
 
@@ -124,9 +153,6 @@ class TeleCashCurrencyIntegrationTest extends TestCase
         $this->registryServiceMock
             ->method('getConfig')
             ->willReturn($configMock);
-
-        // Register RegistryService mock in the container
-        $this->container->set(RegistryService::class, $this->registryServiceMock);
 
         $result = $this->currency->getOxidCurrencyIdByCurrencyCode();
 

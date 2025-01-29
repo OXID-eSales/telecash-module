@@ -104,7 +104,6 @@ class TeleCashCurrency
     public function getOxidCurrencyIdByCurrencyCode(string $currencyCode = '978'): int
     {
         // defaults
-        $oxidCurrencies = [];
         $shopCurrency = 0;
 
         $registryService = $this->getServiceFromContainer(RegistryService::class);
@@ -112,15 +111,20 @@ class TeleCashCurrency
             $config = $registryService->getConfig();
             $oxidCurrencies = $config->getCurrencyArray();
             $shopCurrency = (int) $config->getShopCurrency();
-        }
-        $currencyId = null;
-        $currencyShortName = $this->getShortnameByCurrencyCode($currencyCode);
 
-        foreach ($oxidCurrencies as $oxidCurrency) {
-            if (strtolower($oxidCurrency->name) === strtolower($currencyShortName)) {
-                $currencyId = (int) $oxidCurrency->id;
+            try {
+                $currencyShortName = $this->getShortnameByCurrencyCode($currencyCode);
+
+                foreach ($oxidCurrencies as $oxidCurrency) {
+                    if (strtolower($oxidCurrency->name) === strtolower($currencyShortName)) {
+                        return (int) $oxidCurrency->id;
+                    }
+                }
+            } catch (InvalidArgumentException) {
+                // If the currency code is invalid, we return the default currency
             }
         }
-        return !is_null($currencyId) ? $currencyId : $shopCurrency;
+
+        return $shopCurrency;
     }
 }
