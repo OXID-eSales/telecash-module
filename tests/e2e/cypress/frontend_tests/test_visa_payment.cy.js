@@ -9,7 +9,6 @@ describe('Visa Paying Test', () => {
         cy.get('input#loginPasword').type('useruser');
 
         cy.get('button.btn.btn-primary').contains('Anmelden').click();
-        cy.wait(1000);
 
         cy.get('.card-body')
             .first()
@@ -20,14 +19,10 @@ describe('Visa Paying Test', () => {
 
         cy.get('button.btn-minibasket[data-bs-target="#basketModal"]').first().click();
 
-        cy.wait(500);
-
         cy.get('.modal-content')
             .should('be.visible')
             .find('a.btn.btn-highlight.btn-lg.w-100.mb-2')
             .click();
-
-        cy.wait(200);
 
         cy.get('form#payment')
             .should('be.visible')
@@ -35,11 +30,8 @@ describe('Visa Paying Test', () => {
             .first()
             .check();
 
-        cy.wait(1000);
         cy.get('button[onclick="document.querySelector(\'#payment\').requestSubmit();"]')
             .click();
-
-        cy.wait(1000);
 
         cy.get('.sticky-md-top button.btn.btn-highlight.btn-lg.w-100')
             .click({ force: true });
@@ -64,8 +56,6 @@ describe('Visa Paying Test', () => {
 
         cy.get('#cardCode_masked')
             .type('999');
-
-        cy.wait(3000);
 
         cy.get('#buttonRow #nextBtn')
             .should('be.visible')
