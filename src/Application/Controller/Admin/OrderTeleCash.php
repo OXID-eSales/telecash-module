@@ -78,26 +78,7 @@ class OrderTeleCash extends AdminController
             'ErrorDisplayService'
         );
 
-        // initial oxID
-        $this->oxid = $this->getEditObjectId();
-
-        // initial possible TeleCashOrder
-        $this->order = $this->getOxidOrderModel();
-        $this->order->load($this->oxid);
-
-        /** @var Order $order */
-        $order = $this->order;
-
-        $this->isTeleCashOrder = $order->isTeleCashOrder();
-        $this->teleCashOrder = $order->getTeleCashOrder();
-
-        //initial possible TeleCashPayment
-        $payment = $this->getOxidPaymentModel();
-        $paymentId = $order->getFieldStringData('oxpaymenttype');
-
-        $payment->load($paymentId);
-        /** @var Payment $payment */
-        $this->teleCashPayment = $payment->getTeleCashPayment();
+        $this->initPayment();
     }
 
     /** @inheritdoc
@@ -124,6 +105,9 @@ class OrderTeleCash extends AdminController
             $this->isChargePossible($amount)
         ) {
             $this->afterProcessService->doChargeOrder($this->teleCashOrder->getId(), $amount);
+
+            // reload the order
+            $this->initPayment();
         }
     }
 
@@ -210,5 +194,29 @@ class OrderTeleCash extends AdminController
             $result = $this->teleCashOrder->getPossibleCharge();
         }
         return $result;
+    }
+
+    private function initPayment(): void
+    {
+        // initial oxID
+        $this->oxid = $this->getEditObjectId();
+
+        // initial possible TeleCashOrder
+        $this->order = $this->getOxidOrderModel();
+        $this->order->load($this->oxid);
+
+        /** @var Order $order */
+        $order = $this->order;
+
+        $this->isTeleCashOrder = $order->isTeleCashOrder();
+        $this->teleCashOrder = $order->getTeleCashOrder();
+
+        //initial possible TeleCashPayment
+        $payment = $this->getOxidPaymentModel();
+        $paymentId = $order->getFieldStringData('oxpaymenttype');
+
+        $payment->load($paymentId);
+        /** @var Payment $payment */
+        $this->teleCashPayment = $payment->getTeleCashPayment();
     }
 }
