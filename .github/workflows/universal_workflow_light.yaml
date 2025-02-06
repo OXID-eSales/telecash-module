@@ -1,0 +1,1354 @@
+name: universal_workflow_light
+# This workflow loads a base testplan, creates cached shop instances and runs
+# phpunit, codeception and runtest based tests as well as code scans
+# and sonarcloud reports
+#
+# yamllint disable-line rule:truthy
+on:
+  workflow_call:
+    inputs:
+      testplan:
+        type: string
+        description: 'Testplan to run'
+        required: true
+      runs_on:
+        type: string
+        description: 'JSON string/array describing the runner'
+        required: true
+      defaults:
+        type: string
+        description: 'Which ref do we want to use for the plan defaults'
+        required: false
+        default: 'v3'
+      plan_folder:
+        type: string
+        description: 'Folder containing the test plans'
+        required: false
+        default: 'tests/github_actions'
+      default_plan_folder:
+        type: string
+        description: 'Folder containing the test plan templates'
+        required: false
+        default: '.github/oxid-esales/defaults'
+      debug:
+        type: boolean
+        description: 'Enable debugging'
+        default: true
+        required: false
+      custom_testplan_yaml:
+        type: string
+        description: 'Content of ~/oxid-esales/_custom.yaml'
+        default: ''
+        required: false
+      use_scheduled_slack_channel:
+        type: boolean
+        description: 'Use alternative slack channel'
+        default: false
+        required: false
+
+    secrets:
+      DOCKER_HUB_USER:
+        # description: 'user for the docker login'
+        required: false
+      DOCKER_HUB_TOKEN:
+        # description: 'Token for the docker login'
+        required: false
+      CACHE_ENDPOINT:
+        # description: 'Endpoint for tespkg/actions-cache@v1'
+        required: false    # only for ee
+      CACHE_ACCESS_KEY:
+        # description: 'Access key for tespkg/actions-cache@v1'
+        required: false    # only for ee
+      CACHE_SECRET_KEY:
+        # description: 'Secret key for tespkg/actions-cache@v1'
+        required: false    # only for ee
+      enterprise_github_token:
+        # description: 'OAuth token to access enterprise repos'
+        required: false
+      SONAR_TOKEN:
+        # description: Token for sonarcloud access
+        required: false
+      SLACK_WEBHOOK_URL:
+        required: false
+        # description: Webhook for posting to SLACK
+      SLACK_SCHEDULED_WEBHOOK_URL:
+        required: false
+        # description: Webhook for posting to SLACK
+
+jobs:
+  init:
+    runs-on: ${{ fromJSON(inputs.runs_on) }}
+    steps:
+      - name: 'Checkout testplan defaults'
+        uses: actions/checkout@v4
+        with:
+          repository: 'OXID-eSales/github-actions'
+          ref: '${{ inputs.defaults }}'
+          path: 'defaults'
+          sparse-checkout: '${{ inputs.default_plan_folder }}'
+
+      - name: 'Checkout testplans'
+        uses: actions/checkout@v4
+        with:
+          sparse-checkout: |
+            ${{ inputs.plan_folder}}
+            composer.json
+          path: workflow
+
+      - name: 'Consolidate plans'
+        id: consolidate_plans
+        run: |
+          mkdir -p '${{ inputs.plan_folder }}/defaults'
+          if [ -d workflow/${{ inputs.plan_folder }} ]; then
+            mv workflow/${{ inputs.plan_folder }}/* '${{ inputs.plan_folder }}/'
+            /bin/rm -r 'workflow/${{ inputs.plan_folder }}'
+          fi
+          if [ -f workflow/composer.json ]; then
+            mv workflow/composer.json '${{ inputs.plan_folder }}/'
+          fi
+          mv defaults/${{ inputs.default_plan_folder}}/* '${{ inputs.plan_folder }}/defaults/'
+          cat >'${{ inputs.plan_folder }}/_custom.yaml' <<'EOF'
+          # Generated from workflow input custom_testplan_yaml
+          ${{ inputs.custom_testplan_yaml }}
+          EOF
+          # ToDo: The next line can be removed in v5 when the transition to yaml is finished
+          cp '${{ inputs.plan_folder }}/_custom.yaml' '${{ inputs.plan_folder }}/_custom.yml'
+          if [ '${{ github.event_name }}' == 'pull_request' ]; then
+            REF=$(echo '{{ .Github.HeadRef }}'|sed -e 's|/refs/heads/||')
+            # This is the git ref name
+            sed -e "s|safe_ref_name:.*|safe_ref_name: ${REF}|" -i.backup '${{ inputs.plan_folder }}/defaults/defaults_light.yaml'
+            # This is the same for composer but with an added dev- prefix
+            sed -e "s|ref_name: dev-.*|ref_name: dev-${REF}|" -i.backup '${{ inputs.plan_folder }}/defaults/defaults_light.yaml'
+          fi
+
+          TESTPLAN=$(echo "${{ inputs.testplan }}"|sed -e 's|~|${{ inputs.plan_folder }}|g')
+          # ToDo: Remove the ,${{ inputs.plan_folder }}/defaults/_rename.yaml when releasing v5
+          DEFAULTS="${{ inputs.plan_folder }}/defaults/defaults_light.yaml"
+          echo "testplan=${DEFAULTS},${TESTPLAN},${{ inputs.plan_folder }}/defaults/_rename.yaml" >>"${GITHUB_OUTPUT}"
+
+      - name: 'Load Testplan'
+        id: ltp
+        uses: 'joernott/load_testplan@v1'
+        with:
+          files: '${{ steps.consolidate_plans.outputs.testplan }}'
+          set_output: true
+          set_env: true
+          set_print: true
+          loglevel: info
+          logfile: load_testplan_init.log
+          yaml: generated_testplan.yaml
+
+      - name: 'Prepare artifact and generate safe title'
+        id: post_ltp
+        if: always()
+        run: |
+          cp "${GITHUB_OUTPUT}" generated_output.txt
+          cp "${GITHUB_ENV}" generated_env.txt
+          echo 'title=${{steps.ltp.outputs.global_title}}'| \
+            sed -E 's#\s|\~|"|,|:|<|>|\||\*|\?|\/|\\#_#g' | \
+            sed -e 's#\-\-*#-#' -e 's#\_\_*#_#g'| \
+            tee -a "${GITHUB_OUTPUT}"
+
+      - name: Cache testplan on S3
+        if: ${{ inputs.runs_on != '"ubuntu-latest"'}}
+        uses: tespkg/actions-cache/save@v1
+        with:
+          path: |
+            ${{ inputs.plan_folder }}/*
+          key: '${{ steps.ltp.outputs.init_cache_name }}'
+          endpoint: ${{ secrets.CACHE_ENDPOINT }}
+          accessKey: ${{ secrets.CACHE_ACCESS_KEY }}
+          secretKey: ${{ secrets.CACHE_SECRET_KEY }}
+          bucket: ${{ steps.ltp.outputs.init_cache_bucket }}
+
+      - name: Cache testplan on Github
+        if: ${{ inputs.runs_on == '"ubuntu-latest"'}}
+        uses: actions/cache/save@v4
+        with:
+          path: |
+            ${{ inputs.plan_folder }}/*
+          key: '${{ steps.ltp.outputs.init_cache_name }}'
+
+      - name: Install missing python3-yaml on private runners
+        if: ${{ inputs.runs_on != '"ubuntu-latest"'}}
+        shell: bash
+        run: |
+            sudo DEBIAN_FRONTEND=noninteractive apt-get -qq update
+            sudo apt-get -qq install python3-yaml
+
+      - name: Obfuscate _custom yaml
+        if: always()
+        shell: python
+        run: |
+          import yaml
+
+          def obfuscate(d):
+              for k, v in d.items():
+                  if isinstance(v, dict):
+                      obfuscate(v)
+                  else:
+                      d[k]='***'
+              return d
+
+          with open('${{ inputs.plan_folder }}/_custom.yaml','r') as f:
+              data = yaml.safe_load(f)
+          if isinstance(data, dict):
+              if 'secrets' in data:
+                  data['secrets']=obfuscate(data['secrets'])
+              with open('${{ inputs.plan_folder }}/_custom.yaml', 'w') as file:
+                  yaml.dump(data, file)
+              with open('${{ inputs.plan_folder }}/_custom.yml', 'w') as file:
+                  yaml.dump(data, file)
+
+      - name: 'Create first testplan archive'
+        if: always()
+        id: begin_report
+        uses: OXID-eSales/github-actions/begin_report@v4
+        with:
+          title: ${{ steps.ltp.outputs.finish_slack_title }}
+          prefix: '${{ steps.post_ltp.outputs.title }}'
+          repository: '${{ github.server_url }}/${{ github.repository }}'
+          job: '${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}'
+          testplan: '${{ inputs.testplan }}'
+          files: |
+            ${{ inputs.plan_folder}}/*
+            generated_testplan.yaml
+            generated_output.txt
+            generated_env.txt
+            load_testplan_init.log
+          debug: ${{ inputs.debug }}
+
+      - name: 'Write Report'
+        if: always()
+        uses: OXID-eSales/github-actions/append_report@v4
+        with:
+          prefix: '${{ steps.post_ltp.outputs.title }}'
+          header: true
+          phase: install
+          priority: '001'
+          cached_object: ${{ steps.ltp.outputs.init_cache_name }}
+          debug: false
+          github_token: ${{ secrets.enterprise_github_token || github.token }}
+
+    outputs:
+      debug: ${{ steps.begin_report.outputs.debug }}
+      use_private_cache: ${{ inputs.runs_on != '"ubuntu-latest"'}}
+      global_title: ${{ steps.post_ltp.outputs.title }}
+      # init variables
+      testplan: ${{ steps.consolidate_plans.outputs.testplan }}
+      init_cache_bucket: ${{ steps.ltp.outputs.init_cache_bucket }}
+      init_cache_name: ${{ steps.ltp.outputs.init_cache_name }}
+      # install variables
+      install_matrix_mysql: ${{ steps.ltp.outputs.install_matrix_mysql }}
+      install_matrix_php: ${{ steps.ltp.outputs.install_matrix_php }}
+      install_max_parallel: ${{ steps.ltp.outputs.install_max_parallel }}
+      # runscript variables
+      runscript_matrix_mysql: ${{ steps.ltp.outputs.runscript_matrix_mysql }}
+      runscript_matrix_php: ${{ steps.ltp.outputs.runscript_matrix_php }}
+      runscript_matrix_script: ${{ steps.ltp.outputs.runscript_matrix_script }}
+      runscript_max_parallel: ${{ steps.ltp.outputs.runscript_max_parallel }}
+      # cypress variables
+      cypress_matrix_mysql: ${{ steps.ltp.outputs.cypress_matrix_mysql }}
+      cypress_matrix_php: ${{ steps.ltp.outputs.cypress_matrix_php }}
+      cypress_matrix_script: ${{ steps.ltp.outputs.cypress_matrix_script }}
+      cypress_max_parallel: ${{ steps.ltp.outputs.cypress_max_parallel }}
+      # runslim variables
+      runslim_matrix_mysql: ${{ steps.ltp.outputs.runslim_matrix_mysql }}
+      runslim_matrix_php: ${{ steps.ltp.outputs.runslim_matrix_php }}
+      runslim_matrix_script: ${{ steps.ltp.outputs.runslim_matrix_script }}
+      runslim_max_parallel: ${{ steps.ltp.outputs.runslim_max_parallel }}
+      # sonarcloud variables
+      sonarcloud_matrix_mysql: ${{ steps.ltp.outputs.sonarcloud_matrix_mysql }}
+      sonarcloud_matrix_php: ${{ steps.ltp.outputs.sonarcloud_matrix_php }}
+      sonarcloud_matrix_testplan: ${{ steps.ltp.outputs.sonarcloud_matrix_testplan }}
+      sonarcloud_max_parallel: ${{ steps.ltp.outputs.sonarcloud_max_parallel }}
+      # yamllint variables
+      yamllint_skip: ${{ steps.ltp.outputs.yamllint_skip }}
+      yamllint_file_or_dir: ${{ steps.ltp.outputs.yamllint_file_or_dir }}
+      yamllint_rules: ${{ steps.ltp.outputs.yamllint_rules }}
+      # actionlint variables
+      actionlint_skip: ${{ steps.ltp.outputs.actionlint_skip }}
+      # finish variables
+      finish_matrix_mysql: ${{ steps.ltp.outputs.finish_matrix_mysql }}
+      finish_matrix_php: ${{ steps.ltp.outputs.finish_matrix_php }}
+      finish_skip: ${{ steps.ltp.outputs.finish_skip }}
+      finish_slack_title: ${{ steps.ltp.outputs.finish_slack_title }}
+      finish_slack_compact: ${{ steps.ltp.outputs.finish_slack_compact }}
+
+  install:
+    needs: init
+    strategy:
+      matrix:
+        php: ${{ fromJSON(needs.init.outputs.install_matrix_php) }}
+        mysql: ${{ fromJSON(needs.init.outputs.install_matrix_mysql) }}
+      fail-fast: false
+      max-parallel: ${{ fromJSON(needs.init.outputs.install_max_parallel) }}
+    runs-on: ${{ fromJSON(inputs.runs_on) }}
+
+    steps:
+      - name: Load cached testplan
+        id: itn
+        uses: OXID-eSales/github-actions/load_cached_testplan@v4
+        with:
+          php: ${{ matrix.php }}
+          mysql: ${{ matrix.mysql }}
+          prefix: '${{ needs.init.outputs.global_title }}'
+          root_testplan: ${{ needs.init.outputs.testplan }}
+          matrix_testplan: ''
+          plan_folder: ${{ inputs.plan_folder }}
+          cache_name: ${{ needs.init.outputs.init_cache_name }}
+          cache_endpoint: ${{ secrets.CACHE_ENDPOINT }}
+          cache_access_key: ${{ secrets.CACHE_ACCESS_KEY }}
+          cache_secret_key: ${{ secrets.CACHE_SECRET_KEY }}
+          cache_bucket: ${{ needs.init.outputs.init_cache_bucket }}
+          debug: ${{ needs.init.outputs.debug }}
+
+      - name: 'Load Testplan'
+        id: iltp
+        uses: 'joernott/load_testplan@v1'
+        with:
+          files: '${{steps.itn.outputs.testplan}}'
+          set_output: true
+          set_print: true
+          set_env: true
+          yaml: generated_testplan.yaml
+          loglevel: info
+          logfile: load_testplan_install.log
+          token: ${{ secrets.enterprise_github_token }}
+
+      - name: 'Prepare Shop'
+        id: prepare_shop
+        uses: 'OXID-eSales/github-actions/prepare_shop@v4'
+        with:
+          container_name: ${{ steps.iltp.outputs.install_container_name }}
+          container_options: ${{ steps.iltp.outputs.install_container_options }}
+          container_method: ${{ steps.iltp.outputs.install_container_method }}
+          docker_login: ${{ steps.iltp.outputs.install_docker_login }}
+          docker_user: ${{ secrets.DOCKER_HUB_USER }}
+          docker_token: ${{ secrets.DOCKER_HUB_TOKEN }}
+          # Deprecated, use git_sdk_repository instead. This will be removed in in v5
+          git_sdk_url: ${{ steps.iltp.outputs.install_git_sdk_url }}
+          git_sdk_repository: ${{ steps.iltp.outputs.install_git_sdk_repository }}
+          git_sdk_ref: ${{ steps.iltp.outputs.install_git_sdk_ref }}
+          # Deprecated, use git_repository instead. This will be removed in in v5
+          git_shop_url: ${{ steps.iltp.outputs.install_git_shop_url }}
+          # Deprecated, use git_ref instead. This will be removed in in v5
+          git_shop_ref: ${{ steps.iltp.outputs.install_git_shop_ref }}
+          git_repository: ${{ steps.iltp.outputs.install_git_repository }}
+          git_ref: ${{ steps.iltp.outputs.install_git_ref }}
+          compilation_url: ${{ steps.iltp.outputs.install_composer_root_url }}
+          github_ref_name: ${{ github.ref_name }}
+          php: ${{ matrix.php }}
+          mysql: ${{ matrix.mysql }}
+          custom_ini_error_reporting: ${{ steps.iltp.outputs.install_custom_ini_error_reporting }}
+          custom_ini_xdebug: ${{ steps.iltp.outputs.install_custom_ini_xdebug }}
+          add_services: ${{ steps.iltp.outputs.install_add_services }}
+          composer_file: ${{ steps.iltp.outputs.install_composer_file }}
+          composer_transform: ${{ steps.iltp.outputs.install_composer_transform}}
+          composer_backup: ${{ steps.iltp.outputs.install_composer_backup}}
+          composer_update: ${{ steps.iltp.outputs.install_composer_update}}
+          composer_update_options: ${{ steps.iltp.outputs.install_composer_update_options}}
+          composer_dev_ref: ${{ steps.iltp.outputs.install_composer_dev_ref}}
+          enterprise_github_token: ${{ secrets.enterprise_github_token || github.token }}
+          copy_script_targets: ${{ steps.iltp.outputs.install_copy_script_targets }}
+          debug: ${{ needs.init.outputs.debug }}
+
+      - name: Run composer for each module
+        shell: bash
+        run: |
+          git clone --depth=1 --quiet --branch v1 https://github.com/joernott/load_testplan.git load_testplan
+          LOAD_TESTPLAN=$(find ./load_testplan -iname 'main-linux-amd64-*')
+          chmod a+x "${LOAD_TESTPLAN}"
+          PREFIXES=$(echo '${{steps.iltp.outputs.runscript_matrix_script}}'|tr ',' '\n'|tr -d '[]" '|sed -e 's|-|_|g' -e 's|:.*||'|sort|uniq)
+          for PREFIX in ${PREFIXES}; do
+            VAR="runscript_${PREFIX}_path"
+            COMPOSER_PATH="${!VAR}"
+            VAR="runscript_${PREFIX}_composer_transform"
+            COMPOSER_TRANSFORM="${!VAR}"
+            VAR="runscript_${PREFIX}_composer_early"
+            EARLY="${!VAR}"
+            [ -z "${EARLY}" ] && EARLY="${runscript_composer_early}"
+            E="runscript_${PREFIX}_composer_early=='${EARLY}'"
+            if [[ -n "${COMPOSER_PATH}" && "${EARLY}" != 'true' ]]; then
+              echo -e "\033[0;35mSkipping composer install  for '${PREFIX}', ${E}\033[0m"
+            else
+              if [ -n "${COMPOSER_TRANSFORM}" ]; then
+                echo -e "\033[0;35mtransforming composer.json for '${PREFIX}' in '${COMPOSER_PATH}' using 'runscript_${PREFIX}_path'\033[0m"
+                echo "${COMPOSER_TRANSFORM}" > .composer_merge.tmp.json
+                export INPUT_FILES="source/${COMPOSER_PATH}/composer.json,.composer_merge.tmp.json"
+                export INPUT_INPUT_TYPE="json"
+                export INPUT_JSON="source/${COMPOSER_PATH}/composer.json"
+                "${LOAD_TESTPLAN}"
+                unset INPUT_FILES INPUT_INPUT_TYPE INPUT_JSON
+                rm .composer_merge.tmp.json
+              fi
+              echo -e "\033[0;35mRuning composer install for '${PREFIX}' in '${COMPOSER_PATH}' using 'runscript_${PREFIX}_path, ${E}'\033[0m"
+              docker compose ${{ steps.iltp.outputs.install_container_method }} -T \
+              ${{ steps.iltp.outputs.install_container_options }} \
+                ${{ steps.iltp.outputs.install_container_name }} \
+                composer update ${{ steps.iltp.outputs.install_composer_update_options}} -d "/var/www/${COMPOSER_PATH}"
+            fi
+          done
+          PREFIXES=$(echo '${{steps.iltp.outputs.runslim_matrix_script}}'|tr ',' '\n'|tr -d '[]" '|sed -e 's|-|_|g' -e 's|:.*||'|sort|uniq)
+          for PREFIX in ${PREFIXES}; do
+            VAR="runslim_${PREFIX}_path"
+            COMPOSER_PATH="${!VAR}"
+            VAR="runslim_${PREFIX}_composer_transform"
+            COMPOSER_TRANSFORM="${!VAR}"
+            VAR="runslim_${PREFIX}_composer_early"
+            EARLY="${!VAR}"
+            [ -z "${EARLY}" ] && EARLY="${runslim_composer_early}"
+            E="runslim_${PREFIX}_composer_early=='${EARLY}'"
+            if [[ -n "${COMPOSER_PATH}" && "${EARLY}" != 'true' ]]; then
+              echo -e "\033[0;35mSkipping composer install  for '${PREFIX}', ${E}\033[0m"
+            else
+              if [ -n "${COMPOSER_TRANSFORM}" ]; then
+                echo -e "\033[0;35mtransforming composer.json for '${PREFIX}' in '${COMPOSER_PATH}' using 'runscript_${PREFIX}_path'\033[0m"
+                echo "${COMPOSER_TRANSFORM}" > .composer_merge.tmp.json
+                export INPUT_FILES="source/${COMPOSER_PATH}/composer.json,.composer_merge.tmp.json"
+                export INPUT_INPUT_TYPE="json"
+                export INPUT_JSON="source/${COMPOSER_PATH}/composer.json"
+                "${LOAD_TESTPLAN}"
+                unset INPUT_FILES INPUT_INPUT_TYPE INPUT_JSON
+                rm .composer_merge.tmp.json
+              fi
+              echo -e "\033[0;35mRuning composer install for '${PREFIX}' in '${COMPOSER_PATH}' using 'runslim_${PREFIX}_path, ${E}\033[0m"
+              docker compose ${{ steps.iltp.outputs.install_container_method }} -T \
+              ${{ steps.iltp.outputs.install_container_options }} \
+                ${{ steps.iltp.outputs.install_container_name }} \
+                composer update ${{ steps.iltp.outputs.install_composer_update_options}} -d "/var/www/${COMPOSER_PATH}"
+            fi
+          done
+          rm -rf ./load_testplan
+
+      - name: Generate debugging script for running composer for each module
+        if: ${{ inputs.debug == true }}
+        shell: bash
+        run: |
+          echo "banner 'Run composer for each module'" >>debug/debug.sh
+          PREFIXES=$(echo '${{steps.iltp.outputs.runscript_matrix_script}}'|tr ',' '\n'|tr -d '[]" '|sed -e 's|-|_|g' -e 's|:.*||'|sort|uniq)
+          echo -e "\033[0;35mUnique prefixes: ${PREFIXES}\033[0m"
+          for PREFIX in ${PREFIXES}; do
+            VAR="runscript_${PREFIX}_path"
+            COMPOSER_PATH="${!VAR}"
+            VAR="runscript_${PREFIX}_composer_transform"
+            COMPOSER_TRANSFORM="${!VAR}"
+            VAR="runscript_${PREFIX}_composer_early"
+            EARLY="${!VAR}"
+            [ -z "${EARLY}" ] && EARLY="${runscript_composer_early}"
+            E="runscript_${PREFIX}_composer_early=='${EARLY}'"
+            if [[ -n "${COMPOSER_PATH}" && "${EARLY}" != 'true' ]]; then
+            cat >>debug/debug.sh <<EODS
+              echo -e "\033[0;35mSkipping composer install  for '${PREFIX}', ${E}\033[0m"
+          EODS
+            else
+              if [ -n "${COMPOSER_TRANSFORM}" ]; then
+                JSON=$(cat "source/${COMPOSER_PATH}/composer.json")
+                cat >>debug/debug.sh <<EODS
+          echo -e "\033[0;35mSimulating composer transform for '${PREFIX}' in '${COMPOSER_PATH}' using 'runscript_${PREFIX}_path', ${E}\033[0m"
+          cp "source/${COMPOSER_PATH}/composer.json" "source/${COMPOSER_PATH}/composer.json.bak"
+          cat >"source/${COMPOSER_PATH}/composer.json" <<'EOF'
+          ${JSON}
+          EOF
+          EODS
+              fi
+              cat >>debug/debug.sh <<EODS
+            echo -e "\033[0;35mRuning composer install for '${PREFIX}' in '${COMPOSER_PATH}' using 'runscript_${PREFIX}_path'\033[0m"
+            docker compose ${{ steps.iltp.outputs.install_container_method }} -T \
+            ${{ steps.iltp.outputs.install_container_options }} \
+              --workdir "/var/www/${COMPOSER_PATH}" \
+              ${{ steps.iltp.outputs.install_container_name }} \
+              composer update ${{ steps.iltp.outputs.install_composer_update_options}}
+          EODS
+            fi
+          done
+          PREFIXES=$(echo '${{steps.iltp.outputs.runslim_matrix_script}}'|tr ',' '\n'|tr -d '[]" '|sed -e 's|-|_|g' -e 's|:.*||'|sort|uniq)
+          echo -e "\033[0;35mUnique prefixes: ${PREFIXES}\033[0m"
+          for PREFIX in ${PREFIXES}; do
+            VAR="runslim_${PREFIX}_path"
+            COMPOSER_PATH="${!VAR}"
+            VAR="runslim_${PREFIX}_composer_transform"
+            COMPOSER_TRANSFORM="${!VAR}"
+            VAR="runslim_${PREFIX}_composer_early"
+            EARLY="${!VAR}"
+            [ -z "${EARLY}" ] && EARLY="${runslim_composer_early}"
+            E="runslim_${PREFIX}_composer_early=='${EARLY}'"
+            if [[ -n "${COMPOSER_PATH}" && "${EARLY}" != 'true' ]]; then
+              cat >>debug/debug.sh <<EODS
+                echo -e "\033[0;35mSkipping composer install  for '${PREFIX}', ${E}\033[0m"
+          EODS
+            else
+              if [ -n "${COMPOSER_TRANSFORM}" ]; then
+                JSON=$(cat "source/${COMPOSER_PATH}/composer.json")
+                cat >>debug/debug.sh <<EODS
+          echo -e "\033[0;35mSimulating composer transform for '${PREFIX}' in '${COMPOSER_PATH}' using 'runscript_${PREFIX}_path', ${E}\033[0m"
+          cp "source/${COMPOSER_PATH}/composer.json" "source/${COMPOSER_PATH}/composer.json.bak"
+          cat >"source/${COMPOSER_PATH}/composer.json" <<'EOF'
+          ${JSON}
+          EOF
+          EODS
+              fi
+              cat >>debug/debug.sh <<EODS
+            echo -e "\033[0;35mRuning composer install for '${PREFIX}' in '${COMPOSER_PATH}' using 'runslim_${PREFIX}_path'\033[0m"
+            docker compose ${{ steps.iltp.outputs.install_shop_with_modules_container_method }} -T \
+            ${{ steps.iltp.outputs.install_shop_with_modules_container_options }} \
+              --workdir "/var/www/${COMPOSER_PATH}" \
+              ${{ steps.iltp.outputs.install_shop_with_modules_container_name }} \
+              composer update ${{ steps.iltp.outputs.install_shop_with_modules_composer_update_options}}
+          EODS
+            fi
+          done
+          cat >>debug/debug.sh <<EODS
+            docker compose ${{ steps.iltp.outputs.install_shop_with_modules_container_method }} -T \
+              ${{ steps.iltp.outputs.install_shop_with_modules_container_options }} \
+                ${{ steps.iltp.outputs.install_shop_with_modules_container_name }} \
+                composer update ${{ steps.iltp.outputs.install_shop_with_modules_composer_update_options}}
+          EODS
+
+      - name: 'Stop shop for preparedShop cache'
+        if: ${{ steps.iltp.outputs.install_cache_prepared_shop == 'true' }}
+        uses: 'OXID-eSales/github-actions/stop_shop@v4'
+        with:
+          debug: ${{ needs.init.outputs.debug }}
+
+      - name: Cache preparedShop on s3
+        if: ${{ steps.iltp.outputs.install_cache_prepared_shop == 'true' && needs.init.outputs.use_private_cache == 'true' }}
+        uses: tespkg/actions-cache/save@v1
+        with:
+          path: |
+            ./*
+          key: '${{ steps.iltp.outputs.install_cache_prepared_shop_prefix }}_${{steps.itn.outputs.matrix_suffix}}'
+          endpoint: ${{ secrets.CACHE_ENDPOINT }}
+          accessKey: ${{ secrets.CACHE_ACCESS_KEY }}
+          secretKey: ${{ secrets.CACHE_SECRET_KEY }}
+          bucket: ${{ steps.iltp.outputs.install_cache_bucket }}
+
+      - name: Cache preparedShop on github
+        if: ${{ steps.iltp.outputs.install_cache_prepared_shop == 'true' && needs.init.outputs.use_private_cache != 'true'}}
+        uses: actions/cache/save@v4
+        with:
+          path: |
+            ./*
+          key: '${{ steps.iltp.outputs.install_cache_prepared_shop_prefix }}_${{steps.itn.outputs.matrix_suffix}}'
+
+      - name: Debug cache preparedShop
+        if: ${{ steps.iltp.outputs.install_cache_prepared_shop == 'true' }}
+        shell: bash
+        run: |
+          # install: Debug cache current installation
+          # we need to add the dot folders here explicitly because bash works differently than the action
+          MATRIX='PHP${{matrix.php}}-MYSQL${{matrix.mysql}}'
+          CACHE_NAME="${{ steps.iltp.outputs.install_cache_prepared_shop_prefix}}_${{steps.iltp.outputs.global_title}}-${MATRIX}"
+          echo 'banner "install: Debug cache current installation"'
+          echo "write_cache '${CACHE_NAME}' ./* .env .env.dist .gitignore .git" >>debug/debug.sh
+
+      - name: 'Start shop after caching preparedShop'
+        if: ${{ steps.iltp.outputs.install_cache_prepared_shop == 'true' }}
+        shell: bash
+        run: |
+          # install: Start containers
+          ${{ needs.init.outputs.debug }}
+          echo -e "\033[0;35m### Starting containers\033[0m"
+          make up
+
+      - name: 'Install shop (legacy)'
+        if: ${{ steps.iltp.outputs.install_method == 'legacy' && steps.iltp.outputs.install_skip_shop_installation == 'false' }}
+        uses: 'OXID-eSales/github-actions/install_shop@v4'
+        with:
+          container_name: ${{ steps.iltp.outputs.install_container_name }}
+          container_options: ${{ steps.iltp.outputs.install_container_options }}
+          container_method: ${{ steps.iltp.outputs.install_container_method }}
+          is_enterprise: ${{ steps.iltp.outputs.install_is_enterprise }}
+          config_idebug: ${{ steps.iltp.outputs.install_config_idebug }}
+          debug: ${{ needs.init.outputs.debug }}
+
+      - name: 'Debug Install shop (script)'
+        if: ${{ steps.iltp.outputs.install_method == 'script' && steps.iltp.outputs.install_skip_shop_installation == 'false' }}
+        run: |
+          echo "banner 'Install shop (script)'" >>debug/debug.sh
+          VARS=$(env|grep -E "^global_|^install_|^custom_|^secrets_"|grep -v "^install_shop_with_modules_"|grep -v "|_transform=")
+          IFS=$'\n'
+          while read -r E ; do
+            IFS='=' read -ra EXP <<< "$E"
+            VAL=("${EXP[@]:1}")
+            # shellcheck disable=SC2145
+            echo "export ${EXP[0]}='${VAL[@]}'" >>debug/debug.sh
+          done <<< "$VARS"
+          cat >>debug/debug.sh <<'EOF'
+          SCRIPT="${{ steps.iltp.outputs.install_script }}"
+          if [ -f "${SCRIPT}" ]; then
+            chmod a+x "${SCRIPT}"
+            "${SCRIPT}"
+          else
+            echo -e "\033[0;31mCould not find ${SCRIPT}\033[0m"
+            exit 1
+          fi
+          if [ -s data/php/logs/error_log.txt ]; then
+            echo -e "\033[0;35mPHP error log\033[0m"
+            cat data/php/logs/error_log.txt
+          fi
+          EOF
+
+      - name: 'Install shop (script)'
+        if: ${{ steps.iltp.outputs.install_method == 'script' && steps.iltp.outputs.install_skip_shop_installation == 'false' }}
+        run: |
+          SCRIPT="${{ steps.iltp.outputs.install_script }}"
+          if [ -f "${SCRIPT}" ]; then
+            chmod a+x "${SCRIPT}"
+            "${SCRIPT}"
+          else
+            echo -e "\033[0;31mCould not finds ${SCRIPT}\033[0m"
+            exit 1
+          fi
+          if [ -s data/php/logs/error_log.txt ]; then
+            echo -e "\033[0;35mPHP error log\033[0m"
+            cat data/php/logs/error_log.txt
+          fi
+
+      - name: Activate modules
+        if: ${{ steps.iltp.outputs.install_skip_shop_installation == 'false' }}
+        shell: bash
+        run: |
+          # Activate modules
+          ${{ needs.init.outputs.debug }}
+          if [ -f 'source/bin/oe-console' ]; then
+            OE_CONSOLE='bin/oe-console'
+          else
+            if [ -f 'source/vendor/bin/oe-console' ]; then
+              OE_CONSOLE='vendor/bin/oe-console'
+            else
+              echo -e "\033[0;31mCan't find oe-console in bin or vendor/bin!\033[0m"
+              exit 1
+            fi
+          fi
+          MODULES=$(echo -n "${{ steps.iltp.outputs.install_activate_modules }}"| tr '\n' ' ')
+          for MODULE in ${MODULES}; do
+            echo -e "\033[0;35m###  activating module ${MODULE} ###\033[0m"
+            docker compose ${{ steps.iltp.outputs.install_container_method }} -T \
+              ${{ steps.iltp.outputs.install_container_options }} \
+              ${{ steps.iltp.outputs.install_container_name}} \
+              ${OE_CONSOLE} oe:module:activate "${MODULE}"
+          done
+
+      - name: Write files list
+        if: always()
+        shell: bash
+        run: |
+          # install: Write files list
+          find . >files.txt
+          # Compensate for multiline problems
+          {
+            echo 'ARTIFACT_PATHS<<EOF'
+            echo "${{ steps.iltp.outputs.install_output_files }}" | sed -E 's/,|\s/\n/g'
+            echo EOF
+          } >> "${GITHUB_ENV}"
+
+      - name: Upload configuration artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: '${{ steps.iltp.outputs.install_output_artifact_prefix }}-${{steps.itn.outputs.matrix_suffix}}'
+          path: |-
+            docker*.log
+            files.txt
+            generated_testplan.yaml
+            load_testplan_install.log
+            ${{ env.ARTIFACT_PATHS }}
+
+      - name: Run custom scripts
+        # yamllint disable-line rule:line-length
+        if: ${{ steps.iltp.outputs.install_custom_script != '' || steps.iltp.outputs.install_custom_script_container != '' }}
+        uses: 'OXID-eSales/github-actions/run_custom_scripts@v4'
+        with:
+          container_name: ${{ steps.iltp.outputs.install_container_name }}
+          container_options: ${{ steps.iltp.outputs.install_container_options }}
+          container_method: ${{ steps.iltp.outputs.install_container_method }}
+          custom_script: ${{ steps.iltp.outputs.install_custom_script }}
+          custom_script_container: ${{ steps.iltp.outputs.install_custom_script_container }}
+          debug: ${{ needs.init.outputs.debug }}
+
+      - name: 'Stop shop'
+        if: ${{ always() }}
+        uses: 'OXID-eSales/github-actions/stop_shop@v4'
+        with:
+          debug: ${{ needs.init.outputs.debug }}
+
+      - name: Debug cache current installation
+        if: ${{ inputs.debug }}
+        shell: bash
+        run: |
+          # install: Debug cache current installation
+          # we need to add the dot folders here explicitly because bash works differently than the action
+          MATRIX='PHP${{matrix.php}}-MYSQL${{matrix.mysql}}'
+          CACHE_NAME="${{ steps.iltp.outputs.install_cache_prefix}}_${{steps.iltp.outputs.global_title}}-${MATRIX}"
+          echo "write_cache '${CACHE_NAME}' ./* .env .env.dist .gitignore .git" >>debug/debug.sh
+
+      - name: Cache current installation on s3
+        if: ${{ needs.init.outputs.use_private_cache == 'true' }}
+        uses: tespkg/actions-cache/save@v1
+        with:
+          path: |
+            ./*
+          key: '${{ steps.iltp.outputs.install_cache_prefix}}_${{steps.itn.outputs.matrix_suffix}}'
+          endpoint: ${{ secrets.CACHE_ENDPOINT }}
+          accessKey: ${{ secrets.CACHE_ACCESS_KEY }}
+          secretKey: ${{ secrets.CACHE_SECRET_KEY }}
+          bucket: ${{ steps.iltp.outputs.install_cache_bucket }}
+
+      - name: Cache current installation on github
+        if: ${{ needs.init.outputs.use_private_cache != 'true' }}
+        uses: actions/cache/save@v4
+        with:
+          path: |
+            ./*
+          key: '${{ steps.iltp.outputs.install_cache_prefix}}_${{steps.itn.outputs.matrix_suffix}}'
+
+      - name: 'Write Report'
+        if: always()
+        uses: OXID-eSales/github-actions/append_report@v4
+        with:
+          prefix: '${{ needs.init.outputs.global_title }}'
+          priority: '020'
+          phase: install
+          job: install
+          php: ${{matrix.php}}
+          mysql: ${{matrix.mysql}}
+          status: ${{job.status}}
+          # yamllint disable rule:line-length
+          cached_object: |
+            ${{ steps.iltp.outputs.install_cache_prepared_shop_prefix}}_${{steps.iltp.outputs.global_title}}-PHP${{matrix.php}}-MYSQL${{matrix.mysql}}
+            ${{ steps.iltp.outputs.install_cache_prefix}}_${{steps.iltp.outputs.global_title}}-PHP${{matrix.php}}-MYSQL${{matrix.mysql}}
+          # yamllint enable rule:line-length
+          debug: ${{ inputs.debug }}
+          github_token: ${{ secrets.enterprise_github_token || github.token }}
+
+  runscript:
+    needs: ['init', 'install']
+    if: ${{ needs.init.outputs.runscript_matrix_script != 'skip' }}
+    strategy:
+      matrix:
+        php: ${{ fromJSON(needs.init.outputs.runscript_matrix_php) }}
+        mysql: ${{ fromJSON(needs.init.outputs.runscript_matrix_mysql) }}
+        script: ${{ fromJSON(needs.init.outputs.runscript_matrix_script) }}
+      fail-fast: false
+      max-parallel: ${{ fromJSON(needs.init.outputs.runscript_max_parallel) }}
+    runs-on: ${{ fromJSON(inputs.runs_on) }}
+    env:
+      MATRIX_PHP: ${{ matrix.php }}
+      MATRIX_MYSQL: ${{ matrix.mysql }}
+    steps:
+      - name: Load cached testplan
+        id: rstn
+        uses: OXID-eSales/github-actions/load_cached_testplan@v4
+        with:
+          php: ${{ matrix.php }}
+          mysql: ${{ matrix.mysql }}
+          prefix: '${{ needs.init.outputs.global_title }}'
+          root_testplan: ${{ needs.init.outputs.testplan }}
+          matrix_testplan: ''
+          plan_folder: ${{ inputs.plan_folder }}
+          cache_name: ${{ needs.init.outputs.init_cache_name }}
+          cache_endpoint: ${{ secrets.CACHE_ENDPOINT }}
+          cache_access_key: ${{ secrets.CACHE_ACCESS_KEY }}
+          cache_secret_key: ${{ secrets.CACHE_SECRET_KEY }}
+          cache_bucket: ${{ needs.init.outputs.init_cache_bucket }}
+          debug: ${{ needs.init.outputs.debug }}
+
+      - name: 'Load Testplan'
+        id: rsltp
+        uses: 'joernott/load_testplan@v1'
+        with:
+          files: '${{steps.rstn.outputs.testplan}}'
+          set_output: true
+          set_print: true
+          set_env: true
+          yaml: generated_testplan.yaml
+          loglevel: info
+          logfile: load_testplan_runscript.log
+          token: ${{ secrets.enterprise_github_token || github.token }}
+
+      - name: Convert variables
+        id: rt
+        shell: bash
+        run: |
+          ${{ needs.init.outputs.debug }}
+          set +x
+          E=$(env|grep -e "^runscript_")
+          MATRIX_SCRIPT='${{ matrix.script }}'
+          if [[ ${MATRIX_SCRIPT} != *":"* ]]; then
+            echo -e "\033[0;31m ${X} does not contain a ':'. You need to specify scripts as '<prefix>:<script_name>'"
+            exit 1
+          fi
+          IFS=':' read -r -a S <<< "${MATRIX_SCRIPT}"
+          PREFIX="${S[0]//-/_}"
+          SCRIPT="${S[1]}"
+          echo "runscript_script=${SCRIPT}"|tee -a "${GITHUB_OUTPUT}"
+          for KEY in docker_login load_shop \
+            container_name container_options container_method \
+            cache_bucket \
+            composer_file composer_backup composer_transform composer_update composer_update_options composer_early \
+            custom_script custom_script_container \
+            path install_options \
+            output_prefix coverage_prefix; do
+            VAR="runscript_${PREFIX}_${KEY}"
+            if [[ "${E}" != *"${VAR}"* ]]; then
+              VAR="runscript_${KEY}"
+            fi
+            echo "runscript_${KEY}=${!VAR}"
+            cat >>"${GITHUB_OUTPUT}" <<EOF
+          runscript_${KEY}<<runscript_${KEY}_delimeter
+          ${!VAR}
+          runscript_${KEY}_delimeter
+          EOF
+            export "runscript_${KEY}"="${!VAR}"
+          done
+          if [ "${runscript_composer_early}" == 'false' ]; then
+            echo 'runscript_run_composer_install=true'| tee -a "${GITHUB_OUTPUT}"
+          fi
+          # If runscript_workdir is ~, it will be set to the value of runscript_path
+          VAR="runscript_${PREFIX}_workdir"
+          if [[ "${E}" != *"${VAR}"* ]]; then
+            VAR='runscript_workdir'
+          fi
+          if [ "${!VAR}" == '~' ]; then
+            echo "runscript_workdir=${runscript_path}"| tee -a "${GITHUB_OUTPUT}"
+          else
+            echo "runscript_workdir=${!VAR}"| tee -a "${GITHUB_OUTPUT}"
+          fi
+          SUFFIX="${PREFIX}_${SCRIPT}-${{ steps.rstn.outputs.matrix_suffix }}"
+          echo "runscript_suffix=${SUFFIX}"| \
+            sed -E 's#\s|\~|"|,|:|<|>|\||\*|\?|\/|\\#_#g' | \
+            sed -e 's#\-\-*#-#' -e 's#\_\_*#_#g'| \
+            tee -a "${GITHUB_OUTPUT}"
+          echo "runscript_title=${PREFIX}_${SCRIPT}"| \
+            sed -E 's#\s|\~|"|,|:|<|>|\||\*|\?|\/|\\#_#g' | \
+            sed -e 's#\-\-*#-#' -e 's#\_\_*#_#g' | \
+            tee -a "${GITHUB_OUTPUT}"
+
+      - name: 'Start shop'
+        uses: 'OXID-eSales/github-actions/start_shop@v4'
+        with:
+          cached_shop: '${{ steps.rt.outputs.runscript_load_shop}}_${{ steps.rstn.outputs.matrix_suffix }}'
+          cache_bucket: ${{ steps.rt.outputs.runscript_cache_bucket }}
+          cache_endpoint: ${{ secrets.CACHE_ENDPOINT }}
+          cache_access_key: ${{ secrets.CACHE_ACCESS_KEY }}
+          cache_secret_key: ${{ secrets.CACHE_SECRET_KEY }}
+          docker_login: ${{ steps.rt.outputs.runscript_docker_login }}
+          docker_user: ${{ secrets.DOCKER_HUB_USER }}
+          docker_token: ${{ secrets.DOCKER_HUB_TOKEN }}
+          wait_for_selenium: true
+          debug: ${{ needs.init.outputs.debug }}
+
+      - name: 'Modify composer.json'
+        # Also run this if there is a transformation but composer_early is set to 'skip'
+        if: ${{ steps.rt.outputs.runscript_composer_transform != '' && steps.rt.outputs.runscript_composer_early != 'true' }}
+        uses: 'OXID-eSales/github-actions/composer_merge@v4'
+        with:
+          file: 'source/${{ steps.rt.outputs.runscript_path }}/composer.json'
+          backup: true
+          transform: |
+            ${{ steps.rt.outputs.runscript_composer_transform }}
+          update: ${{ steps.rt.outputs.runscript_composer_update }}
+          update_options: '${{ steps.rt.outputs.runscript_composer_update_options }} -d /var/www/${{ steps.rt.outputs.runscript_path }}'
+          container_name: ${{ steps.rt.outputs.runscript_container_name }}
+          container_options: ${{ steps.rt.outputs.runscript_container_options }}
+          container_method: 'exec'
+          debug: ${{ needs.init.outputs.debug }}
+          github_token: ${{ secrets.enterprise_github_token || github.token }}
+
+      - name: Run composer if there is no transform
+        # Only run this if there is no transformation and composer_early is set to 'false'
+        if: ${{ steps.rt.outputs.runscript_composer_transform == '' && steps.rt.outputs.runscript_composer_early == 'false' }}
+        run: |
+          # run composer
+          ${{ inputs.debug }}
+          docker compose exec -T \
+            ${{ steps.rt.outputs.runscript_container_options }} \
+            ${{ steps.rt.outputs.runscript_container_name }} \
+            composer config -g github-oauth.github.com "${{ secrets.enterprise_github_token || github.token }}"
+          docker compose exec -T \
+            ${{ steps.rt.outputs.runscript_container_options }} \
+            ${{ steps.rt.outputs.runscript_container_name }} \
+            composer update --no-interaction -d "/var/www/${{ steps.rt.outputs.runscript_path }}"
+
+      - name: Run custom scripts
+        if: ${{ steps.rt.outputs.runscript_custom_script != '' || steps.rt.outputs.runscript_custom_script_container != '' }}
+        uses: 'OXID-eSales/github-actions/run_custom_scripts@v4'
+        with:
+          container_name: ${{ steps.rt.outputs.runscript_container_name }}
+          container_options: ${{ steps.rt.outputs.runscript_container_options }}
+          container_method: ${{ steps.rt.outputs.runscript_container_method }}
+          custom_script: ${{ steps.rt.outputs.runscript_custom_script }}
+          custom_script_container: ${{ steps.rt.outputs.runscript_custom_script_container }}
+          debug: ${{ needs.init.outputs.debug }}
+          token: ${{ github.token }}
+
+      - name: 'Run runscript check'
+        uses: 'OXID-eSales/github-actions/run_test_script@v4'
+        with:
+          script: ${{ steps.rt.outputs.runscript_script }}
+          path: ${{ steps.rt.outputs.runscript_path }}
+          workdir: ${{ steps.rt.outputs.runscript_workdir }}
+          run_composer_install: ${{ steps.rt.outputs.runscript_run_composer_install }}
+          install_options: ${{ steps.rt.outputs.runscript_install_options }}
+          container_name: ${{ steps.rt.outputs.runscript_container_name }}
+          container_options: ${{ steps.rt.outputs.runscript_container_options }}
+          container_method: ${{ steps.rt.outputs.runscript_container_method }}
+          output_artifact: ${{ steps.rt.outputs.runscript_output_prefix}}-${{steps.rt.outputs.runscript_suffix }}
+          debug: ${{ needs.init.outputs.debug }}
+          github_token: ${{ secrets.enterprise_github_token || github.token }}
+
+      - name: Upload coverage report
+        if: ${{ always() && steps.rt.outputs.runscript_coverage_prefix != '' }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ steps.rt.outputs.runscript_coverage_prefix}}-${{steps.rt.outputs.runscript_suffix }}
+          path: source/${{ steps.rt.outputs.runscript_path }}/tests/Reports/*
+
+      - name: 'Stop shop'
+        if: ${{ always() }}
+        uses: 'OXID-eSales/github-actions/stop_shop@v4'
+        with:
+          debug: ${{ needs.init.outputs.debug }}
+
+      - name: 'Write Report'
+        if: always()
+        uses: OXID-eSales/github-actions/append_report@v4
+        with:
+          prefix: '${{ needs.init.outputs.global_title }}'
+          priority: '100'
+          phase: test
+          job: runscript
+          title: '${{ steps.rt.outputs.runscript_title }}'
+          php: ${{matrix.php}}
+          mysql: ${{matrix.mysql}}
+          status: ${{job.status}}
+          debug: ${{ inputs.debug }}
+          github_token: ${{ secrets.enterprise_github_token || github.token }}
+
+  runslim:
+    needs: ['init', 'install']
+    if: ${{ needs.init.outputs.runslim_matrix_script != 'skip' }}
+    strategy:
+      matrix:
+        php: ${{ fromJSON(needs.init.outputs.runslim_matrix_php) }}
+        mysql: ${{ fromJSON(needs.init.outputs.runslim_matrix_mysql) }}
+        script: ${{ fromJSON(needs.init.outputs.runslim_matrix_script) }}
+      fail-fast: false
+      max-parallel: ${{ fromJSON(needs.init.outputs.runslim_max_parallel) }}
+    runs-on: ${{ fromJSON(inputs.runs_on) }}
+    env:
+      MATRIX_PHP: ${{ matrix.php }}
+      MATRIX_MYSQL: ${{ matrix.mysql }}
+    steps:
+      - name: Load cached testplan
+        id: rstn
+        uses: OXID-eSales/github-actions/load_cached_testplan@v4
+        with:
+          php: ${{ matrix.php }}
+          mysql: ${{ matrix.mysql }}
+          prefix: '${{ needs.init.outputs.global_title }}'
+          root_testplan: ${{ needs.init.outputs.testplan }}
+          matrix_testplan: ''
+          plan_folder: ${{ inputs.plan_folder }}
+          cache_name: ${{ needs.init.outputs.init_cache_name }}
+          cache_endpoint: ${{ secrets.CACHE_ENDPOINT }}
+          cache_access_key: ${{ secrets.CACHE_ACCESS_KEY }}
+          cache_secret_key: ${{ secrets.CACHE_SECRET_KEY }}
+          cache_bucket: ${{ needs.init.outputs.init_cache_bucket }}
+          debug: ${{ needs.init.outputs.debug }}
+
+      - name: 'Load Testplan'
+        id: rsltp
+        uses: 'joernott/load_testplan@v1'
+        with:
+          files: '${{steps.rstn.outputs.testplan}}'
+          set_output: true
+          set_print: true
+          set_env: true
+          yaml: generated_testplan.yaml
+          loglevel: info
+          logfile: load_testplan_runslim.log
+          token: ${{ secrets.enterprise_github_token }}
+
+      - name: Convert variables
+        id: rt
+        shell: bash
+        run: |
+          ${{ needs.init.outputs.debug }}
+          set +x
+          E=$(env|grep -e "^runslim_")
+          MATRIX_SCRIPT='${{ matrix.script }}'
+          if [[ ${MATRIX_SCRIPT} != *":"* ]]; then
+            echo -e "\033[0;31m ${X} does not contain a ':'. You need to specify scripts as '<prefix>:<script_name>'"
+            exit 1
+          fi
+          IFS=':' read -r -a S <<< "${MATRIX_SCRIPT}"
+          PREFIX="${S[0]//-/_}"
+          SCRIPT="${S[1]}"
+          echo "runslim_script=${SCRIPT}"|tee -a "${GITHUB_OUTPUT}"
+          for KEY in docker_login load_shop \
+            container_name container_options container_method \
+            cache_bucket \
+            composer_file composer_backup composer_transform composer_update composer_update_options composer_early \
+            custom_script custom_script_container \
+            path install_options \
+            output_prefix coverage_prefix; do
+            VAR="runslim_${PREFIX}_${KEY}"
+            if [[ "${E}" != *"${VAR}"* ]]; then
+              VAR="runslim_${KEY}"
+            fi
+            echo "runslim_${KEY}=${!VAR}"
+            cat >>"${GITHUB_OUTPUT}" <<EOF
+          runslim_${KEY}<<runslim_${KEY}_delimeter
+          ${!VAR}
+          runslim_${KEY}_delimeter
+          EOF
+            export "runslim_${KEY}"="${!VAR}"
+          done
+          if [ "${runslim_composer_early}" == 'false' ]; then
+            echo 'runslim_run_composer_install=true'| tee -a "${GITHUB_OUTPUT}"
+          fi
+          # If runslim_workdir is ~, it will be set to the value of runslim_path
+          VAR="runslim_${PREFIX}_workdir"
+          if [[ "${E}" != *"${VAR}"* ]]; then
+            VAR='runslim_workdir'
+          fi
+          if [ "${!VAR}" == '~' ]; then
+            echo "runslim_workdir=${runslim_path}"| tee -a "${GITHUB_OUTPUT}"
+          else
+            echo "runslim_workdir=${!VAR}"| tee -a "${GITHUB_OUTPUT}"
+          fi
+          SUFFIX="${PREFIX}_${SCRIPT}-${{ steps.rstn.outputs.matrix_suffix }}"
+          echo "runslim_suffix=${SUFFIX}"|sed -E 's#"|,|:|<|>|\||\*|\?|\/|\\#_#g' | tee -a "${GITHUB_OUTPUT}"
+          echo "runslim_title=${PREFIX}_${SCRIPT}"|sed -E 's#"|,|:|<|>|\||\*|\?|\/|\\#_#g' | tee -a "${GITHUB_OUTPUT}"
+
+      - name: 'Start shop'
+        uses: 'OXID-eSales/github-actions/start_shop@v4'
+        with:
+          cached_shop: '${{ steps.rt.outputs.runslim_load_shop}}_${{ steps.rstn.outputs.matrix_suffix }}'
+          cache_bucket: ${{ steps.rt.outputs.runslim_cache_bucket }}
+          cache_endpoint: ${{ secrets.CACHE_ENDPOINT }}
+          cache_access_key: ${{ secrets.CACHE_ACCESS_KEY }}
+          cache_secret_key: ${{ secrets.CACHE_SECRET_KEY }}
+          docker_login: ${{ steps.rt.outputs.runslim_docker_login }}
+          docker_user: ${{ secrets.DOCKER_HUB_USER }}
+          docker_token: ${{ secrets.DOCKER_HUB_TOKEN }}
+          wait_for_selenium: true
+          debug: ${{ needs.init.outputs.debug }}
+
+      - name: 'Modify composer.json'
+        if: ${{ steps.rt.outputs.runslim_composer_transform != '' && steps.rt.outputs.runslim_composer_early == 'false' }}
+        uses: 'OXID-eSales/github-actions/composer_merge@v4'
+        with:
+          file: 'source/${{ steps.rt.outputs.runslim_path }}/composer.json'
+          backup: true
+          transform: |
+            ${{ steps.rt.outputs.runslim_composer_transform }}
+          update: ${{ steps.rt.outputs.runslim_composer_update }}
+          update_options: '${{ steps.rt.outputs.runslim_composer_update_options }} -d /var/www/${{ steps.rt.outputs.runslim_path }}'
+          container_name: ${{ steps.rt.outputs.runslim_container_name }}
+          container_options: ${{ steps.rt.outputs.runslim_container_options }}
+          container_method: 'exec'
+          debug: ${{ needs.init.outputs.debug }}
+          github_token: ${{ secrets.enterprise_github_token || github.token }}
+
+      - name: Run composer if there is no transform
+        if: ${{ steps.rt.outputs.runslim_composer_transform == '' && steps.rt.outputs.runslim_composer_early == 'false' }}
+        run: |
+          # run composer
+          ${{ inputs.debug }}
+          docker compose exec -T \
+            ${{ steps.rt.outputs.runslim_container_options }} \
+            ${{ steps.rt.outputs.runslim_container_name }} \
+            composer config -g github-oauth.github.com "${{ secrets.enterprise_github_token || github.token }}"
+          docker compose exec -T \
+            ${{ steps.rt.outputs.runslim_container_options }} \
+            ${{ steps.rt.outputs.runslim_container_name }} \
+            composer update --no-interaction -d "/var/www/${{ steps.rt.outputs.runslim_path }}"
+
+      - name: Run custom scripts
+        if: ${{ steps.rt.outputs.runslim_custom_script != '' || steps.rt.outputs.runslim_custom_script_container != '' }}
+        uses: 'OXID-eSales/github-actions/run_custom_scripts@v4'
+        with:
+          container_name: ${{ steps.rt.outputs.runslim_container_name }}
+          container_options: ${{ steps.rt.outputs.runslim_container_options }}
+          container_method: ${{ steps.rt.outputs.runslim_container_method }}
+          custom_script: ${{ steps.rt.outputs.runslim_custom_script }}
+          custom_script_container: ${{ steps.rt.outputs.runslim_custom_script_container }}
+          debug: ${{ needs.init.outputs.debug }}
+
+      - name: 'Run runslim check'
+        uses: 'OXID-eSales/github-actions/run_test_script@v4'
+        with:
+          script: ${{ steps.rt.outputs.runslim_script }}
+          path: ${{ steps.rt.outputs.runslim_path }}
+          workdir: ${{ steps.rt.outputs.runslim_workdir }}
+          run_composer_install: ${{ steps.rt.outputs.runslim_run_composer_install }}
+          install_options: ${{ steps.rt.outputs.runslim_install_options }}
+          container_name: ${{ steps.rt.outputs.runslim_container_name }}
+          container_options: ${{ steps.rt.outputs.runslim_container_options }}
+          container_method: ${{ steps.rt.outputs.runslim_container_method }}
+          output_artifact: ${{ steps.rt.outputs.runslim_output_prefix}}-${{steps.rt.outputs.runslim_suffix }}
+          debug: ${{ needs.init.outputs.debug }}
+          github_token: ${{ secrets.enterprise_github_token || github.token }}
+
+      - name: Upload coverage report
+        if: ${{ always() && steps.rt.outputs.runslim_coverage_prefix != '' }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ steps.rt.outputs.runslim_coverage_prefix}}-${{steps.rt.outputs.runslim_suffix }}
+          path: source/${{ steps.rt.outputs.runslim_path }}/tests/Reports/*
+
+      - name: 'Stop shop'
+        if: ${{ always() }}
+        uses: 'OXID-eSales/github-actions/stop_shop@v4'
+        with:
+          debug: ${{ needs.init.outputs.debug }}
+
+      - name: 'Write Report'
+        if: always()
+        uses: OXID-eSales/github-actions/append_report@v4
+        with:
+          prefix: '${{ needs.init.outputs.global_title }}'
+          priority: '100'
+          phase: test
+          job: runslim
+          title: '${{ steps.rt.outputs.runslim_title }}'
+          php: ${{matrix.php}}
+          mysql: ${{matrix.mysql}}
+          status: ${{job.status}}
+          debug: ${{ inputs.debug }}
+          github_token: ${{ secrets.enterprise_github_token || github.token }}
+
+  cypress:
+    needs: ['init', 'install']
+    strategy:
+      matrix:
+        php: ${{ fromJSON(needs.init.outputs.runscript_matrix_php) }}
+        mysql: ${{ fromJSON(needs.init.outputs.runscript_matrix_mysql) }}
+      fail-fast: false
+      max-parallel: ${{ fromJSON(needs.init.outputs.runscript_max_parallel) }}
+    runs-on: ${{ fromJSON(inputs.runs_on) }}
+    env:
+      MATRIX_PHP: ${{ matrix.php }}
+      MATRIX_MYSQL: ${{ matrix.mysql }}
+    steps:
+      - name: Load cached testplan
+        id: rstn
+        uses: OXID-eSales/github-actions/load_cached_testplan@v4
+        with:
+          php: ${{ matrix.php }}
+          mysql: ${{ matrix.mysql }}
+          prefix: '${{ needs.init.outputs.global_title }}'
+          root_testplan: ${{ needs.init.outputs.testplan }}
+          matrix_testplan: ''
+          plan_folder: ${{ inputs.plan_folder }}
+          cache_name: ${{ needs.init.outputs.init_cache_name }}
+          cache_endpoint: ${{ secrets.CACHE_ENDPOINT }}
+          cache_access_key: ${{ secrets.CACHE_ACCESS_KEY }}
+          cache_secret_key: ${{ secrets.CACHE_SECRET_KEY }}
+          cache_bucket: ${{ needs.init.outputs.init_cache_bucket }}
+          debug: ${{ needs.init.outputs.debug }}
+
+      - name: 'Load Testplan'
+        id: rsltp
+        uses: 'joernott/load_testplan@v1'
+        with:
+          files: '${{steps.rstn.outputs.testplan}}'
+          set_output: true
+          set_print: true
+          set_env: true
+          yaml: generated_testplan.yaml
+          loglevel: info
+          logfile: load_testplan_runscript.log
+          token: ${{ secrets.enterprise_github_token || github.token }}
+
+      - name: Set Cypress Variables
+        run: |
+          declare -a vars=(
+            "cypress_composer_transform=some_value"
+            "cypress_composer_early=false"
+            "cypress_container_name=php"
+            "cypress_container_options="
+            "cypress_path=/var/www/html"
+          )
+          for var in "${vars[@]}"; do
+            printf '%s\n' "$var" >> "${GITHUB_ENV}"
+          done
+
+      - name: Convert variables
+        id: cy
+        shell: bash
+        run: |
+          echo "Debugging environment variables:"
+          env | grep "^cypress_"
+          echo "Setting outputs..."
+          # Rest of the script...
+          ${{ needs.init.outputs.debug }}
+          set +x
+          E=$(env|grep -e "^cypress_")
+          MATRIX_SCRIPT='osc_telecash:cypress'
+          if [[ ${MATRIX_SCRIPT} != *":"* ]]; then
+            echo -e "\033[0;31m ${X} does not contain a ':'. You need to specify scripts as '<prefix>:<script_name>'"
+            exit 1
+          fi
+          IFS=':' read -r -a S <<< "${MATRIX_SCRIPT}"
+          PREFIX="${S[0]//-/_}"
+          SCRIPT="${S[1]}"
+          echo "cypress_script=${SCRIPT}" >> $GITHUB_OUTPUT
+          for KEY in docker_login load_shop \
+            container_name container_options container_method \
+            cache_bucket \
+            composer_file composer_backup composer_transform composer_update composer_update_options composer_early \
+            custom_script custom_script_container \
+            path install_options \
+            output_prefix coverage_prefix; do
+            VAR="cypress_${PREFIX}_${KEY}"
+            if [[ "${E}" != *"${VAR}"* ]]; then
+              VAR="cypress_${KEY}"
+            fi
+            echo "cypress_${KEY}=${!VAR}" >> $GITHUB_OUTPUT
+            export "cypress_${KEY}"="${!VAR}"
+          done
+          if [ "${cypress_composer_early}" == 'false' ]; then
+            echo 'cypress_run_composer_install=true' >> $GITHUB_OUTPUT
+          fi
+          # If cypress_workdir is ~, it will be set to the value of cypress_path
+          VAR="cypress_${PREFIX}_workdir"
+          if [[ "${E}" != *"${VAR}"* ]]; then
+            VAR='cypress_workdir'
+          fi
+          if [ "${!VAR}" == '~' ]; then
+            echo "cypress_workdir=${cypress_path}" >> $GITHUB_OUTPUT
+          else
+            echo "cypress_workdir=${!VAR}" >> $GITHUB_OUTPUT
+          fi
+          SUFFIX="${PREFIX}_${SCRIPT}-${{ steps.rstn.outputs.matrix_suffix }}"
+          echo "cypress_suffix=${SUFFIX}" | \
+            sed -E 's#\s|\~|"|,|:|<|>|\||\*|\?|\/|\\#_#g' | \
+            sed -e 's#\-\-*#-#' -e 's#\_\_*#_#g' >> $GITHUB_OUTPUT
+          echo "cypress_title=${PREFIX}_${SCRIPT}" | \
+            sed -E 's#\s|\~|"|,|:|<|>|\||\*|\?|\/|\\#_#g' | \
+            sed -e 's#\-\-*#-#' -e 's#\_\_*#_#g' >> $GITHUB_OUTPUT
+
+      - name: Debug Outputs
+        run: |
+          echo "cypress_composer_transform: ${{ steps.cy.outputs.cypress_composer_transform }}"
+          echo "cypress_composer_early: ${{ steps.cy.outputs.cypress_composer_early }}"
+          echo "cypress_container_name: ${{ steps.cy.outputs.cypress_container_name }}"
+          echo "cypress_container_options: ${{ steps.cy.outputs.cypress_container_options }}"
+          echo "cypress_path: ${{ steps.cy.outputs.cypress_path }}"
+
+
+      - name: 'Start shop'
+        uses: 'OXID-eSales/github-actions/start_shop@v4'
+        with:
+          cached_shop: 'shopInstallation-ce-${{ github.sha }}-${{ github.run_id }}_${{ steps.rstn.outputs.matrix_suffix }}'
+          cache_endpoint: ${{ secrets.CACHE_ENDPOINT }}
+          cache_access_key: ${{ secrets.CACHE_ACCESS_KEY }}
+          cache_secret_key: ${{ secrets.CACHE_SECRET_KEY }}
+          docker_login: ${{ steps.cy.outputs.runscript_docker_login }}
+          docker_user: ${{ secrets.DOCKER_HUB_USER }}
+          docker_token: ${{ secrets.DOCKER_HUB_TOKEN }}
+          wait_for_selenium: false
+          debug: ${{ needs.init.outputs.debug }}
+
+      - name: Run composer
+        run: |
+          # run composer
+          ${{ inputs.debug }}
+          docker compose exec -T \
+            ${{ steps.cy.outputs.cypress_container_options }} \
+            ${{ steps.cy.outputs.cypress_container_name }} \
+            composer config -g github-oauth.github.com "${{ secrets.enterprise_github_token || github.token }}"
+          docker compose exec -T \
+            ${{ steps.cy.outputs.cypress_container_options }} \
+            ${{ steps.cy.outputs.cypress_container_name }} \
+            composer update --no-interaction -d "/var/www/${{ steps.cy.outputs.cypress_path }}"
+
+      - name: Run custom scripts
+        uses: 'OXID-eSales/github-actions/run_custom_scripts@v4'
+        with:
+          container_name: ${{ steps.cy.outputs.cypress_container_name }}
+          container_options: ${{ steps.cy.outputs.cypress_container_options }}
+          container_method: ${{ steps.cy.outputs.cypress_container_method }}
+          custom_script: ${{ steps.cy.outputs.cypress_custom_script }}
+          custom_script_container: ${{ steps.cy.outputs.cypress_custom_script_container }}
+          debug: ${{ needs.init.outputs.debug }}
+          token: ${{ github.token }}
+
+      - name: Upload Cypress Screenshots and Videos
+        if: ${{ always() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ steps.cv.outputs.cypress_coverage_prefix || 'cypress__'}}-${{steps.cv.outputs.cypress_suffix }}
+          path: source/vendor/oxid-solution-catalysts/telecash-module/tests/e2e/cypress/_generated
+
+      - name: 'Stop shop'
+        if: ${{ always() }}
+        uses: 'OXID-eSales/github-actions/stop_shop@v4'
+        with:
+          debug: ${{ needs.init.outputs.debug }}
+
+      - name: 'Write Report'
+        if: always()
+        uses: OXID-eSales/github-actions/append_report@v4
+        with:
+          prefix: '${{ needs.init.outputs.global_title }}'
+          priority: '100'
+          phase: test
+          job: cypress
+          title: '${{ steps.cy.outputs.cypress_title }}'
+          status: ${{job.status}}
+          debug: ${{ inputs.debug }}
+          github_token: ${{ secrets.enterprise_github_token || github.token }}
+
+  finish:
+    if: ${{ always() && needs.init.outputs.finish_skip != 'true' }}
+    needs:
+      - init
+      - install
+      - runscript
+      - runslim
+      - cypress
+    runs-on: ${{ fromJSON(inputs.runs_on) }}
+    steps:
+      - name: Choose Slack channel
+        id: slack
+        shell: bash
+        run: |
+          if [ "${{ inputs.use_scheduled_slack_channel }}" == "false" ]; then
+            echo "webhook=${{ secrets.SLACK_WEBHOOK_URL }}" >>"${GITHUB_OUTPUT}"
+          else
+            echo "webhook=${{ secrets.SLACK_SCHEDULED_WEBHOOK_URL }}" >>"${GITHUB_OUTPUT}"
+          fi
+      - name: 'Generate report'
+        id: generate_report
+        uses: 'OXID-eSales/github-actions/generate_report@v4'
+        with:
+          prefix: '${{ needs.init.outputs.global_title }}'
+          slack_webhook: ${{ steps.slack.outputs.webhook }}
+          title: '${{ needs.init.outputs.finish_slack_title }}'
+          compact: '${{ needs.init.outputs.finish_slack_compact }}'
+          debug: ${{ inputs.debug }}
+
+      - name: 'Checkout the repo for cleanup'
+        uses: actions/checkout@v4
+        with:
+          path: repo
+
+      - name: 'Clean Cache'
+        # if: ${{ steps.generate_report.outputs.overall_status == 'success' }}
+        uses: 'OXID-eSales/github-actions/clean_cache@v4'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        with:
+          path: repo
+          runs_on: ${{ inputs.runs_on }}
+          cache_endpoint: ${{ secrets.CACHE_ENDPOINT }}
+          cache_access_key: ${{ secrets.CACHE_ACCESS_KEY }}
+          cache_secret_key: ${{ secrets.CACHE_SECRET_KEY }}
+          cache_objects: |
+            ${{ steps.generate_report.outputs.cache_objects }}
+          debug: ${{ needs.init.outputs.debug }}

@@ -42,6 +42,11 @@ runslim:
         "osc_telecash:phpstan-report"
       ]
 
+cypress:
+  osc_telecash:
+    path: 'vendor/oxid-solution-catalysts/telecash-module'
+  custom_script: '$(pwd)/source/vendor/oxid-solution-catalysts/telecash-module/.github/oxid-esales/cypress.sh --no_make_up=true'
+
 sonarcloud:
   matrix:
     testplan: '["-"]'
