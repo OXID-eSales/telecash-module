@@ -131,8 +131,9 @@ class Context
     public function getFailUrl(): string
     {
         $parameter = [
-            "cl"  => "payment",
-            "fnc" => "provideTeleCashError",
+            "cl"     => "payment",
+            "fnc"    => "provideTeleCashError",
+            "stoken" => $this->session->getSessionChallengeToken()
         ];
 
         return $this->prepareUrl($parameter);
