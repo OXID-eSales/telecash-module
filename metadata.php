@@ -61,7 +61,7 @@ $aModule = [
         'en' => 'This module provides the integration of the payment provider Telecash.',
     ],
     'thumbnail'   => 'pictures/logo.png',
-    'version'     => '1.0.0-rc.2',
+    'version'     => '1.0.0-rc.3',
     'author'      => 'OXID eSales AG',
     'url'         => '',
     'email'       => '',

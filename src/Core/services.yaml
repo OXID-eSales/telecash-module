@@ -7,7 +7,7 @@ services:
     class: OxidSolutionCatalysts\TeleCash\Core\Service\Logger
     public: true
     arguments:
-      Psr\Log\LoggerInterface: '@OxidSolutionCatalysts\TeleCash\Logger'
+      - '@OxidSolutionCatalysts\TeleCash\Logger'
 
   OxidSolutionCatalysts\TeleCash\Core\Service\Context:
     class: OxidSolutionCatalysts\TeleCash\Core\Service\Context

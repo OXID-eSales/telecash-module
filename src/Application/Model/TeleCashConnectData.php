@@ -249,7 +249,7 @@ class TeleCashConnectData implements TeleCashConnectDataInterface
                 $user->getFieldStringData('oxcountryid'),
                 $user->getFieldStringData('oxstateid')
             ),
-            'bcountry' => $this->getCountryName($user->getFieldStringData('oxcountryid')),
+            'bcountry' => $this->getCountryIsoAlpha2($user->getFieldStringData('oxcountryid')),
             'bzip'     => $user->getFieldStringData('oxzip'),
             'phone'    => $user->getFieldStringData('oxphone'),
             'fax'      => $user->getFieldStringData('oxfax'),
@@ -295,7 +295,7 @@ class TeleCashConnectData implements TeleCashConnectDataInterface
                 $addressObj->getFieldStringData('oxcountryid'),
                 $addressObj->getFieldStringData('oxstateid')
             ),
-            'scountry' => $this->getCountryName($addressObj->getFieldStringData('oxcountryid')),
+            'scountry' => $this->getCountryIsoAlpha2($addressObj->getFieldStringData('oxcountryid')),
             'szip'     => $addressObj->getFieldStringData('oxzip'),
         ];
     }
@@ -325,17 +325,17 @@ class TeleCashConnectData implements TeleCashConnectDataInterface
     }
 
     /**
-     * get Country Name from OXID CountryID
+     * get Country IsoAlpha2 Code from OXID CountryID
      *
      * @param string $countryId
      * @return string
      */
-    private function getCountryName(string $countryId): string
+    private function getCountryIsoAlpha2(string $countryId): string
     {
         /** @var \OxidSolutionCatalysts\TeleCash\Extension\Application\Model\Country $country */
         $country = $this->oxNewService->oxNew(Country::class);
         $country->load($countryId);
-        return $country->isLoaded() ? $country->getFieldStringData('oxtitle') : '';
+        return $country->isLoaded() ? $country->getFieldStringData('oxisoalpha2') : '';
     }
 
     /**
