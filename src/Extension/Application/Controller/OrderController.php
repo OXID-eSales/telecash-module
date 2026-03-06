@@ -26,9 +26,12 @@ class OrderController extends OrderController_parent
     use ModelGetter;
     use RequestGetter;
 
-    public function __construct()
-    {
-        parent::__construct();
+    public function __construct(
+        bool $initParent = true
+    ) {
+        if ($initParent) {
+            parent::__construct();
+        }
 
         $this->setContainer($this->getContainer());
     }

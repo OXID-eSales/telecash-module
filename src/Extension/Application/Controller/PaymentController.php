@@ -21,17 +21,19 @@ class PaymentController extends PaymentController_parent
     use ModelGetter;
     use RequestGetter;
 
-    protected TranslateServiceInterface $translateService;
+    /**
+     * @var TranslateServiceInterface|null $translateService
+     */
+    protected ?TranslateServiceInterface $translateService;
 
-    public function __construct()
-    {
-        parent::__construct();
+    public function __construct(
+        bool $initParent = true
+    ) {
+        if ($initParent) {
+            parent::__construct();
+        }
 
         $this->setContainer($this->getContainer());
-        $this->translateService = $this->getRequiredService(
-            TranslateServiceInterface::class,
-            'TranslateServiceInterface'
-        );
     }
 
     /**
@@ -43,7 +45,7 @@ class PaymentController extends PaymentController_parent
         $telecashConnect = $this->getTeleCashConnect();
         $telecashConnect->setResponseData($_POST);
 
-        $defaultError = $this->translateService->translateString('TELECASH_DEFAULT_PAYMENT_ERROR');
+        $defaultError = $this->getTranslationService()->translateString('TELECASH_DEFAULT_PAYMENT_ERROR');
         $teleCashError = '';
 
         if ($telecashConnect->isValidResponse()) {
@@ -53,5 +55,16 @@ class PaymentController extends PaymentController_parent
 
         $this->_sPaymentErrorText = $teleCashError ?: $defaultError;
         $this->_sPaymentError = '-1';
+    }
+
+    protected function getTranslationService(): TranslateServiceInterface
+    {
+        if ($this->translateService === null) {
+            $this->translateService = $this->getRequiredService(
+                TranslateServiceInterface::class,
+                'TranslateServiceInterface'
+            );
+        }
+        return $this->translateService;
     }
 }

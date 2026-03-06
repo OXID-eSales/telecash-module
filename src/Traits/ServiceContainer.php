@@ -47,7 +47,7 @@ trait ServiceContainer
      * @param class-string<T> $serviceId
      * @return T|null
      */
-    protected function getServiceFromContainer(string $serviceId): ?object
+    protected function getServiceFromContainer(string $serviceId)
     {
         try {
             if ($this->container && $this->container->has($serviceId)) {

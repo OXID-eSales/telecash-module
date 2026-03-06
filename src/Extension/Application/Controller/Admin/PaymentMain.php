@@ -26,22 +26,24 @@ class PaymentMain extends PaymentMain_parent
     use ModelGetter;
     use ServiceContainer;
 
-    protected TranslateServiceInterface $translateService;
+    /**
+     * @var TranslateServiceInterface|null $translateService
+     */
+    protected ?TranslateServiceInterface $translateService;
 
-    protected RegistryService $registryService;
+    /**
+     * @var RegistryService|null $registryService
+     */
+    protected ?RegistryService $registryService;
 
-    public function __construct()
-    {
-        parent::__construct();
+    public function __construct(
+        bool $initParent = true
+    ) {
+        if ($initParent) {
+            parent::__construct();
+        }
+
         $this->setContainer($this->getContainer());
-        $this->translateService = $this->getRequiredService(
-            TranslateServiceInterface::class,
-            'TranslateServiceInterface'
-        );
-        $this->registryService = $this->getRequiredService(
-            RegistryService::class,
-            'RegistryService'
-        );
     }
 
     /**
@@ -152,8 +154,8 @@ class PaymentMain extends PaymentMain_parent
             $teleCashPayment->setTeleCashCaptureType();
             $result = (bool) $teleCashPayment->save();
         } catch (Exception $e) {
-            $this->registryService->getUtilsView()->addErrorToDisplay(
-                $this->translateService->translateString('OSC_TELECASH_PAYMENT_DATA_INITIAL_ERROR') . $e->getMessage()
+            $this->getRegistryService()->getUtilsView()->addErrorToDisplay(
+                $this->getTranslationService()->translateString('OSC_TELECASH_PAYMENT_DATA_INITIAL_ERROR') . $e->getMessage()
             );
             return false;
         }
@@ -182,12 +184,34 @@ class PaymentMain extends PaymentMain_parent
             try {
                 $result = (bool) $teleCashPayment->save();
             } catch (TeleCashException | Exception $e) {
-                $this->registryService->getUtilsView()->addErrorToDisplay(
+                $this->getRegistryService()->getUtilsView()->addErrorToDisplay(
                     $e->getMessage()
                 );
             }
         }
 
         return $result;
+    }
+
+    protected function getRegistryService(): RegistryService
+    {
+        if ($this->registryService === null) {
+            $this->registryService = $this->getRequiredService(
+                RegistryService::class,
+                'RegistryService'
+            );
+        }
+        return $this->registryService;
+    }
+
+    protected function getTranslationService(): TranslateServiceInterface
+    {
+        if ($this->translateService === null) {
+            $this->translateService = $this->getRequiredService(
+                TranslateServiceInterface::class,
+                'TranslateServiceInterface'
+            );
+        }
+        return $this->translateService;
     }
 }
