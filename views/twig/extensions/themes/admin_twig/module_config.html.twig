@@ -26,7 +26,7 @@
                 <dl>
                     <dt>
                         {% if _teleCashFileValue %}
-                            <input type="text" style="width: 250px;" name="{{ _teleCashFileOption }}_readonly" value="{{ _teleCashFileValue|raw }}" readonly disabled />
+                            <input type="text" style="width: 250px;" name="{{ _teleCashFileOption }}_readonly" value="{{ _teleCashFileValue|e('html_attr') }}" readonly disabled />
                         {% else %}
                             <input class="telecash_uploads" type="file" name="{{ _teleCashFileOption }}"
                                     {{ readonly }}>

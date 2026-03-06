@@ -192,7 +192,11 @@ class TeleCashConnect
                 continue;
             }
             $tpl = '<input type="hidden" name="%s" value="%s" />';
-            $html .= sprintf($tpl, $name, $value);
+            $html .= sprintf(
+                $tpl,
+                htmlspecialchars($name, ENT_QUOTES, 'UTF-8'),
+                htmlspecialchars($value, ENT_QUOTES, 'UTF-8')
+            );
         }
 
         return $html;
@@ -347,6 +351,19 @@ class TeleCashConnect
         return $this->calculateAndCompareHashes($data, $toCheck, $hash);
     }
 
+    private const SENSITIVE_RESPONSE_FIELDS = [
+        'cardnumber',
+        'expmonth',
+        'expyear',
+        'cvm',
+        'iban',
+        'accountnumber',
+        'bankcode',
+        'approval_code',
+        'response_hash',
+        'notification_hash',
+    ];
+
     /**
      * Sets the response data
      *
@@ -357,8 +374,29 @@ class TeleCashConnect
         $this->responseData = $data;
         $this->logger?->log(
             'debug',
-            'Debug: setResponseData: ' . $this->arrayToJson($data)
+            'Debug: setResponseData: ' . $this->arrayToJson($this->maskSensitiveData($data))
         );
+    }
+
+    /**
+     * Masks sensitive fields in data arrays before logging
+     *
+     * @param array<string, string> $data
+     * @return array<string, string>
+     */
+    private function maskSensitiveData(array $data): array
+    {
+        $masked = $data;
+        foreach ($masked as $key => $value) {
+            if (in_array(strtolower($key), self::SENSITIVE_RESPONSE_FIELDS, true) && is_string($value)) {
+                if (strlen($value) > 4) {
+                    $masked[$key] = str_repeat('*', strlen($value) - 4) . substr($value, -4);
+                } else {
+                    $masked[$key] = '****';
+                }
+            }
+        }
+        return $masked;
     }
 
     /**
@@ -478,11 +516,12 @@ class TeleCashConnect
             $hashAlgo,
             $secretKey
         );
+        $result = hash_equals($hash, $compareHash);
         $this->logger?->log(
             'debug',
-            'Debug: calculateAndCompareHashes: calculated "' . $hash . '" vs. "' . $compareHash . '"'
+            'Debug: calculateAndCompareHashes: ' . ($result ? 'match' : 'mismatch')
         );
 
-        return $hash === $compareHash;
+        return $result;
     }
 }

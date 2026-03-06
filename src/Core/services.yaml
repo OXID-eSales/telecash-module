@@ -58,4 +58,4 @@ services:
     arguments:
       $loggerName: 'TeleCash Payment Logger'
       $logFilePath: '@=service("OxidSolutionCatalysts\\TeleCash\\Core\\Service\\Context").getTeleCashLogFilePath()'
-      $logLevel: !php/const Psr\Log\LogLevel::DEBUG
+      $logLevel: '@=service("OxidSolutionCatalysts\\TeleCash\\Settings\\Service\\ModuleSettingsServiceInterface").getLogLevel() ?: "error"'

@@ -64,6 +64,10 @@ class TeleCashOrderHistoryList extends ListModel
      */
     public function getTeleCashOrderHistoryList(string $oId, string $orderDirection = 'asc'): void
     {
+        $orderDirection = in_array(strtolower($orderDirection), ['asc', 'desc'], true)
+            ? $orderDirection
+            : 'asc';
+
         $oBaseObject = $this->getBaseObject();
         $sFields = $oBaseObject->getSelectFields();
         $sViewName = $oBaseObject->getViewName();

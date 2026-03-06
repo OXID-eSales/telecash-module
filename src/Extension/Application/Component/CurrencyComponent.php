@@ -30,8 +30,10 @@ class CurrencyComponent extends CurrencyComponent_parent
     {
         $this->setContainer($this->getContainer());
 
-        // translate the passed currency parameter from Telecash,
-        // since the same parameter is also used by OXID.
+        // TeleCash returns a numeric ISO 4217 currency code in $_POST['currency'].
+        // OXID's parent CurrencyComponent::init() reads $_POST['cur'] to set the active shop currency.
+        // We must translate and set this before parent::init() runs — there is no OXID API
+        // to set the active currency before component initialization, so $_POST is the only option.
         $currency = $this->getStringRequestEscapedData('currency');
         if ($currency) {
             $teleCashCurrency = new TeleCashCurrency();
@@ -40,7 +42,7 @@ class CurrencyComponent extends CurrencyComponent_parent
                     $currency
                 );
             } catch (InvalidArgumentException) {
-                // do nothing
+                // unknown currency code — let OXID use the default
             }
         }
 

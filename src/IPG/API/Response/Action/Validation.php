@@ -40,7 +40,7 @@ class Validation extends Action
                 );
             }
         } else {
-            throw new RuntimeException("Validate Call failed " . $responseDoc->saveXML());
+            throw new RuntimeException("Validate Call failed: no IPGApiActionResponse found");
         }
     }
 }

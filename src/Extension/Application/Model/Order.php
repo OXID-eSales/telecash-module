@@ -12,6 +12,7 @@ namespace OxidSolutionCatalysts\TeleCash\Extension\Application\Model;
 use Doctrine\DBAL\Exception;
 use OxidEsales\EshopCommunity\Internal\Framework\Database\QueryBuilderFactoryInterface;
 use OxidSolutionCatalysts\TeleCash\Application\Model\TeleCashOrder;
+use OxidSolutionCatalysts\TeleCash\Core\Service\Logger;
 use OxidSolutionCatalysts\TeleCash\Exception\TeleCashException;
 use OxidSolutionCatalysts\TeleCash\Traits\DataGetter;
 use OxidSolutionCatalysts\TeleCash\Traits\ModelGetter;
@@ -151,8 +152,9 @@ class Order extends Order_parent
             $this->assign([
                 $field => $value
             ]);
-        } catch (Exception) {
-            // do nothing
+        } catch (Exception $exception) {
+            $logger = $this->getServiceFromContainer(Logger::class);
+            $logger?->log('error', 'Order::updateDBField failed: ' . $exception->getMessage());
         }
     }
 }

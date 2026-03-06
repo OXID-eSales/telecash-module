@@ -53,6 +53,17 @@ class OrderService extends SoapClientCurl
         }
     }
 
+    private const SENSITIVE_XML_ELEMENTS = [
+        'CardNumber',
+        'ExpMonth',
+        'ExpYear',
+        'CVM',
+        'Iban',
+        'AccountNumber',
+        'BankCode',
+        'MandateReference',
+    ];
+
     public function handleDebug(string $type, string $source): void
     {
         $xml = new DOMDocument();
@@ -60,10 +71,27 @@ class OrderService extends SoapClientCurl
         $xml->preserveWhiteSpace = false;
         $xml->formatOutput = true;
 
+        $this->maskSensitiveXmlElements($xml);
+
         $this->logger->log(
             'debug',
             'Debug: ' . $type . ': ' . $xml->saveXML()
         );
+    }
+
+    private function maskSensitiveXmlElements(DOMDocument $xml): void
+    {
+        foreach (self::SENSITIVE_XML_ELEMENTS as $tagName) {
+            $elements = $xml->getElementsByTagName($tagName);
+            foreach ($elements as $element) {
+                $value = $element->textContent;
+                if (strlen($value) > 4) {
+                    $element->textContent = str_repeat('*', strlen($value) - 4) . substr($value, -4);
+                } else {
+                    $element->textContent = '****';
+                }
+            }
+        }
     }
 
     /**

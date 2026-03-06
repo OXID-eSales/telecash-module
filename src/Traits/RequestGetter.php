@@ -132,7 +132,7 @@ trait RequestGetter
     }
 
     /**
-     * return a requested and escaped array
+     * @deprecated Use getArrayRequestData() instead — this method does not actually escape.
      *
      * @param string $key
      * @param array<string|int, mixed> $default
@@ -140,9 +140,6 @@ trait RequestGetter
      */
     public function getArrayRequestEscapedData(string $key, array $default = []): array
     {
-        /** @var string $oxidDefault */
-        $oxidDefault = $default;
-        $value = $this->getRequest() ? $this->getRequest()->getRequestParameter($key, $oxidDefault) : $default;
-        return is_array($value) ? $value : $default;
+        return $this->getArrayRequestData($key, $default);
     }
 }

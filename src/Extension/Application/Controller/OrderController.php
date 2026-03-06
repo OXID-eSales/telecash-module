@@ -103,7 +103,10 @@ class OrderController extends OrderController_parent
         $deliveryId = $this->getStringRequestEscapedData("deladrid");
         if ($deliveryId) {
             $address = $this->getOxNewService()->oxNew(Address::class);
-            if ($address->load($deliveryId)) {
+            $user = $this->getUser();
+            if ($address->load($deliveryId) && $user
+                && $address->getFieldData('oxuserid') === $user->getId()
+            ) {
                 $teleCashConnectData->setOxidAddress($address);
             }
         }

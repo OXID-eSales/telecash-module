@@ -9,7 +9,7 @@ declare(strict_types=1);
 
 namespace OxidSolutionCatalysts\TeleCash\Application\Controller\Admin;
 
-use OxidEsales\Eshop\Core\Controller\BaseController;
+use OxidEsales\Eshop\Application\Controller\Admin\AdminController;
 use OxidSolutionCatalysts\TeleCash\Core\Module;
 use OxidSolutionCatalysts\TeleCash\Core\Service\RegistryService;
 use OxidSolutionCatalysts\TeleCash\Exception\TeleCashException;
@@ -37,7 +37,7 @@ use OxidSolutionCatalysts\TeleCash\Traits\ServiceContainer;
  *
  * @package OxidSolutionCatalysts\TeleCash\Application\Controller\Admin
  */
-class AdminTeleCashJsonEndpoint extends BaseController
+class AdminTeleCashJsonEndpoint extends AdminController
 {
     use ModelGetter;
     use Json;

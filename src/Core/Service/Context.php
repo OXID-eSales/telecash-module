@@ -146,12 +146,6 @@ class Context
      */
     private function prepareUrl(array $parameter): string
     {
-        // add xdebug in sandbox for better testing
-        $sandboxMode = !$this->moduleSettings->isLiveApiMode();
-        if ($sandboxMode) {
-            $parameter['XDEBUG_SESSION_START'] = "1";
-        }
-
         return html_entity_decode(
             $this->shopConfig->getCurrentShopUrl(false) . 'index.php?' . http_build_query($parameter)
         );

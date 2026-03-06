@@ -61,7 +61,7 @@ $aModule = [
         'en' => 'This module provides the integration of the payment provider Telecash.',
     ],
     'thumbnail'   => 'pictures/logo.png',
-    'version'     => '1.0.0-rc.3',
+    'version'     => '1.0.0-rc.4',
     'author'      => 'OXID eSales AG',
     'url'         => '',
     'email'       => '',
@@ -112,7 +112,7 @@ $aModule = [
         [
             'group' => ModuleSettingsServiceInterface::MODULE_CONFIG_API_FRONTEND_VARGROUP,
             'name'  => ModuleSettingsServiceInterface::SHARED_SECRET,
-            'type'  => 'str',
+            'type'  => 'password',
             'value' => '',
         ],
         [
@@ -124,19 +124,19 @@ $aModule = [
         [
             'group' => ModuleSettingsServiceInterface::MODULE_CONFIG_API_BACKEND_VARGROUP,
             'name'  => ModuleSettingsServiceInterface::BASIC_AUTH_PASSWORD,
-            'type'  => 'str',
+            'type'  => 'password',
             'value' => '',
         ],
         [
             'group' => ModuleSettingsServiceInterface::MODULE_CONFIG_API_BACKEND_VARGROUP,
             'name'  => ModuleSettingsServiceInterface::CLIENT_CERT_INSTALL_PASSWORD,
-            'type'  => 'str',
+            'type'  => 'password',
             'value' => '',
         ],
         [
             'group' => ModuleSettingsServiceInterface::MODULE_CONFIG_API_BACKEND_VARGROUP,
             'name'  => ModuleSettingsServiceInterface::CLIENT_CERT_PRIVATEKEY_PASSWORD,
-            'type'  => 'str',
+            'type'  => 'password',
             'value' => '',
         ],
         [

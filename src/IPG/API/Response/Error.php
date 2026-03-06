@@ -148,16 +148,15 @@ class Error extends AbstractResponse
                         default:
                             throw new RuntimeException(
                                 "Undefined SOAP Client Exception: " .
-                                $response->clientErrorType .
-                                ' (Complete SOAP Fault: ' .
-                                $document->saveXML() .
-                                ')'
+                                $response->clientErrorType
                             );
                     }
                     break;
 
                 default:
-                    throw new RuntimeException("Undefined SOAP Error: (" . $document->saveXML() . ")");
+                    throw new RuntimeException(
+                        "Undefined SOAP Error (faultcode: " . $faultCodeValue . ")"
+                    );
             }
         }
 
